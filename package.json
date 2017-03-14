@@ -1,14 +1,20 @@
 {
   "name": "library-template",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "source/Main.js",
   "license": "MIT",
+  "scripts": {
+    "test-dev": "jest --watch"
+  },
   "devDependencies": {
     "babel-cli": "^6.23.0",
     "babel-core": "^6.23.1",
     "babel-eslint": "^7.1.1",
-    "babel-preset-es2015": "^6.22.0",
+    "babel-preset-flow": "^6.23.0",
+    "babel-preset-latest": "^6.24.0",
     "babel-preset-stage-1": "^6.22.0",
+    "eslint": "^3.17.1",
+    "eslint-config-littlebits": "^0.6.2",
     "jest": "^19.0.2",
     "jest-cli": "^19.0.2"
   },
@@ -23,12 +29,10 @@
   },
   "babel": {
     "presets": [
-      "es2015",
+      "latest",
+      "flow",
       "stage-1"
     ]
   },
-  "dependencies": {
-    "eslint": "^3.17.1",
-    "eslint-config-littlebits": "^0.6.2"
-  }
+  "dependencies": {}
 }
