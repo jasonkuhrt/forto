@@ -10,31 +10,31 @@ describe("measureZones", () => {
     const frame = B.make(110,110)
     const target = B.translate(50,50,B.make(10,10))
     expect(Forto.measureZones(target, frame))
-    .toMatchObject({
-      top: { width: 110, height: 50 },
-      bottom: { width: 110, height: 50 },
-      left: { width: 50, height: 110 },
-      right: { width: 50, height: 110 },
-    })
+    .toMatchObject([
+      { side: "Top", width: 110, height: 50 },
+      { side: "Bottom", width: 110, height: 50 },
+      { side: "Left", width: 50, height: 110 },
+      { side: "Right", width: 50, height: 110 },
+    ])
   })
 
   it("if target exceeds a frame side, zones of that side have a negative main-length", () => {
     const frame = B.make(10,10)
     const target1 = B.translate(-1,-1,B.make(2,2))
     expect(Forto.measureZones(target1, frame))
-    .toMatchObject({
-      top: { width: 10, height: -1 },
-      bottom: { width: 10, height: 9 },
-      left: { width: -1, height: 10 },
-      right: { width: 9, height: 10 },
-    })
+    .toMatchObject([
+      { side: "Top", width: 10, height: -1 },
+      { side: "Bottom", width: 10, height: 9 },
+      { side: "Left", width: -1, height: 10 },
+      { side: "Right", width: 9, height: 10 },
+    ])
     const target2 = B.translate(9,9,B.make(2,2))
     expect(Forto.measureZones(target2, frame))
-    .toMatchObject({
-      top: { width: 10, height: 9 },
-      bottom: { width: 10, height: -1 },
-      left: { width: 9, height: 10 },
-      right: { width: -1, height: 10 },
-    })
+    .toMatchObject([
+      { side: "Top", width: 10, height: 9 },
+      { side: "Bottom", width: 10, height: -1 },
+      { side: "Left", width: 9, height: 10 },
+      { side: "Right", width: -1, height: 10 },
+    ])
   })
 })
