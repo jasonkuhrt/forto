@@ -98,8 +98,8 @@ const calcFit = (
       : { width: popover.width, height: popover.height + tip.height }
   const diffH = measuredZone.height - popoverTip.height
   const diffW = measuredZone.width - popoverTip.width
-  const popoverNegAreaH = diffH >= 0 ? 0 : diffH * popoverTip.width
-  const popoverNegAreaW = diffW >= 0 ? 0 : diffW * (popoverTip.height - Math.abs(max(0, diffH)))
+  const popoverNegAreaH = diffH >= 0 ? 0 : Math.abs(diffH * popoverTip.width)
+  const popoverNegAreaW = diffW >= 0 ? 0 : Math.abs(diffW * (popoverTip.height - Math.abs(max(0, diffH))))
   const popoverNegArea = popoverNegAreaH + popoverNegAreaW
   const popoverNegAreaPercent = popoverNegArea / area(popoverTip)
   return (
@@ -147,6 +147,10 @@ const optimalZone = (
 }
 
 
+
+export type {
+  MeasuredZone,
+}
 
 export default {
   measureZones,
