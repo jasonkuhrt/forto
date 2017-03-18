@@ -38,3 +38,17 @@ describe("measureZones", () => {
     ])
   })
 })
+
+
+describe("calcFit", () => {
+  const popover = B.make(9,9)
+  const tip = B.make(1,1)
+  const zone = { side: "top", width: 100, height: 50 }
+  it("returns percentage area of popover that would be cropped", () => {
+    expect(Forto.calcFit(popover, tip, zone))
+    .toMatchObject({
+      ...zone,
+      popoverNegAreaPercent: 0,
+    })
+  })
+})

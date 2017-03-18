@@ -46,7 +46,7 @@ type FittedZone = {
   side : Side,
   width : number,
   height : number,
-  targetNegAreaPercent : number
+  popoverNegAreaPercent : number
 }
 
 const measureZones = (
@@ -87,25 +87,27 @@ const max = (ceiling, n) => (
   n <= ceiling ? n : ceiling
 )
 
-const calcFits = (popover, tip, measuredZones) : Array<FittedZone> => (
-  measuredZones.map((zone) => {
-    const [popoverWidth, popoverHeight] =
-      Orientation.isHorizontal(zone)
-        ? [popover.width + tip.height, popover.height]
-        : [popover.width, popover.height + tip.height]
-    const diffHeight = zone.height - popoverHeight
-    const diffWidth = zone.width - popoverHeight
-    const targetNegAreaH = diffHeight < 0 ? diffHeight * popoverWidth : 0
-    const targetNegAreaW = diffWidth < 0 ? diffWidth * (popoverHeight - Math.abs(max(0, diffHeight))) : 0
-    const targetNegArea = targetNegAreaH + targetNegAreaW
-    const targetNegAreaPercent = targetNegArea / area(zone)
-    return (
-      Object.assign({}, zone, {
-        targetNegAreaPercent,
-      })
-    )
-  })
-)
+const calcFit = (
+  popover : BoundingBox,
+  tip : BoundingBox,
+  measuredZone : MeasuredZone
+) : FittedZone => {
+  const popoverTip =
+    Orientation.isHorizontal(measuredZone)
+      ? { width: popover.width + tip.height, height: popover.height }
+      : { width: popover.width, height: popover.height + tip.height }
+  const diffH = measuredZone.height - popoverTip.height
+  const diffW = measuredZone.width - popoverTip.width
+  const popoverNegAreaH = diffH >= 0 ? 0 : diffH * popoverTip.width
+  const popoverNegAreaW = diffW >= 0 ? 0 : diffW * (popoverTip.height - Math.abs(max(0, diffH)))
+  const popoverNegArea = popoverNegAreaH + popoverNegAreaW
+  const popoverNegAreaPercent = popoverNegArea / area(popoverTip)
+  return (
+    Object.assign({}, measuredZone, {
+      popoverNegAreaPercent,
+    })
+  )
+}
 
 const area = (size : any) : number => (
   size.width * size.height
@@ -120,9 +122,9 @@ const compare = (a : number, b : number) => (
 const rankZones = (zoneFits : Array<FittedZone>) : Array<FittedZone> => (
   zoneFits.sort((a, b) => {
     return (
-      a.targetNegAreaPercent < b.targetNegAreaPercent ?
+      a.popoverNegAreaPercent < b.popoverNegAreaPercent ?
         -1 :
-      a.targetNegAreaPercent > b.targetNegAreaPercent ?
+      a.popoverNegAreaPercent > b.popoverNegAreaPercent ?
         1 :
       // Either neither have negative area or both have equally negative area.
       // In either case check which has the largest area
@@ -131,9 +133,16 @@ const rankZones = (zoneFits : Array<FittedZone>) : Array<FittedZone> => (
   })
 )
 
-const optimalZone = (target : BoundingBox, frame : BoundingBox, popover : BoundingBox, tip : any) : Zone => {
+const optimalZone = (
+  target : BoundingBox,
+  frame : BoundingBox,
+  popover : BoundingBox,
+  tip : any
+) : Zone => {
   return (
-    F.first(rankZones(calcFits(popover, tip, measureZones(target, frame))))
+    F.first(rankZones(
+      measureZones(target, frame).map((zone) => calcFit(popover, tip, zone)
+    )))
   )
 }
 
@@ -141,8 +150,10 @@ const optimalZone = (target : BoundingBox, frame : BoundingBox, popover : Boundi
 
 export default {
   measureZones,
+  calcFit,
 }
 
 export {
   measureZones,
+  calcFit,
 }
