@@ -1,10 +1,16 @@
 /* eslint-disable */
 // @flow
-const F = {}
 
-F.first = (x) => (
-  x[0]
-)
+import F from "./prelude"
+
+// TODO
+// * Optimal zone measurements that factor in Thresholds
+// * preferred zones
+// * elligible zones
+// * Popover positioning
+// * Tip positioning
+// * Tip disabling
+// * API
 
 type Side =
   | "Top"

@@ -1,5 +1,4 @@
 // @flow
-import type { MeasuredZone } from "./Main"
 import Forto from "./Main"
 import B from "./BoundingBox"
 
@@ -43,7 +42,7 @@ describe("measureZones", () => {
 
 
 describe("calcFit", () => {
-  const zone : MeasuredZone = { side: "Top", width: 50, height: 50 }
+  const zone = { side: "Top", width: 50, height: 50 }
   it("returns percentage area of popover that would be cropped", () => {
     const popover = B.make(10,10)
     const tip = B.make(0,0)
