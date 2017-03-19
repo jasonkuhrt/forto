@@ -12,7 +12,7 @@ describe("measureZones", () => {
     const frame = B.make(110,110)
     const target = B.translate(50,50,B.make(10,10))
     expect(Forto.measureZones(target, frame))
-    .toMatchObject([
+    .toEqual([
       { side: "Top", width: 110, height: 50 },
       { side: "Bottom", width: 110, height: 50 },
       { side: "Left", width: 50, height: 110 },
@@ -24,7 +24,7 @@ describe("measureZones", () => {
     const frame = B.make(10,10)
     const target1 = B.translate(-1,-1,B.make(2,2))
     expect(Forto.measureZones(target1, frame))
-    .toMatchObject([
+    .toEqual([
       { side: "Top", width: 10, height: -1 },
       { side: "Bottom", width: 10, height: 9 },
       { side: "Left", width: -1, height: 10 },
@@ -32,7 +32,7 @@ describe("measureZones", () => {
     ])
     const target2 = B.translate(9,9,B.make(2,2))
     expect(Forto.measureZones(target2, frame))
-    .toMatchObject([
+    .toEqual([
       { side: "Top", width: 10, height: 9 },
       { side: "Bottom", width: 10, height: -1 },
       { side: "Left", width: 9, height: 10 },
@@ -48,7 +48,7 @@ describe("calcFit", () => {
     const popover = B.make(10,10)
     const tip = B.make(0,0)
     expect(Forto.calcFit(popover, tip, zone))
-    .toMatchObject({
+    .toEqual({
       ...zone,
       popoverNegAreaPercent: 0,
     })
@@ -59,7 +59,7 @@ describe("calcFit", () => {
       const popover = B.make(10 + 90,10)
       const tip = B.make(0,0)
       expect(Forto.calcFit(popover, tip, zone))
-      .toMatchObject({
+      .toEqual({
         ...zone,
         popoverNegAreaPercent: 0.5,
       })
@@ -68,7 +68,7 @@ describe("calcFit", () => {
       const popover = B.make(10,10 + 90)
       const tip = B.make(0,0)
       expect(Forto.calcFit(popover, tip, zone))
-      .toMatchObject({
+      .toEqual({
         ...zone,
         popoverNegAreaPercent: 0.5,
       })
@@ -77,7 +77,7 @@ describe("calcFit", () => {
       const popover = B.make(10 + 90,10 + 90)
       const tip = B.make(0,0)
       expect(Forto.calcFit(popover, tip, zone))
-      .toMatchObject({
+      .toEqual({
         ...zone,
         popoverNegAreaPercent: 0.75,
       })
@@ -88,7 +88,7 @@ describe("calcFit", () => {
     const popover = B.make(10,10)
     const tip = B.make(0,0)
     expect(Forto.calcFit(popover, tip, zone2))
-    .toMatchObject({
+    .toEqual({
       ...zone2,
       popoverNegAreaPercent: 1,
     })
@@ -99,7 +99,7 @@ describe("calcFit", () => {
       const popover = B.make(1,1 + 90)
       const tip = B.make(1,9)
       expect(Forto.calcFit(popover, tip, zone))
-      .toMatchObject({
+      .toEqual({
         ...zone,
         popoverNegAreaPercent: 0.5,
       })
@@ -109,7 +109,7 @@ describe("calcFit", () => {
       const popover = B.make(1 + 90,1)
       const tip = B.make(1,9)
       expect(Forto.calcFit(popover, tip, zone2))
-      .toMatchObject({
+      .toEqual({
         ...zone2,
         popoverNegAreaPercent: 0.5,
       })
@@ -125,7 +125,7 @@ describe("rankZones", () => {
       { side: "Bottom", width: 100, height: 100, popoverNegAreaPercent: 1 },
       { side: "Top", width: 50, height: 50, popoverNegAreaPercent: 0 },
     ]
-    expect(Forto.rankZones(fittedZones)).toMatchObject([
+    expect(Forto.rankZones(fittedZones)).toEqual([
       { side: "Top", width: 50, height: 50, popoverNegAreaPercent: 0 },
       { side: "Bottom", width: 100, height: 100, popoverNegAreaPercent: 1 },
     ])
@@ -135,7 +135,7 @@ describe("rankZones", () => {
       { side: "Top", width: 50, height: 50, popoverNegAreaPercent: 0 },
       { side: "Bottom", width: 100, height: 100, popoverNegAreaPercent: 0 },
     ]
-    expect(Forto.rankZones(fittedZones)).toMatchObject([
+    expect(Forto.rankZones(fittedZones)).toEqual([
       { side: "Bottom", width: 100, height: 100, popoverNegAreaPercent: 0 },
       { side: "Top", width: 50, height: 50, popoverNegAreaPercent: 0 },
     ])
@@ -145,7 +145,7 @@ describe("rankZones", () => {
       { side: "Top", width: 50, height: 50, popoverNegAreaPercent: 1 },
       { side: "Bottom", width: 100, height: 100, popoverNegAreaPercent: 1 },
     ]
-    expect(Forto.rankZones(fittedZones)).toMatchObject([
+    expect(Forto.rankZones(fittedZones)).toEqual([
       { side: "Bottom", width: 100, height: 100, popoverNegAreaPercent: 1 },
       { side: "Top", width: 50, height: 50, popoverNegAreaPercent: 1 },
     ])
@@ -155,7 +155,7 @@ describe("rankZones", () => {
       { side: "Bottom", width: 100, height: 100, popoverNegAreaPercent: 10 },
       { side: "Top", width: 50, height: 50, popoverNegAreaPercent: 1 },
     ]
-    expect(Forto.rankZones(fittedZones)).toMatchObject([
+    expect(Forto.rankZones(fittedZones)).toEqual([
       { side: "Top", width: 50, height: 50, popoverNegAreaPercent: 1 },
       { side: "Bottom", width: 100, height: 100, popoverNegAreaPercent: 10 },
     ])
@@ -167,7 +167,7 @@ describe("rankZones", () => {
       { side: "Right", width: 2, height: 2, popoverNegAreaPercent: 0 },
       { side: "Left", width: 2, height: 2, popoverNegAreaPercent: 0 },
     ]
-    expect(Forto.rankZones(fittedZones)).toMatchObject([
+    expect(Forto.rankZones(fittedZones)).toEqual([
       { side: "Top", width: 2, height: 2, popoverNegAreaPercent: 0 },
       { side: "Right", width: 2, height: 2, popoverNegAreaPercent: 0 },
       { side: "Left", width: 2, height: 2, popoverNegAreaPercent: 0 },
@@ -184,7 +184,7 @@ describe("optimalZone", () => {
   const popover = B.make(10,10)
   const tip = B.make(1,1)
   it("should return the optimal zone", () => {
-    expect(Forto.optimalZone(frame, target, popover, tip)).toMatchObject({
+    expect(Forto.optimalZone(frame, target, popover, tip)).toEqual({
       side: "Bottom",
       height: 90,
       width: 110,
