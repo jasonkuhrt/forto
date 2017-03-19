@@ -127,8 +127,10 @@ const rankZones = (zoneFits : Array<FittedZone>) : Array<FittedZone> => (
       a.popoverNegAreaPercent > b.popoverNegAreaPercent ?
         1 :
       // Either neither have negative area or both have equally negative area.
-      // In either case check which has the largest area
-        compare(area(a), area(b))
+      // In either case check which has the largest area.
+        // NOTE we inverse compare since it treats larger as coming later
+        // but for us larger is better and hence should come first.
+        compare(area(a), area(b)) * -1
     )
   })
 )
@@ -150,14 +152,17 @@ const optimalZone = (
 
 export type {
   MeasuredZone,
+  FittedZone,
 }
 
 export default {
   measureZones,
   calcFit,
+  rankZones,
 }
 
 export {
   measureZones,
   calcFit,
+  rankZones,
 }

@@ -116,3 +116,48 @@ describe("calcFit", () => {
     })
   })
 })
+
+
+
+describe("rankZones", () => {
+  it("should rank second-class lower than first-class even if smaller area", () => {
+    const fittedZones = [
+      { side: "Bottom", width: 100, height: 100, popoverNegAreaPercent: 1 },
+      { side: "Top", width: 50, height: 50, popoverNegAreaPercent: 0 },
+    ]
+    expect(Forto.rankZones(fittedZones)).toMatchObject([
+      { side: "Top", width: 50, height: 50, popoverNegAreaPercent: 0 },
+      { side: "Bottom", width: 100, height: 100, popoverNegAreaPercent: 1 },
+    ])
+  })
+  it("should rank larger areas higher amongst first-class", () => {
+    const fittedZones = [
+      { side: "Top", width: 50, height: 50, popoverNegAreaPercent: 0 },
+      { side: "Bottom", width: 100, height: 100, popoverNegAreaPercent: 0 },
+    ]
+    expect(Forto.rankZones(fittedZones)).toMatchObject([
+      { side: "Bottom", width: 100, height: 100, popoverNegAreaPercent: 0 },
+      { side: "Top", width: 50, height: 50, popoverNegAreaPercent: 0 },
+    ])
+  })
+  it("should rank larger areas higher amongst equal second-class", () => {
+    const fittedZones = [
+      { side: "Top", width: 50, height: 50, popoverNegAreaPercent: 1 },
+      { side: "Bottom", width: 100, height: 100, popoverNegAreaPercent: 1 },
+    ]
+    expect(Forto.rankZones(fittedZones)).toMatchObject([
+      { side: "Bottom", width: 100, height: 100, popoverNegAreaPercent: 1 },
+      { side: "Top", width: 50, height: 50, popoverNegAreaPercent: 1 },
+    ])
+  })
+  it("should rank less negative higher amongst non-equal second-classe", () => {
+    const fittedZones = [
+      { side: "Bottom", width: 100, height: 100, popoverNegAreaPercent: 10 },
+      { side: "Top", width: 50, height: 50, popoverNegAreaPercent: 1 },
+    ]
+    expect(Forto.rankZones(fittedZones)).toMatchObject([
+      { side: "Top", width: 50, height: 50, popoverNegAreaPercent: 1 },
+      { side: "Bottom", width: 100, height: 100, popoverNegAreaPercent: 10 },
+    ])
+  })
+})
