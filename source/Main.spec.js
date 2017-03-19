@@ -160,6 +160,20 @@ describe("rankZones", () => {
       { side: "Bottom", width: 100, height: 100, popoverNegAreaPercent: 10 },
     ])
   })
+  it("if two zones are of equal worth maintain their existing order", () => {
+    const fittedZones = [
+      { side: "Bottom", width: 1, height: 1, popoverNegAreaPercent: 0 },
+      { side: "Top", width: 2, height: 2, popoverNegAreaPercent: 0 },
+      { side: "Right", width: 2, height: 2, popoverNegAreaPercent: 0 },
+      { side: "Left", width: 2, height: 2, popoverNegAreaPercent: 0 },
+    ]
+    expect(Forto.rankZones(fittedZones)).toMatchObject([
+      { side: "Top", width: 2, height: 2, popoverNegAreaPercent: 0 },
+      { side: "Right", width: 2, height: 2, popoverNegAreaPercent: 0 },
+      { side: "Left", width: 2, height: 2, popoverNegAreaPercent: 0 },
+      { side: "Bottom", width: 1, height: 1, popoverNegAreaPercent: 0 },
+    ])
+  })
 })
 
 
