@@ -136,15 +136,19 @@ const rankZones = (zoneFits : Array<FittedZone>) : Array<FittedZone> => (
 )
 
 const optimalZone = (
-  target : BoundingBox,
   frame : BoundingBox,
+  target : BoundingBox,
   popover : BoundingBox,
   tip : any
 ) : Zone => {
   return (
-    F.first(rankZones(
-      measureZones(target, frame).map((zone) => calcFit(popover, tip, zone)
-    )))
+    F.first(
+      rankZones(
+        measureZones(target, frame).map((zone) =>
+          calcFit(popover, tip, zone)
+        )
+      )
+    )
   )
 }
 
@@ -159,10 +163,12 @@ export default {
   measureZones,
   calcFit,
   rankZones,
+  optimalZone,
 }
 
 export {
   measureZones,
   calcFit,
   rankZones,
+  optimalZone,
 }

@@ -161,3 +161,20 @@ describe("rankZones", () => {
     ])
   })
 })
+
+
+
+describe("optimalZone", () => {
+  const frame = B.make(110,110)
+  const target = B.translate(50,10,B.make(10,10))
+  const popover = B.make(10,10)
+  const tip = B.make(1,1)
+  it("should return the optimal zone", () => {
+    expect(Forto.optimalZone(frame, target, popover, tip)).toMatchObject({
+      side: "Bottom",
+      height: 90,
+      width: 110,
+      popoverNegAreaPercent: 0,
+    })
+  })
+})
