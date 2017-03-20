@@ -11,6 +11,24 @@ import F from "./prelude"
 // * Tip positioning
 // * Tip disabling
 // * API
+type Orientation =
+  | "Horizontal"
+  | "Vertical"
+
+const horizontal : Orientation = "Horizontal"
+const vertical : Orientation = "Vertical"
+
+type Position = {
+  x : number,
+  y : number,
+}
+
+// type Order =
+//   | "Before"
+//   | "After"
+//
+// const before : Order = "Before"
+// const after : Order = "After"
 
 type Side =
   | "Top"
@@ -83,11 +101,51 @@ const measureZones = (
   ]
 }
 
-const Orientation = {}
+const Ori = {}
 
-Orientation.isHorizontal = (ofASide) : boolean => (
+Ori.isHorizontal = (ofASide) : boolean => (
   ["Right", "Left"].indexOf(ofASide.side) !== -1
 )
+
+Ori.of = (ofASide) : Orientation => (
+  ["Right", "Left"].indexOf(ofASide.side) !== -1 ? "Horizontal" : "Vertical"
+)
+
+Ori.crossDim = (ori : Orientation) => (
+  ori === horizontal ? "height" : "width"
+)
+
+Ori.mainDim = (ori : Orientation) => (
+  ori === vertical ? "width" : "height"
+)
+
+Ori.mainAxis = (ori : Orientation) => (
+  ori === horizontal ? "x" : "y"
+)
+
+Ori.crossAxis = (ori : Orientation) => (
+  ori === horizontal ? "y" : "x"
+)
+
+Ori.mainEnd = (ori : Orientation) => (
+  ori === horizontal ? "right" : "bottom"
+)
+
+Ori.crossEnd = (ori : Orientation) => (
+  ori === horizontal ? "bottom" : "right"
+)
+
+Ori.mainLength = (ori : Orientation) => (
+  ori === horizontal ? "width" : "height"
+)
+
+Ori.crossLength = (ori : Orientation) => (
+  ori === horizontal ? "height" : "width"
+)
+
+// Ori.orderOf = (ofASide) : Order => (
+//   ["Left", "Top"].indexOf(ofASide.side) ? after : before
+// )
 
 const max = (ceiling, n) => (
   n <= ceiling ? n : ceiling
@@ -99,7 +157,7 @@ const calcFit = (
   measuredZone : MeasuredZone
 ) : FittedZone => {
   const popoverTip =
-    Orientation.isHorizontal(measuredZone)
+    Ori.isHorizontal(measuredZone)
       ? { width: popover.width + tip.height, height: popover.height }
       : { width: popover.width, height: popover.height + tip.height }
   const diffH = measuredZone.height - popoverTip.height
@@ -160,6 +218,27 @@ const optimalZone = (
 
 
 
+const calcPopoverPosition = (
+  frame : BoundingBox,
+  target : BoundingBox,
+  popover : BoundingBox,
+  zone : Zone
+) : Position => {
+  const ori = Ori.of(zone)
+  const p : Position = { x: 0, y: 0 }
+  /* Place the popover next to the target. */
+  p[Ori.mainAxis(ori)] =
+    ["Left", "Top"].indexOf(zone.side) !== -1
+      ? target[Ori.mainStart(ori)] - popover[Ori.mainDim(ori)]
+      : target[Ori.mainEnd(ori)]
+  /* Align the popover's cross-axis with that of target. */
+  p[Ori.crossAxis(ori)] =
+    (target[Ori.crossEnd(ori)] - (target[Ori.crossLength(ori)] / 2)) -
+    (popover[Ori.crossEnd(ori)] - (popover[Ori.crossLength(ori)] / 2))
+  return p
+}
+
+
 export type {
   MeasuredZone,
   FittedZone,
@@ -170,6 +249,7 @@ export default {
   calcFit,
   rankZones,
   optimalZone,
+  calcPopoverPosition,
 }
 
 export {
@@ -177,4 +257,5 @@ export {
   calcFit,
   rankZones,
   optimalZone,
+  calcPopoverPosition,
 }
