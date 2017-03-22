@@ -7,7 +7,6 @@ import F from "./prelude"
 // * Optimal zone measurements that factor in Thresholds
 // * preferred zones
 // * elligible zones
-// * Popover positioning
 // * Tip positioning
 // * Tip disabling
 // * API
@@ -139,6 +138,10 @@ Ori.crossEnd = (ori : Orientation) => (
   ori === horizontal ? "bottom" : "right"
 )
 
+Ori.crossStart = (ori : Orientation) => (
+  ori === horizontal ? "top" : "left"
+)
+
 Ori.mainLength = (ori : Orientation) => (
   ori === horizontal ? "width" : "height"
 )
@@ -233,6 +236,7 @@ const calcPopoverPosition = (
   const p : Position = { x: 0, y: 0 }
   const crossAxis = Ori.crossAxis(ori)
   const crossEnd = Ori.crossEnd(ori)
+  const crossStart = Ori.crossStart(ori)
   const crossLength = Ori.crossLength(ori)
 
   /* Place the popover next to the target. */
@@ -241,10 +245,19 @@ const calcPopoverPosition = (
       ? target[Ori.mainStart(ori)] - popover[Ori.mainDim(ori)]
       : target[Ori.mainEnd(ori)]
 
-  /* Align the popover's cross-axis with that of target. */
-  p[crossAxis] =
-    (target[crossEnd] - center(target[crossLength])) -
-    center(popover[crossLength])
+  /* Align the popover's cross-axis center with that of target. Only the
+  target length within frame should be considered. That is, find the
+  cross-axis center of the part of target within the frame bounds, ignoring any
+  length outside said frame bounds. */
+  let targetCrossAxisCrossPos = target[crossStart] + center(target[crossLength])
+  const frameTargetEndDiff = frame[crossEnd] - target[crossEnd]
+  if (frameTargetEndDiff < 0)
+    targetCrossAxisCrossPos += center(frameTargetEndDiff)
+  const frameTargetStartDiff = target[crossStart] - frame[crossStart]
+  if (frameTargetStartDiff < 0)
+    targetCrossAxisCrossPos -= center(frameTargetStartDiff)
+
+  p[crossAxis] = targetCrossAxisCrossPos - center(popover[crossLength])
 
   /* If the popover exceeds Frame bounds on both ends center it between them. */
   const crossLengthDiff = frame[crossLength] - popover[crossLength]

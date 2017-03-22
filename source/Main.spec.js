@@ -241,4 +241,28 @@ describe("calcPopoverPosition", () => {
       y: 100 + 10,
     })
   })
+  it("does not include cropped cross end of target when calculating targets cross-axis", () => {
+    const target2 = B.translate(380,100,B.make(30,30))
+    const popover = B.make(10,10)
+    expect(Forto.calcPopoverPosition(frame, target2, popover, zone)).toEqual({
+      x: 385,
+      y: 100 + 30,
+    })
+  })
+  it("does not include cropped cross start of target when calculating targets cross-axis", () => {
+    const target2 = B.translate(-10,100,B.make(30,30))
+    const popover = B.make(10,10)
+    expect(Forto.calcPopoverPosition(frame, target2, popover, zone)).toEqual({
+      x: 5,
+      y: 100 + 30,
+    })
+  })
+  it("does not include cropped cross start+end of target when calculating targets cross-axis", () => {
+    const target2 = B.translate(-10,100,B.make(420,10))
+    const popover = B.make(10,10)
+    expect(Forto.calcPopoverPosition(frame, target2, popover, zone)).toEqual({
+      x: 200 - 5,
+      y: 100 + 10,
+    })
+  })
 })
