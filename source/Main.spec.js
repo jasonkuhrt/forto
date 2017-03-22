@@ -217,4 +217,28 @@ describe("calcPopoverPosition", () => {
       y: 100 + 10,
     })
   })
+  it("popover can meet but not exceed frame end bounds to match cross-axis", () => {
+    const target2 = B.translate(400 - 10,100,B.make(10,10))
+    const popover = B.make(20,20)
+    expect(Forto.calcPopoverPosition(frame, target2, popover, zone)).toEqual({
+      x: 400 - 20,
+      y: 100 + 10,
+    })
+  })
+  it("popover can meet but not exceed frame start bounds to match cross-axis", () => {
+    const target2 = B.translate(0,100,B.make(10,10))
+    const popover = B.make(20,20)
+    expect(Forto.calcPopoverPosition(frame, target2, popover, zone)).toEqual({
+      x: 0,
+      y: 100 + 10,
+    })
+  })
+  it("if popover does not fit within frame cross-length then center it within frame", () => {
+    const target2 = B.translate(0,100,B.make(10,10))
+    const popover = B.make(400 + 10,10)
+    expect(Forto.calcPopoverPosition(frame, target2, popover, zone)).toEqual({
+      x: -1 * 10 / 2,
+      y: 100 + 10,
+    })
+  })
 })

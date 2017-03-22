@@ -51,6 +51,10 @@ type Side =
 type Zone = {
   side : Side,
 }
+type Size = {
+  width : number,
+  height : number,
+}
 type BoundingBox = {
   top : number,
   bottom : number,
@@ -217,24 +221,41 @@ const optimalZone = (
 }
 
 
+const center = (n) => n / 2
 
 const calcPopoverPosition = (
   frame : BoundingBox,
   target : BoundingBox,
-  popover : BoundingBox,
+  popover : Size,
   zone : Zone
 ) : Position => {
   const ori = Ori.of(zone)
   const p : Position = { x: 0, y: 0 }
+  const crossAxis = Ori.crossAxis(ori)
+  const crossEnd = Ori.crossEnd(ori)
+  const crossLength = Ori.crossLength(ori)
+
   /* Place the popover next to the target. */
   p[Ori.mainAxis(ori)] =
     ["Left", "Top"].indexOf(zone.side) !== -1
       ? target[Ori.mainStart(ori)] - popover[Ori.mainDim(ori)]
       : target[Ori.mainEnd(ori)]
+
   /* Align the popover's cross-axis with that of target. */
-  p[Ori.crossAxis(ori)] =
-    (target[Ori.crossEnd(ori)] - (target[Ori.crossLength(ori)] / 2)) -
-    (popover[Ori.crossEnd(ori)] - (popover[Ori.crossLength(ori)] / 2))
+  p[crossAxis] =
+    (target[crossEnd] - center(target[crossLength])) -
+    center(popover[crossLength])
+
+  /* If the popover exceeds Frame bounds on both ends center it between them. */
+  const crossLengthDiff = frame[crossLength] - popover[crossLength]
+  if (crossLengthDiff < 0) {
+    p[crossAxis] = center(crossLengthDiff)
+  } else if (p[crossAxis] + popover[crossLength] > frame[crossEnd]) {
+    p[crossAxis] = frame[crossEnd] - popover[crossLength]
+  } else if (p[crossAxis] < 0) {
+    p[crossAxis] = 0
+  }
+
   return p
 }
 
