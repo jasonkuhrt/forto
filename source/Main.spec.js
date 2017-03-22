@@ -197,16 +197,23 @@ describe("optimalZone", () => {
 describe("calcPopoverPosition", () => {
   const frame = B.make(400,400)
   const target = B.translate(200,100,B.make(10,10))
-  const popover = B.make(10,10)
   const zone = {
     side: "Bottom",
     height: 100,
     width: 400,
     popoverNegAreaPercent: 0,
   }
-  it("moves popover so that its cross-axis matches that of target", () => {
+  it("moves popover of less cross-length than target to match its cross-axis to target", () => {
+    const popover = B.make(6,6)
     expect(Forto.calcPopoverPosition(frame, target, popover, zone)).toEqual({
-      x: 200,
+      x: 202,
+      y: 100 + 10,
+    })
+  })
+  it("moves popover of greater cross-length than target to match its cross-axis to target", () => {
+    const popover = B.make(12,12)
+    expect(Forto.calcPopoverPosition(frame, target, popover, zone)).toEqual({
+      x: 199,
       y: 100 + 10,
     })
   })
