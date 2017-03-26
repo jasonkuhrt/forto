@@ -266,3 +266,49 @@ describe("calcPopoverPosition", () => {
     })
   })
 })
+
+
+
+describe("calcTipPosition", () => {
+  const orientation = "Horizontal"
+  const tip = { width: 4, height: 4 }
+  it("finds centered tip position", () => {
+    const target = B.translate(200,100,B.make(10,10))
+    const popover = B.translate(200 - 10, 100,B.make(10,10))
+    expect(Forto.calcTipPosition(orientation, target, popover, tip)).toEqual({
+      x: 0,
+      y: 103,
+    })
+  })
+  it("refers to popover before/popover after if it should", () => {
+    const target = B.translate(200,100,B.make(30,30))
+    const popover = B.translate(200 - 10, 110,B.make(10,10))
+    expect(Forto.calcTipPosition(orientation, target, popover, tip)).toEqual({
+      x: 0,
+      y: 113,
+    })
+  })
+  it("refers to popover before/target aftert if it should", () => {
+    const target = B.translate(200,100,B.make(30,30))
+    const popover = B.translate(200 - 30, 110,B.make(30,30))
+    expect(Forto.calcTipPosition(orientation, target, popover, tip)).toEqual({
+      x: 0,
+      y: 118,
+    })
+  })
+})
+
+
+
+describe("calcLayout", () => {
+  const frame = B.make(100,100)
+  const target = B.translate(90,50,B.make(10,10))
+  const popover = B.make(10,10)
+  const tip = B.make(2,2)
+  it("calculates the layout start to finish", () => {
+    expect(Forto.calcLayout(frame, target, popover, tip)).toEqual({
+      popover: { x: 80, y: 50 },
+      tip: { x: 0, y: 54 },
+    })
+  })
+})

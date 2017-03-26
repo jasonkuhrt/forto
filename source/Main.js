@@ -3,11 +3,43 @@
 
 import F from "./prelude"
 
+const min = (x : number, o : number) : number => (
+  x <= o ? x : o
+)
+const max = (x : number, o : number) : number => (
+  x >= o ? x : o
+)
+const centerBetween = (x, o) => (
+  x > o
+    ? 0
+    : x + ((o - x) / 2)
+)
+const centerOf = (orientation, x) => (
+  orientation === "Horizontal"
+    ? x.width / 2
+    : x.height / 2
+)
+const upperLimit = (ceiling, n) => (
+  n <= ceiling ? n : ceiling
+)
+const area = (size : any) : number => (
+  size.width * size.height
+)
+
+const compare = (a : number, b : number) => (
+  a <   b ? -1 :
+  a >   b ?  1 :
+             0
+)
+
+const center = (n) => n / 2
+
+
 // TODO
 // * Optimal zone measurements that factor in Thresholds
 // * preferred zones
 // * elligible zones
-// * Tip positioning
+// * mode unbounded
 // * Tip disabling
 // * API
 type Orientation =
@@ -76,6 +108,17 @@ type FittedZone = {
   popoverNegAreaPercent : number
 }
 
+const BoundingBoxFromSizePosition = (
+  size : Size,
+  position : Position
+) : BoundingBox => ({
+  ...size,
+  left: position.x,
+  top: position.y,
+  bottom: position.y + size.height,
+  right: position.x + size.width,
+})
+
 const measureZones = (
   target: BoundingBox,
   frame: BoundingBox
@@ -110,7 +153,7 @@ Ori.isHorizontal = (ofASide) : boolean => (
   ["Right", "Left"].indexOf(ofASide.side) !== -1
 )
 
-Ori.of = (ofASide) : Orientation => (
+Ori.fromSide = (ofASide) : Orientation => (
   ["Right", "Left"].indexOf(ofASide.side) !== -1 ? "Horizontal" : "Vertical"
 )
 
@@ -134,6 +177,10 @@ Ori.mainEnd = (ori : Orientation) => (
   ori === horizontal ? "right" : "bottom"
 )
 
+Ori.mainStart = (ori : Orientation) => (
+  ori === horizontal ? "left" : "top"
+)
+
 Ori.crossEnd = (ori : Orientation) => (
   ori === horizontal ? "bottom" : "right"
 )
@@ -149,17 +196,17 @@ Ori.mainLength = (ori : Orientation) => (
 Ori.crossLength = (ori : Orientation) => (
   ori === horizontal ? "height" : "width"
 )
+Ori.opposite = (ori : Orientation) => (
+  ori === horizontal ? vertical : horizontal
+)
 
 // Ori.orderOf = (ofASide) : Order => (
 //   ["Left", "Top"].indexOf(ofASide.side) ? after : before
 // )
 
-const max = (ceiling, n) => (
-  n <= ceiling ? n : ceiling
-)
 
 const calcFit = (
-  popover : BoundingBox,
+  popover : Size,
   tip : BoundingBox,
   measuredZone : MeasuredZone
 ) : FittedZone => {
@@ -170,7 +217,7 @@ const calcFit = (
   const diffH = measuredZone.height - popoverTip.height
   const diffW = measuredZone.width - popoverTip.width
   const popoverNegAreaH = diffH >= 0 ? 0 : Math.abs(diffH * popoverTip.width)
-  const popoverNegAreaW = diffW >= 0 ? 0 : Math.abs(diffW * (popoverTip.height - Math.abs(max(0, diffH))))
+  const popoverNegAreaW = diffW >= 0 ? 0 : Math.abs(diffW * (popoverTip.height - Math.abs(upperLimit(0, diffH))))
   const popoverNegArea = popoverNegAreaH + popoverNegAreaW
   const popoverNegAreaPercent = popoverNegArea / area(popoverTip)
   return (
@@ -180,15 +227,7 @@ const calcFit = (
   )
 }
 
-const area = (size : any) : number => (
-  size.width * size.height
-)
 
-const compare = (a : number, b : number) => (
-  a <   b ? -1 :
-  a >   b ?  1 :
-             0
-)
 
 const rankZones = (zoneFits : Array<FittedZone>) : Array<FittedZone> => (
   zoneFits.sort((a, b) => {
@@ -209,7 +248,7 @@ const rankZones = (zoneFits : Array<FittedZone>) : Array<FittedZone> => (
 const optimalZone = (
   frame : BoundingBox,
   target : BoundingBox,
-  popover : BoundingBox,
+  popover : Size,
   tip : any
 ) : Zone => {
   return (
@@ -224,7 +263,6 @@ const optimalZone = (
 }
 
 
-const center = (n) => n / 2
 
 const calcPopoverPosition = (
   frame : BoundingBox,
@@ -232,7 +270,7 @@ const calcPopoverPosition = (
   popover : Size,
   zone : Zone
 ) : Position => {
-  const ori = Ori.of(zone)
+  const ori = Ori.fromSide(zone)
   const p : Position = { x: 0, y: 0 }
   const crossAxis = Ori.crossAxis(ori)
   const crossEnd = Ori.crossEnd(ori)
@@ -268,8 +306,49 @@ const calcPopoverPosition = (
   } else if (p[crossAxis] < 0) {
     p[crossAxis] = 0
   }
-
   return p
+}
+
+const calcTipPosition = (
+  orientation : Orientation,
+  target : BoundingBox,
+  popover : BoundingBox,
+  tip : Size
+) : any => {
+  const crossStart = Ori.crossStart(orientation)
+  const crossEnd = Ori.crossEnd(orientation)
+  const crossLength = Ori.crossEnd(orientation)
+  const innerMostBefore = max(
+    popover[crossStart],
+    target[crossStart]
+  )
+  const innerMostAfter = min(
+    popover[crossEnd],
+    target[crossEnd]
+  )
+  return {
+    [Ori.crossAxis(orientation)]:
+      centerBetween(innerMostBefore, innerMostAfter)
+      - centerOf(Ori.opposite(orientation), tip),
+    [Ori.mainAxis(orientation)]: 0,
+  }
+}
+
+const calcLayout = (
+  frame: BoundingBox,
+  target: BoundingBox,
+  popoverSize: Size,
+  tip: Size,
+) : any => {
+  const zone = optimalZone(frame, target, popoverSize, tip)
+  const popoverPosition = calcPopoverPosition(frame, target, popoverSize, zone)
+  const popoverBoundingBox =
+    BoundingBoxFromSizePosition(popoverSize, popoverPosition)
+  const tipPosition = calcTipPosition(Ori.fromSide(zone), target, popoverBoundingBox, tip)
+  return ({
+    popover: popoverPosition,
+    tip: tipPosition,
+  })
 }
 
 
@@ -284,6 +363,8 @@ export default {
   rankZones,
   optimalZone,
   calcPopoverPosition,
+  calcTipPosition,
+  calcLayout,
 }
 
 export {
@@ -292,4 +373,6 @@ export {
   rankZones,
   optimalZone,
   calcPopoverPosition,
+  calcTipPosition,
+  calcLayout,
 }
