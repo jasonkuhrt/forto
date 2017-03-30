@@ -1,6 +1,8 @@
 import assign from "object.assign"
 import Dom from "../source/dom"
+import Chai from "chai"
 assign.shim()
+const A = Chai.assert
 
 
 const frame = document.createElement("div")
@@ -18,19 +20,38 @@ before(() => {
 
 describe("dom", () => {
   Object.assign(frame.style, {
-    width: "400px",
-    height: "400px",
+    width: "20px",
+    height: "20px",
+    position: "absolute",
+    top: "0px",
+    left: "0px"
   })
   Object.assign(target.style, {
     width: "10px",
-    height: "400px",
+    height: "20px",
+    position: "absolute",
+    top: "0px",
+    left: "0px"
   })
   Object.assign(popover.style, {
     width: "4px",
     height: "4px",
+    position: "absolute",
+    top: "0px",
+    left: "0px"
+  })
+  Object.assign(tip.style, {
+    width: "0px",
+    height: "0px",
+    position: "absolute",
+    top: "0px",
+    left: "0px"
   })
   it("fails", () => {
     const layout = Dom.foobar(frame, target, popover, tip)
-    console.log(layout)
+    A.deepEqual(
+      layout,
+      { popover: { x: 10, y: 8 }, tip: { y: 10, x: 0 }}
+    )
   })
 })

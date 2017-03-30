@@ -1,8 +1,8 @@
-import Path from "path"
+const Path = require("path")
 
 const path = Path.join.bind(null, __dirname)
 
-export default {
+module.exports = {
   entry: [
     "./source/Main.js",
     "./test/dom.js",
@@ -14,7 +14,8 @@ export default {
   module: {
     rules: [
       {
-        test: /.*\.js$/,
+        test: /\.js$/,
+        exclude: /node_modules/,
         loader: "babel-loader"
       }
     ]

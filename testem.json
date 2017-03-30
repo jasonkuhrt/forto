@@ -8,5 +8,5 @@
     "./build/**/*.js"
   ],
   "before_tests": "webpack",
-  "launch_in_dev": ["PhantomJS"]
+  "launch_in_dev": ["PhantomJS", "Chrome"]
 }
