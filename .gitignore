@@ -58,3 +58,4 @@ typings/
 .env
 
 flow-typed/
+build

@@ -4,12 +4,13 @@
   "main": "source/Main.js",
   "license": "MIT",
   "scripts": {
-    "test-dev": "jest --watch"
+    "test:dev": "jest --watch"
   },
   "devDependencies": {
     "babel-cli": "^6.23.0",
     "babel-core": "^6.23.1",
     "babel-eslint": "^7.1.1",
+    "babel-loader": "^6.4.1",
     "babel-preset-flow": "^6.23.0",
     "babel-preset-latest": "^6.24.0",
     "babel-preset-stage-1": "^6.22.0",
@@ -17,7 +18,11 @@
     "eslint-config-littlebits": "^0.6.2",
     "flow-bin": "^0.42.0",
     "jest": "^19.0.2",
-    "jest-cli": "^19.0.2"
+    "jest-cli": "^19.0.2",
+    "mocha": "^3.2.0",
+    "object.assign": "^4.0.4",
+    "testem": "^1.15.0",
+    "webpack": "^2.3.2"
   },
   "eslintConfig": {
     "parser": "babel-eslint",
