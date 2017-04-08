@@ -78,10 +78,9 @@ const calcArrangementBounds = (arrangement) => {
   )
 }
 
-const onArrangementChange = (intervalMs, arrangement) =>
+const observeArrChanges = (intervalMs, arrangement) =>
   new Observable((observer) => {
     const subs = [
-
       // Watch for scroll events in the frame
       observeDomEvent("scroll", arrangement.frame)
         .subscribe(() => { observer.next() }),
@@ -106,18 +105,18 @@ const onArrangementChange = (intervalMs, arrangement) =>
 
 
 
-// Main Module Entry Points
+// Main Entry Points
 
-const main = (arrangement) => (
-  onArrangementChange(arrangement)
+const observe = (arrangement) => (
+  observeArrChanges(arrangement)
   .map(Main.calcLayout)
 )
 
-const includingPositionChanges = (intervalMs, arrangement) => {
+const observeWithPolling = (intervalMs, arrangement) => {
   let arrangementBounds = calcArrangementBounds(arrangement)
   return (
     mergeObservables(
-      onArrangementChange(arrangement),
+      observeArrChanges(arrangement),
       // If the position of any arrangement elements change we need to
       // recalculate layout to see if final layout is affected. There is no
       // way to do this without polling.
@@ -135,10 +134,10 @@ const includingPositionChanges = (intervalMs, arrangement) => {
 
 
 export default {
-  main,
-  includingPositionChanges,
+  observe,
+  observeWithPolling,
 }
 export {
-  main,
-  includingPositionChanges,
+  observe,
+  observeWithPolling,
 }
