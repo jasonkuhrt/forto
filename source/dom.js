@@ -3,11 +3,16 @@ import F from "./prelude"
 import Observable from "zen-observable"
 import OnResize from "element-resize-detector"
 
-// TODO This tries to run body.insertBefore
+
+
+// Constructor tries to run body.insertBefore
 // https://github.com/wnr/element-resize-detector/blob/ad30e37d44a90c3c0bfaeed392755641d8dde469/dist/element-resize-detector.js#L490
 // so we must wait for after DOM ready event
-const onResize = OnResize({
-  strategy: "scroll"
+let onResize
+document.addEventListener("DOMContentLoaded", () => {
+  onResize = OnResize({
+    strategy: "scroll"
+  })
 })
 
 /* We want to calculate the popover positon for a DOM UI and if there are
