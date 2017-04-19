@@ -5,12 +5,13 @@ const path = Path.join.bind(null, __dirname)
 module.exports = {
   entry: [
     "./source/Main.js",
-    "./test/dom.js",
+    "./test/Main.js",
   ],
   output: {
     filename: "[name].js",
     path: path("./build")
   },
+  devtool: "source-map",
   module: {
     rules: [
       {

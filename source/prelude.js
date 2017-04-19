@@ -1,4 +1,7 @@
 /* eslint-disable no-param-reassign */
+import isEqual from "lodash.isequal"
+
+
 const first = (x) => (
   x[0]
 )
@@ -17,9 +20,11 @@ const mapObject = (object, f) => (
 export default {
   first,
   mapObject,
+  isEqual,
 }
 
 export {
   first,
   mapObject,
+  isEqual,
 }

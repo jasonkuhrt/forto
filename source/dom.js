@@ -1,16 +1,16 @@
 import Main from "./Main"
 import F from "./prelude"
 import Observable from "zen-observable"
-import OnResize from "element-resize-detector"
+import ERD from "element-resize-detector"
 
 
 
 // Constructor tries to run body.insertBefore
 // https://github.com/wnr/element-resize-detector/blob/ad30e37d44a90c3c0bfaeed392755641d8dde469/dist/element-resize-detector.js#L490
 // so we must wait for after DOM ready event
-let onResize
+let erd
 document.addEventListener("DOMContentLoaded", () => {
-  onResize = OnResize({
+  erd = ERD({
     strategy: "scroll"
   })
 })
@@ -23,32 +23,35 @@ to use CSS animation/transition while another uses React motion while another
 uses React Interpolate. Only the former of the three examples would support
 us directly assigning new positioning results to popover and tip. The other
 examples listed would need to handle the application of positioning results */
-
 const observeDomEvent = (eventName, element) => {
   return new Observable((observer) => {
-    const isElementResize = eventName === "resize" && element === window
-    const onEvent = (event) => {
+    const isElementResize = eventName === "resize" && element !== window
+    // TODO Remove this function
+    // https://github.com/cujojs/most/issues/426
+    const observeNextTimedOut = (event) => {
+      setTimeout(() => { observer.next(event) }, 0)
+    }
+    const observerNext = (event) => {
       observer.next(event)
     }
-    const cleanUp = () => {
+    if (isElementResize) {
+      erd.listenTo(element, observeNextTimedOut)
+    } else {
+      element.addEventListener(eventName, observerNext)
+    }
+    return function dispose () {
       if (isElementResize) {
-        onResize.removeListener(element, onEvent)
+        erd.removeListener(element, observeNextTimedOut)
       } else {
-        element.removeEventListener(eventName, onEvent)
+        element.removeEventListener(eventName, observerNext)
       }
     }
-    if (isElementResize) {
-      onResize.listenTo(element, onEvent)
-    } else {
-      element.addEventListener(eventName, onEvent)
-    }
-    return cleanUp
   })
 }
 
 const observePeriodic = (everyMs) => {
   return new Observable((observer) => {
-    const intervalId = setInterval(everyMs, () => observer.next())
+    const intervalId = setInterval(() => observer.next(), everyMs)
     return () => {
       clearInterval(intervalId)
     }
@@ -73,12 +76,30 @@ const calcArrangementBounds = (arrangement) => {
   return (
     F.mapObject(
       arrangement,
-      (x) => x.getBoundingClientRect()
+      (x) => {
+        // Make props enumerable so that we can leverage isEqual later
+        const {
+          width,
+          height,
+          top,
+          bottom,
+          left,
+          right
+        } = x.getBoundingClientRect()
+        return {
+          width,
+          height,
+          top,
+          bottom,
+          left,
+          right
+        }
+      }
     )
   )
 }
 
-const observeArrChanges = (intervalMs, arrangement) =>
+const observeArrChanges = (arrangement) =>
   new Observable((observer) => {
     const subs = [
       // Watch for scroll events in the frame
@@ -109,7 +130,7 @@ const observeArrChanges = (intervalMs, arrangement) =>
 
 const observe = (arrangement) => (
   observeArrChanges(arrangement)
-  .map(Main.calcLayout)
+  .map(Main.calcLayoutFromArrangement)
 )
 
 const observeWithPolling = (intervalMs, arrangement) => {
@@ -121,23 +142,28 @@ const observeWithPolling = (intervalMs, arrangement) => {
       // recalculate layout to see if final layout is affected. There is no
       // way to do this without polling.
       observePeriodic(intervalMs)
-      .filter(() => {
-        const arrangementBoundsBefore = arrangementBounds
-        arrangementBounds = calcArrangementBounds(arrangement)
-        return F.deepEqualObjects(arrangementBoundsBefore, arrangementBounds)
-      }),
+        .map(() =>
+          calcArrangementBounds(arrangement)
+        )
+        .filter((arrangementBoundsNow) => {
+          const arrangementBoundsBefore = arrangementBounds
+          arrangementBounds = arrangementBoundsNow
+          return !F.isEqual(arrangementBoundsBefore, arrangementBoundsNow)
+        })
     )
-    .map(Main.calcLayout)
+    .map(Main.calcLayoutFromArrangement)
   )
 }
 
 
 
 export default {
+  observeDomEvent,
   observe,
   observeWithPolling,
 }
 export {
+  observeDomEvent,
   observe,
   observeWithPolling,
 }

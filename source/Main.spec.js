@@ -1,6 +1,6 @@
 // @flow
-import Forto from "./Main"
-import B from "./BoundingBox"
+const Forto = require("./Main")
+const B = require("./BoundingBox")
 
 // TODO Property Test ideas
 // * When measuring zones, the zones along an orientation always have the

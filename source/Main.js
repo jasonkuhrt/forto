@@ -351,6 +351,31 @@ const calcLayout = (
   })
 }
 
+type Arrangement = {
+  frame: BoundingBox,
+  target: BoundingBox,
+  popover: Size,
+  tip: Size,
+}
+
+const calcLayoutFromArrangement = (arrangement : Arrangement) : any => {
+  const {
+    frame,
+    target,
+    popover,
+    tip,
+  } = arrangement
+  const zone = optimalZone(frame, target, popover, tip)
+  const popoverPosition = calcPopoverPosition(frame, target, popover, zone)
+  const popoverBoundingBox =
+    BoundingBoxFromSizePosition(popover, popoverPosition)
+  const tipPosition = calcTipPosition(Ori.fromSide(zone), target, popoverBoundingBox, tip)
+  return ({
+    popover: popoverPosition,
+    tip: tipPosition,
+  })
+}
+
 
 export type {
   MeasuredZone,
@@ -365,6 +390,7 @@ export default {
   calcPopoverPosition,
   calcTipPosition,
   calcLayout,
+  calcLayoutFromArrangement,
 }
 
 export {
@@ -375,4 +401,5 @@ export {
   calcPopoverPosition,
   calcTipPosition,
   calcLayout,
+  calcLayoutFromArrangement,
 }
