@@ -67,31 +67,43 @@ const mergeObservables = (a, b) => {
   })
 }
 
-const calcArrangementBounds = (arrangement) => {
-  return (
-    F.mapObject(
-      arrangement,
-      (x) => {
-        // Make props enumerable so that we can leverage isEqual later
-        const {
-          width,
-          height,
-          top,
-          bottom,
-          left,
-          right
-        } = x.getBoundingClientRect()
-        return {
-          width,
-          height,
-          top,
-          bottom,
-          left,
-          right
-        }
+// Make props enumerable so that we can leverage isEqual later
+const getBoundingClientRect = (el) => {
+  const {
+    width,
+    height,
+    top,
+    bottom,
+    left,
+    right
+  } = el.getBoundingClientRect()
+  return {
+    width,
+    height,
+    top,
+    bottom,
+    left,
+    right
+  }
+}
+
+const calcArrangementBounds = ({ frame, ...elems }) => {
+  const elemsBounds = F.mapObject(elems, getBoundingClientRect)
+  const frameBounds =
+    frame === window
+      ? {
+        width: window.outerWidth,
+        height: window.outerHeight,
+        top: 0,
+        bottom: window.outerHeight,
+        left: 0,
+        right: window.outerWidth,
       }
-    )
-  )
+      : getBoundingClientRect(frame)
+  return {
+    frame: frameBounds,
+    ...elemsBounds
+  }
 }
 
 const observeArrChanges = (arrangement) =>

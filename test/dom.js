@@ -16,8 +16,13 @@ FRP.Stream.prototype.collectAll = function () {
   )
 }
 
-const makeDiv = () =>
-  document.createElement("div")
+const makeDiv = (style) => {
+  const el = document.createElement("div")
+  if (style) {
+    Object.assign(el.style, style)
+  }
+  return el
+}
 
 const makePixel = () => {
   const el = makeDiv()
@@ -38,6 +43,7 @@ const arrStyles = {
   frame: {
     width: "100px",
     height: "100px",
+    overflow: "auto",
   },
   target: {
     width: "10px",
@@ -66,16 +72,19 @@ const temporary = makeDiv()
 before(() => {
   temporary.id = "temporary"
   document.body.appendChild(temporary)
-  F.mapObjIndexed(
-    (el, name) => {
-      if (name === "target") {
-        arrangement.frame.appendChild(el)
-      } else {
-        document.body.appendChild(el)
-      }
-    },
-    arrangement
-  )
+
+  document.body.appendChild(arrangement.frame)
+  document.body.appendChild(arrangement.popover)
+  document.body.appendChild(arrangement.tip)
+  arrangement.frame.appendChild(arrangement.target)
+  /* Force a scroll on frame */
+  const divThatIsTall = makeDiv()
+  divThatIsTall.id = "tallDiv"
+  Object.assign(divThatIsTall.style, {
+    width: "1px",
+    height: arrangement.frame.offsetHeight + 1000 + "px"
+  })
+  arrangement.frame.appendChild(divThatIsTall)
 })
 
 beforeEach(() => {
@@ -166,13 +175,53 @@ it("if position change of frame there is a change event", () => {
   return promise
 })
 
-// Test that changes in position of arrangement elements do not trigger a
-// change if using normal event based observation (as opposed to not using
-// poll-based observation).
-it("if position change there is no change event, via frame")
-it("if position change there is no change event, via target")
-it("if position change there is no change event, via popover")
-it("if position change there is no change event, via tip")
+it("if frame can and does scroll a new layout is calculated", () => {
+  const promise = FRP
+    .from(Dom.observeWithPolling(1000, arrangement))
+    .skip(4) // Initial binding fires element resize events
+    .collect(1)
+  arrangement.frame.scrollTop = 1
+  return promise
+})
 
-it("if frame can and does scroll a new layout is calculated")
-it("the frame can be the window instead of an element")
+it("if window-based frame does scroll a new layout is calculated", () => {
+  document.body.appendChild(makeDiv({ height: "10000px", width: "1px" }))
+  const arrangement2 = {
+    frame: window,
+    popover: makePixel(),
+    tip: makePixel(),
+    target: makePixel(),
+  }
+  F.pipe(
+    F.omit(["frame"]),
+    F.values,
+    F.forEach(x => document.body.appendChild(x))
+  )(arrangement2)
+  const promise = FRP
+    .from(Dom.observe(arrangement2))
+    .skip(3) // Initial binding fires element resize events
+    .collect(1)
+  arrangement2.frame.scrollBy(0, 100)
+  return promise
+})
+
+it("if window-based frame dimensions change a new layout is calculated", () => {
+  const arrangement2 = {
+    frame: window,
+    popover: makePixel(),
+    tip: makePixel(),
+    target: makePixel(),
+  }
+  F.pipe(
+    F.omit(["frame"]),
+    F.values,
+    F.forEach(x => document.body.appendChild(x))
+  )(arrangement2)
+  const promise = FRP
+    .from(Dom.observe(arrangement2))
+    .skip(3) // Initial binding fires element resize events
+    .collect(1)
+  // Not possible to change window size via script so we simulate it instead.
+  window.dispatchEvent(new Event('resize'));
+  return promise
+})
