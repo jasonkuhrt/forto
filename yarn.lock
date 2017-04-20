@@ -3216,9 +3216,9 @@ mocha@^3.2.0:
     mkdirp "0.5.1"
     supports-color "3.1.2"
 
-most@^1.2.2:
+"most@https://github.com/cujojs/most#fix-take-double-dispose":
   version "1.2.2"
-  resolved "https://registry.yarnpkg.com/most/-/most-1.2.2.tgz#8f12e434ad6195ed2e1efb3ec217e0cbcf3e1de8"
+  resolved "https://github.com/cujojs/most#2f00572babeb483c6a4e9a0187dc7d69443fe30a"
   dependencies:
     "@most/multicast" "^1.2.5"
     "@most/prelude" "^1.4.0"

@@ -26,22 +26,17 @@ examples listed would need to handle the application of positioning results */
 const observeDomEvent = (eventName, element) => {
   return new Observable((observer) => {
     const isElementResize = eventName === "resize" && element !== window
-    // TODO Remove this function
-    // https://github.com/cujojs/most/issues/426
-    const observeNextTimedOut = (event) => {
-      setTimeout(() => { observer.next(event) }, 0)
-    }
     const observerNext = (event) => {
       observer.next(event)
     }
     if (isElementResize) {
-      erd.listenTo(element, observeNextTimedOut)
+      erd.listenTo(element, observerNext)
     } else {
       element.addEventListener(eventName, observerNext)
     }
     return function dispose () {
       if (isElementResize) {
-        erd.removeListener(element, observeNextTimedOut)
+        erd.removeListener(element, observerNext)
       } else {
         element.removeEventListener(eventName, observerNext)
       }
