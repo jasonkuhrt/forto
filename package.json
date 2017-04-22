@@ -14,7 +14,6 @@
     "babel-jest": "^19.0.0",
     "babel-loader": "^7.0.0",
     "babel-preset-flow": "^6.23.0",
-    "babel-preset-latest": "^6.24.1",
     "babel-preset-stage-1": "^6.24.1",
     "chai": "^3.5.0",
     "core-js": "^2.4.1",
@@ -38,20 +37,6 @@
     "env": {
       "jest": true
     }
-  },
-  "babel": {
-    "presets": [
-      [
-        "latest",
-        {
-          "es2015": {
-            "modules": false
-          }
-        }
-      ],
-      "flow",
-      "stage-1"
-    ]
   },
   "dependencies": {
     "element-resize-detector": "^1.1.11",
