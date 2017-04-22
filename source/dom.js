@@ -1,7 +1,7 @@
 import Main from "./Main"
 import F from "./prelude"
 import Observable from "zen-observable"
-import ERD from "element-resize-detector"
+import ElementResizeDetector from "element-resize-detector"
 
 
 
@@ -10,7 +10,7 @@ import ERD from "element-resize-detector"
 // so we must wait for after DOM ready event
 let erd
 document.addEventListener("DOMContentLoaded", () => {
-  erd = ERD({
+  erd = ElementResizeDetector({
     strategy: "scroll"
   })
 })
