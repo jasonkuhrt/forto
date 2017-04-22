@@ -301,12 +301,14 @@ describe("calcTipPosition", () => {
 
 
 describe("calcLayout", () => {
-  const frame = B.make(100,100)
-  const target = B.translate(90,50,B.make(10,10))
-  const popover = B.make(10,10)
-  const tip = B.make(2,2)
+  const arrangement = {
+    frame: B.make(100,100),
+    target: B.translate(90,50,B.make(10,10)),
+    popover: B.make(10,10),
+    tip: B.make(2,2),
+  }
   it("calculates the layout start to finish", () => {
-    expect(Forto.calcLayout(frame, target, popover, tip)).toEqual({
+    expect(Forto.calcLayout(arrangement)).toEqual({
       popover: { x: 80, y: 50 },
       tip: { x: 0, y: 54 },
     })

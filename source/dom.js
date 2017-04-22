@@ -137,7 +137,7 @@ const observeArrChanges = (arrangement) =>
 
 const observe = (arrangement) => (
   observeArrChanges(arrangement)
-  .map(Main.calcLayoutFromArrangement)
+  .map(Main.calcLayout)
 )
 
 const observeWithPolling = (intervalMs, arrangement) => {
@@ -158,7 +158,7 @@ const observeWithPolling = (intervalMs, arrangement) => {
           return !F.isEqual(arrangementBoundsBefore, arrangementBoundsNow)
         })
     )
-    .map(Main.calcLayoutFromArrangement)
+    .map(Main.calcLayout)
   )
 }
 
