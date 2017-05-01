@@ -26,20 +26,29 @@ const area = (size) => (
 const compare = (a, b) => (
   a < b ? -1 :
   a > b ? 1 :
-             0
+          0
 )
 
 const center = (n) => n / 2
 
 
 // TODO
-// * Optimal zone measurements that factor in Thresholds
 // * preferred zones
 // * Tip disabling
+// * Optimal zone measurements that factor in Thresholds
 // * API
 
-const horizontal = "Horizontal"
-const vertical = "Vertical"
+const Sides = {
+  Top: "Top",
+  Bottom: "Bottom",
+  Left: "Left",
+  Right: "Right",
+}
+
+const Orders = {
+  Before: "Before",
+  After: "After",
+}
 
 const BoundingBoxFromSizePosition = (size, position) => ({
   ...size,
@@ -52,79 +61,87 @@ const BoundingBoxFromSizePosition = (size, position) => ({
 const measureZones = (target, frame) => {
   return [
     {
-      side: "Top",
+      side: Sides.Top,
       width: frame.width,
       height: target.top - frame.top,
     },
     {
-      side: "Bottom",
+      side: Sides.Bottom,
       width: frame.width,
       height: frame.bottom - target.bottom,
     },
     {
-      side: "Left",
+      side: Sides.Left,
       width: target.left - frame.left,
       height: frame.height,
     },
     {
-      side: "Right",
+      side: Sides.Right,
       width: frame.right - target.right,
       height: frame.height,
     },
   ]
 }
 
+
+const Oris = {
+  Horizontal: "Horizontal",
+  Vertical: "Vertical",
+}
+
 const Ori = {}
 
 Ori.isHorizontal = (ofASide) => (
-  [ "Right", "Left" ].indexOf(ofASide.side) !== -1
+  [ Sides.Right, Sides.Left ].indexOf(ofASide.side) !== -1
 )
 
 Ori.fromSide = (ofASide) => (
-  [ "Right", "Left" ].indexOf(ofASide.side) !== -1 ? "Horizontal" : "Vertical"
+  [ Sides.Right, Sides.Left ].indexOf(ofASide.side) !== -1
+    ? Oris.Horizontal
+    : Oris.Vertical
 )
 
 Ori.crossDim = (ori) => (
-  ori === horizontal ? "height" : "width"
+  ori === Oris.Horizontal ? "height" : "width"
 )
 
 Ori.mainDim = (ori) => (
-  ori === vertical ? "width" : "height"
+  ori === Oris.Vertical ? "width" : "height"
 )
 
 Ori.mainAxis = (ori) => (
-  ori === horizontal ? "x" : "y"
+  ori === Oris.Horizontal ? "x" : "y"
 )
 
 Ori.crossAxis = (ori) => (
-  ori === horizontal ? "y" : "x"
+  ori === Oris.Horizontal ? "y" : "x"
 )
 
 Ori.mainEnd = (ori) => (
-  ori === horizontal ? "right" : "bottom"
+  ori === Oris.Horizontal ? "right" : "bottom"
 )
 
 Ori.mainStart = (ori) => (
-  ori === horizontal ? "left" : "top"
+  ori === Oris.Horizontal ? "left" : "top"
 )
 
 Ori.crossEnd = (ori) => (
-  ori === horizontal ? "bottom" : "right"
+  ori === Oris.Horizontal ? "bottom" : "right"
 )
 
 Ori.crossStart = (ori) => (
-  ori === horizontal ? "top" : "left"
+  ori === Oris.Horizontal ? "top" : "left"
 )
 
 Ori.mainLength = (ori) => (
-  ori === horizontal ? "width" : "height"
+  ori === Oris.Horizontal ? "width" : "height"
 )
 
 Ori.crossLength = (ori) => (
-  ori === horizontal ? "height" : "width"
+  ori === Oris.Horizontal ? "height" : "width"
 )
 Ori.opposite = (ori) => (
-  ori === horizontal ? vertical : horizontal
+  ori === Oris.Horizontal ? Oris.Vertical : Oris.Horizontal
 )
 
 // Ori.orderOf = (ofASide) : Order => (
@@ -254,10 +271,10 @@ const calcTipPosition = (orientation, target, popover, tip) => {
 }
 
 const expandEligibleZoneShorthand = (elligibleZones) => {
-  if (elligibleZones === "Horizontal") return [ "Left", "Right" ]
-  if (elligibleZones === "Vertical") return [ "Top", "Bottom" ]
-  if (elligibleZones === "Before") return [ "Top", "Left" ]
-  if (elligibleZones === "After") return [ "Bottom", "Right" ]
+  if (elligibleZones === Oris.Horizontal) return [ Sides.Left, Sides.Right ]
+  if (elligibleZones === Oris.Vertical) return [ Sides.Top, Sides.Bottom ]
+  if (elligibleZones === Orders.Before) return [ Sides.Top, Sides.Left ]
+  if (elligibleZones === Orders.After) return [ Sides.Bottom, Sides.Right ]
   return [elligibleZones]
 }
 
@@ -289,7 +306,7 @@ const calcLayout = (settingsUnchecked, arrangement) => {
   )
   const tipPosition = calcTipPosition(
     Ori.fromSide(zone),
-    arrangement.arget,
+    arrangement.target,
     popoverBoundingBox,
     arrangement.tip
   )

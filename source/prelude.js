@@ -16,7 +16,7 @@ const mapObject = (object, f) => (
 )
 
 const isExists = (x) => (
-  x === null || x === undefined
+  x !== null && x !== undefined
 )
 
 const defaultsTo = (x, o) => (
