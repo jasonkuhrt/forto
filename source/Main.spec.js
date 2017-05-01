@@ -1,4 +1,3 @@
-// @flow
 import Forto from "./Main"
 import B from "./BoundingBox"
 
@@ -177,13 +176,43 @@ describe("rankZones", () => {
 
 
 
-describe("optimalZone", () => {
-  const frame = B.make(110,110)
-  const target = B.translate(50,10,B.make(10,10))
-  const popover = B.make(10,10)
-  const tip = B.make(1,1)
+describe("optimalZone (elligible unspecified)", () => {
+  const arrangement = {
+    frame: B.make(110,110),
+    target: B.translate(50,10,B.make(10,10)),
+    popover: B.make(9,9),
+    tip: B.make(1,1),
+  }
+  const optimalZone = Forto.optimalZone.bind(null, { elligibleZones: null })
   it("should return the optimal zone", () => {
-    expect(Forto.optimalZone(frame, target, popover, tip)).toEqual({
+    expect(optimalZone(arrangement)).toEqual({
+      side: "Bottom",
+      height: 90,
+      width: 110,
+      popoverNegAreaPercent: 0,
+    })
+  })
+})
+
+describe("optimalZone (elligible specified)", () => {
+  const arrangement = {
+    frame: B.make(110,110),
+    target: B.translate(50,10,B.make(10,10)),
+    popover: B.make(9,9),
+    tip: B.make(1,1),
+  }
+  it("should only return a single possible zone if elligible choice is singular", () => {
+    const zone = Forto.optimalZone({ elligibleZones: ["Top"]}, arrangement)
+    expect(zone).toEqual({
+      side: "Top",
+      height: 10,
+      width: 110,
+      popoverNegAreaPercent: 0,
+    })
+  })
+  it("should return optimal zone within those elligible", () => {
+    const zone = Forto.optimalZone({ elligibleZones: [ "Top", "Bottom" ]}, arrangement)
+    expect(zone).toEqual({
       side: "Bottom",
       height: 90,
       width: 110,
@@ -194,7 +223,9 @@ describe("optimalZone", () => {
 
 
 
-describe("calcPopoverPosition", () => {
+describe("calcPopoverPosition (bounded)", () => {
+  const calcPopoverPositionBounded =
+      Forto.calcPopoverPosition.bind(null, { isBounded: true })
   const frame = B.make(400,400)
   const target = B.translate(200,100,B.make(10,10))
   const zone = {
@@ -205,22 +236,25 @@ describe("calcPopoverPosition", () => {
   }
   it("moves popover of less cross-length than target to match its cross-axis to target", () => {
     const popover = B.make(6,6)
-    expect(Forto.calcPopoverPosition(frame, target, popover, zone)).toEqual({
+    expect(calcPopoverPositionBounded(frame, target, popover, zone)).toEqual({
       x: 202,
       y: 100 + 10,
     })
   })
   it("moves popover of greater cross-length than target to match its cross-axis to target", () => {
     const popover = B.make(12,12)
-    expect(Forto.calcPopoverPosition(frame, target, popover, zone)).toEqual({
+    expect(calcPopoverPositionBounded(frame, target, popover, zone)).toEqual({
       x: 199,
       y: 100 + 10,
     })
   })
+
+  // Test Popover position when frame bounds would be crossed
+
   it("popover can meet but not exceed frame end bounds to match cross-axis", () => {
     const target2 = B.translate(400 - 10,100,B.make(10,10))
     const popover = B.make(20,20)
-    expect(Forto.calcPopoverPosition(frame, target2, popover, zone)).toEqual({
+    expect(calcPopoverPositionBounded(frame, target2, popover, zone)).toEqual({
       x: 400 - 20,
       y: 100 + 10,
     })
@@ -228,7 +262,7 @@ describe("calcPopoverPosition", () => {
   it("popover can meet but not exceed frame start bounds to match cross-axis", () => {
     const target2 = B.translate(0,100,B.make(10,10))
     const popover = B.make(20,20)
-    expect(Forto.calcPopoverPosition(frame, target2, popover, zone)).toEqual({
+    expect(calcPopoverPositionBounded(frame, target2, popover, zone)).toEqual({
       x: 0,
       y: 100 + 10,
     })
@@ -236,15 +270,18 @@ describe("calcPopoverPosition", () => {
   it("if popover does not fit within frame cross-length then center it within frame", () => {
     const target2 = B.translate(0,100,B.make(10,10))
     const popover = B.make(400 + 10,10)
-    expect(Forto.calcPopoverPosition(frame, target2, popover, zone)).toEqual({
+    expect(calcPopoverPositionBounded(frame, target2, popover, zone)).toEqual({
       x: -1 * 10 / 2,
       y: 100 + 10,
     })
   })
+
+  // Test cross axis matching when target exceeds bounds
+
   it("does not include cropped cross end of target when calculating targets cross-axis", () => {
     const target2 = B.translate(380,100,B.make(30,30))
     const popover = B.make(10,10)
-    expect(Forto.calcPopoverPosition(frame, target2, popover, zone)).toEqual({
+    expect(calcPopoverPositionBounded(frame, target2, popover, zone)).toEqual({
       x: 385,
       y: 100 + 30,
     })
@@ -252,7 +289,7 @@ describe("calcPopoverPosition", () => {
   it("does not include cropped cross start of target when calculating targets cross-axis", () => {
     const target2 = B.translate(-10,100,B.make(30,30))
     const popover = B.make(10,10)
-    expect(Forto.calcPopoverPosition(frame, target2, popover, zone)).toEqual({
+    expect(calcPopoverPositionBounded(frame, target2, popover, zone)).toEqual({
       x: 5,
       y: 100 + 30,
     })
@@ -260,8 +297,47 @@ describe("calcPopoverPosition", () => {
   it("does not include cropped cross start+end of target when calculating targets cross-axis", () => {
     const target2 = B.translate(-10,100,B.make(420,10))
     const popover = B.make(10,10)
-    expect(Forto.calcPopoverPosition(frame, target2, popover, zone)).toEqual({
+    expect(calcPopoverPositionBounded(frame, target2, popover, zone)).toEqual({
       x: 200 - 5,
+      y: 100 + 10,
+    })
+  })
+})
+
+
+
+describe("calcPopoverPosition (unbounded)", () => {
+  const calcPopoverPositionUnbounded =
+    Forto.calcPopoverPosition.bind(null, { isBounded: false })
+  const frame = B.make(400,400)
+  const zone = {
+    side: "Bottom",
+    height: 100,
+    width: 400,
+    popoverNegAreaPercent: 0,
+  }
+
+  it("popover can exceed frame end bounds to match cross-axis", () => {
+    const target2 = B.translate(400 - 10,100, B.make(10,10))
+    const popover = B.make(20,20)
+    expect(calcPopoverPositionUnbounded(frame, target2, popover, zone)).toEqual({
+      x: 400 - 15,
+      y: 100 + 10,
+    })
+  })
+  it("popover can exceed frame start bounds to match cross-axis", () => {
+    const target2 = B.translate(0,100,B.make(10,10))
+    const popover = B.make(20,20)
+    expect(calcPopoverPositionUnbounded(frame, target2, popover, zone)).toEqual({
+      x: -5,
+      y: 100 + 10,
+    })
+  })
+  it("if popover does not fit within frame cross-length then center it within frame", () => {
+    const target2 = B.translate(0,100,B.make(10,10))
+    const popover = B.make(400 + 10,10)
+    expect(calcPopoverPositionUnbounded(frame, target2, popover, zone)).toEqual({
+      x: -200,
       y: 100 + 10,
     })
   })
@@ -301,6 +377,7 @@ describe("calcTipPosition", () => {
 
 
 describe("calcLayout", () => {
+  const settings = {}
   const arrangement = {
     frame: B.make(100,100),
     target: B.translate(90,50,B.make(10,10)),
@@ -308,7 +385,7 @@ describe("calcLayout", () => {
     tip: B.make(2,2),
   }
   it("calculates the layout start to finish", () => {
-    expect(Forto.calcLayout(arrangement)).toEqual({
+    expect(Forto.calcLayout(settings, arrangement)).toEqual({
       popover: { x: 80, y: 50 },
       tip: { x: 0, y: 54 },
     })

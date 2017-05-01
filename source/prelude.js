@@ -15,16 +15,28 @@ const mapObject = (object, f) => (
   }, {})
 )
 
+const isExists = (x) => (
+  x === null || x === undefined
+)
+
+const defaultsTo = (x, o) => (
+  isExists(x) ? x : o
+)
+
 
 
 export default {
+  defaultsTo,
   first,
   mapObject,
   isEqual,
+  isExists,
 }
 
 export {
+  defaultsTo,
   first,
   mapObject,
   isEqual,
+  isExists,
 }
