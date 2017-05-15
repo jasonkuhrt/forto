@@ -1,3 +1,9 @@
+// TODO
+// * thresholds for preferred zones (only prefer up to a given threshold of inferiority)
+// * thresholds for re-zoning (only re-zone if better-enough)
+// * API
+// * dist: transpile to ES5
+
 import F from "./prelude"
 
 const min = (x, o) => (x <= o ? x : o)
@@ -11,12 +17,6 @@ const area = size => size.width * size.height
 const compare = (a, b) => (a < b ? -1 : a > b ? 1 : 0)
 
 const center = n => n / 2
-
-// TODO
-// * preferred zones up to a given threshold
-// * Optimal zone measurements that factor in Thresholds
-// * API
-// * dist: transpile to ES5?
 
 const Sides = {
   Top: "Top",
