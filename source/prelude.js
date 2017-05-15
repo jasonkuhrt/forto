@@ -1,29 +1,23 @@
 /* eslint-disable no-param-reassign */
 import isEqual from "lodash.isequal"
 
+const splitWith = (f, xs) => {
+  const a = [], b = []
+  xs.forEach(x => (f(x) ? a : b).push(x))
+  return [a, b]
+}
 
-const first = (x) => (
-  x[0]
-)
+const first = x => x[0]
 
-const mapObject = (object, f) => (
-  Object
-  .keys(object)
-  .reduce((objectNew, key) => {
+const mapObject = (object, f) =>
+  Object.keys(object).reduce((objectNew, key) => {
     objectNew[key] = f(object[key])
     return objectNew
   }, {})
-)
 
-const isExists = (x) => (
-  x !== null && x !== undefined
-)
+const isExists = x => x !== null && x !== undefined
 
-const defaultsTo = (x, o) => (
-  isExists(x) ? x : o
-)
-
-
+const defaultsTo = (x, o) => (isExists(x) ? x : o)
 
 export default {
   defaultsTo,
@@ -31,12 +25,7 @@ export default {
   mapObject,
   isEqual,
   isExists,
+  splitWith,
 }
 
-export {
-  defaultsTo,
-  first,
-  mapObject,
-  isEqual,
-  isExists,
-}
+export { defaultsTo, first, mapObject, isEqual, isExists, splitWith }
