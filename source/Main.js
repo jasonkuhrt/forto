@@ -131,8 +131,8 @@ const fitsOfBestClass = zoneFits => {
 
 const rankZones = (settings, zoneFits) => {
   const preferredZones = settings.preferredZones
-    ? fitsOfBestClass(zoneFits).filter(x =>
-        settings.preferredZones.includes(x.side)
+    ? fitsOfBestClass(zoneFits).filter(
+        x => settings.preferredZones.indexOf(x.side) > -1
       )
     : []
 
@@ -153,9 +153,9 @@ const optimalZone = (settings, arrangement) => {
   // TODO We can optimize measureZones to apply the elligibleZones logic
   // so that it does not needlessly create objects.
   const zonesMeasured = settings.elligibleZones
-    ? measureZones(arrangement.target, arrangement.frame)
-        // TODO includes is ES2016 only
-        .filter(zone => settings.elligibleZones.includes(zone.side))
+    ? measureZones(arrangement.target, arrangement.frame).filter(
+        zone => settings.elligibleZones.indexOf(zone.side) > -1
+      )
     : measureZones(arrangement.target, arrangement.frame)
 
   // Preferred zones
