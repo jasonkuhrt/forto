@@ -14,9 +14,9 @@ const center = n => n / 2
 
 // TODO
 // * preferred zones up to a given threshold
-// * Tip disabling
 // * Optimal zone measurements that factor in Thresholds
 // * API
+// * dist: transpile to ES5?
 
 const Sides = {
   Top: "Top",
@@ -264,8 +264,12 @@ const checkAndNormalizeSettings = settings => {
   }
 }
 
-const calcLayout = (settingsUnchecked, arrangement) => {
+const calcLayout = (settingsUnchecked, arrangementUnchecked) => {
   const settings = checkAndNormalizeSettings(settingsUnchecked)
+  const isTipEnabled = Boolean(arrangementUnchecked.tip)
+  const arrangement = isTipEnabled
+    ? arrangementUnchecked
+    : { ...arrangementUnchecked, tip: { width: 0, height: 0 } }
   const zone = optimalZone(settings, arrangement)
   const popoverPosition = calcPopoverPosition(
     settings,
@@ -278,12 +282,14 @@ const calcLayout = (settingsUnchecked, arrangement) => {
     arrangement.popover,
     popoverPosition
   )
-  const tipPosition = calcTipPosition(
-    Ori.fromSide(zone),
-    arrangement.target,
-    popoverBoundingBox,
-    arrangement.tip
-  )
+  const tipPosition = isTipEnabled
+    ? calcTipPosition(
+        Ori.fromSide(zone),
+        arrangement.target,
+        popoverBoundingBox,
+        arrangement.tip
+      )
+    : null
   return {
     popover: popoverPosition,
     tip: tipPosition,

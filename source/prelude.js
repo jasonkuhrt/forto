@@ -17,7 +17,7 @@ const mapObject = (object, f) =>
 
 const isExists = x => x !== null && x !== undefined
 
-const defaultsTo = (x, o) => (isExists(x) ? x : o)
+const defaultsTo = (x, o) => (isExists(o) ? o : x)
 
 export default {
   defaultsTo,

@@ -445,4 +445,10 @@ describe("calcLayout", () => {
       tip: { x: 0, y: 54 },
     })
   })
+  it("tip is optional", () => {
+    expect(Forto.calcLayout(settings, { ...arrangement, tip: null })).toEqual({
+      popover: { x: 80, y: 50 },
+      tip: null,
+    })
+  })
 })
