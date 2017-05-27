@@ -182,6 +182,8 @@ describe("rankZones with preference", () => {
       Forto.rankZones({ preferredZones: ["Top", "Bottom"] }, zoneFits)
     ).toEqual([
       { side: "Bottom", width: 100, height: 100, popoverNegAreaPercent: 0 },
+      { side: "Left", width: 200, height: 200, popoverNegAreaPercent: 0 },
+      { side: "Top", width: 50, height: 50, popoverNegAreaPercent: 1 },
     ])
   })
   it("if first classes, if single pref in first class then it should be ranked highest even if not greatest area", () => {
@@ -191,6 +193,7 @@ describe("rankZones with preference", () => {
     ]
     expect(Forto.rankZones({ preferredZones: ["Top"] }, zoneFits)).toEqual([
       { side: "Top", width: 50, height: 50, popoverNegAreaPercent: 0 },
+      { side: "Bottom", width: 100, height: 100, popoverNegAreaPercent: 0 },
     ])
   })
   it("if first classes, if multiple prefs in first class, rank best pref that with greatest area", () => {
@@ -212,6 +215,7 @@ describe("rankZones with preference", () => {
     ]
     expect(Forto.rankZones({ preferredZones: ["Top"] }, zoneFits)).toEqual([
       { side: "Top", width: 50, height: 50, popoverNegAreaPercent: 1 },
+      { side: "Bottom", width: 100, height: 100, popoverNegAreaPercent: 2 },
     ])
   })
   it("if second classes, if multiple prefs in second class, rank best pref that with least crop area", () => {
@@ -225,6 +229,84 @@ describe("rankZones with preference", () => {
       { side: "Top", width: 50, height: 50, popoverNegAreaPercent: 1 },
       { side: "Bottom", width: 100, height: 100, popoverNegAreaPercent: 2 },
     ])
+  })
+})
+
+describe("rankZones with preference up to thrshold", () => {
+  it("preference is taken if better than alternatives", () => {
+    const b = {
+      side: "Bottom",
+      width: 10,
+      height: 10,
+      popoverNegAreaPercent: 0,
+    }
+    const t = { side: "Top", width: 10, height: 5, popoverNegAreaPercent: 0 }
+    expect(
+      Forto.rankZones(
+        { preferredZones: ["Top"], preferZoneUntilPercentWorse: 0.49 },
+        [b, t]
+      )
+    ).toEqual([t, b])
+  })
+  it("preference is not taken if worse than an alternative by equal to or greater than threshold", () => {
+    const a = {
+      side: "Bottom",
+      width: 10,
+      height: 10,
+      popoverNegAreaPercent: 0,
+    }
+    const b = { side: "Top", width: 10, height: 5, popoverNegAreaPercent: 0 }
+    expect(
+      Forto.rankZones(
+        { preferredZones: ["Top"], preferZoneUntilPercentWorse: 0.5 },
+        [a, b]
+      )
+    ).toEqual([a, b])
+  })
+  it("given threshold has no effect between selecting two preferences", () => {
+    const a = {
+      side: "Bottom",
+      width: 10,
+      height: 10,
+      popoverNegAreaPercent: 0,
+    }
+    const b = { side: "Top", width: 10, height: 5, popoverNegAreaPercent: 0 }
+    expect(
+      Forto.rankZones(
+        { preferredZones: ["Top", "Bottom"], preferZoneUntilPercentWorse: 0.9 },
+        [a, b]
+      )
+    ).toEqual([a, b])
+  })
+  it("threshold preference does not override class boundry", () => {
+    const a = {
+      side: "Bottom",
+      width: 10,
+      height: 10,
+      popoverNegAreaPercent: 1,
+    }
+    const b = { side: "Top", width: 10, height: 5, popoverNegAreaPercent: 0 }
+    expect(
+      Forto.rankZones(
+        { preferredZones: ["Bottom"], preferZoneUntilPercentWorse: 1 },
+        [a, b]
+      )
+    ).toEqual([b, a])
+  })
+  it("preference threshold amongst class 2 applies same idea", () => {
+    const a = {
+      side: "Bottom",
+      width: 10,
+      height: 10,
+      popoverNegAreaPercent: 30,
+    }
+    const b = { side: "Top", width: 10, height: 5, popoverNegAreaPercent: 20 }
+    expect(
+      Forto.rankZones(
+        { preferredZones: ["Bottom"], preferZoneUntilPercentWorse: 0.5 },
+        [a, b]
+      )
+    ).toEqual([a, b])
   })
 })
 
