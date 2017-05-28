@@ -121,31 +121,68 @@ const calcFit = (popover, tip, measuredZone) => {
   })
 }
 
-const rankZones = (settings, zoneFits) => {
-  return zoneFits.sort((a, b) => {
-    const areaA = area(a)
-    const areaB = area(b)
+const rankZonesWithPreference = (prefZones, zoneFits) =>
+  zoneFits.sort((a, b) => {
     if (a.popoverNegAreaPercent < b.popoverNegAreaPercent) return -1
     if (a.popoverNegAreaPercent > b.popoverNegAreaPercent) return 1
-    const prefs = settings.preferredZones
-    if (prefs) {
-      const prefA = settings.preferredZones.indexOf(a.side) > -1
-      const prefB = settings.preferredZones.indexOf(b.side) > -1
-      const threshold = settings.preferZoneUntilPercentWorse
-      if (threshold) {
-        if (prefA && !prefB && (areaB - areaA) / areaB > threshold) return -1
-        if (!prefA && prefB && (areaA - areaB) / areaA > threshold) return 1
-      } else {
-        if (prefA && !prefB) return -1
-        if (!prefA && prefB) return 1
-      }
+    const prefA = prefZones.indexOf(a.side) > -1
+    const prefB = prefZones.indexOf(b.side) > -1
+    if (prefA && !prefB) return -1
+    if (!prefA && prefB) return 1
+    return compare(area(a), area(b)) * -1
+  })
+
+const rankZonesWithThresholdPreference = (prefZones, threshold, zoneFits) =>
+  zoneFits.sort((a, b) => {
+    if (!a.popoverNegAreaPercent && b.popoverNegAreaPercent) return -1
+    if (a.popoverNegAreaPercent && !b.popoverNegAreaPercent) return 1
+    const areaA = area(a)
+    const areaB = area(b)
+    const prefA = prefZones.indexOf(a.side) > -1
+    const prefB = prefZones.indexOf(b.side) > -1
+    if (a.popoverNegAreaPercent && b.popoverNegAreaPercent) {
+      if (
+        prefA &&
+        !prefB &&
+        1 - b.popoverNegAreaPercent / a.popoverNegAreaPercent < threshold
+      )
+        return -1
+      if (
+        !prefA &&
+        prefB &&
+        1 - a.popoverNegAreaPercent / b.popoverNegAreaPercent < threshold
+      )
+        return 1
+      if (a.popoverNegAreaPercent < b.popoverNegAreaPercent) return -1
+      if (a.popoverNegAreaPercent > b.popoverNegAreaPercent) return 1
     }
+    if (prefA && !prefB && (areaB - areaA) / areaB > threshold) return -1
+    if (!prefA && prefB && (areaA - areaB) / areaA > threshold) return 1
+    return compare(areaA, areaB) * -1
+  })
+
+const rankZonesSimple = zoneFits =>
+  zoneFits.sort((a, b) => {
+    if (a.popoverNegAreaPercent < b.popoverNegAreaPercent) return -1
+    if (a.popoverNegAreaPercent > b.popoverNegAreaPercent) return 1
     // Either neither have negative area or both have equally negative area.
     // In either case check which has the largest area.
     // NOTE we inverse compare since it treats larger as coming later
     // but for us larger is better and hence should come first.
-    return compare(areaA, areaB) * -1
+    return compare(area(a), area(b)) * -1
   })
+
+const rankZones = (settings, zoneFits) => {
+  if (settings.preferredZones) {
+    return settings.preferZoneUntilPercentWorse
+      ? rankZonesWithThresholdPreference(
+          settings.preferredZones,
+          settings.preferZoneUntilPercentWorse,
+          zoneFits
+        )
+      : rankZonesWithPreference(settings.preferredZones, zoneFits)
+  }
+  return rankZonesSimple(zoneFits)
 }
 
 const optimalZone = (settings, arrangement) => {
