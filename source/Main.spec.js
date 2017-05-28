@@ -106,130 +106,87 @@ describe("calcFit", () => {
 })
 
 describe("rankZones", () => {
+  const b = {
+    side: "Bottom",
+    width: 100,
+    height: 100,
+    popoverNegAreaPercent: 0,
+  }
+  const t = { side: "Top", width: 50, height: 50, popoverNegAreaPercent: 0 }
+  const test = (zoneFits, zoneFitsRanked) => {
+    expect(Forto.rankZones({}, zoneFits)).toEqual(zoneFitsRanked)
+  }
   it("should rank second-class lower than first-class even if smaller area", () => {
-    const zoneFits = [
-      { side: "Bottom", width: 100, height: 100, popoverNegAreaPercent: 1 },
-      { side: "Top", width: 50, height: 50, popoverNegAreaPercent: 0 },
-    ]
-    expect(Forto.rankZones({}, zoneFits)).toEqual([
-      { side: "Top", width: 50, height: 50, popoverNegAreaPercent: 0 },
-      { side: "Bottom", width: 100, height: 100, popoverNegAreaPercent: 1 },
-    ])
+    const $b = { ...b, popoverNegAreaPercent: 1 }
+    test([$b, t], [t, $b])
   })
   it("should rank larger areas higher amongst first-class", () => {
-    const zoneFits = [
-      { side: "Top", width: 50, height: 50, popoverNegAreaPercent: 0 },
-      { side: "Bottom", width: 100, height: 100, popoverNegAreaPercent: 0 },
-    ]
-    expect(Forto.rankZones({}, zoneFits)).toEqual([
-      { side: "Bottom", width: 100, height: 100, popoverNegAreaPercent: 0 },
-      { side: "Top", width: 50, height: 50, popoverNegAreaPercent: 0 },
-    ])
+    test([t, b], [b, t])
   })
   it("should rank larger areas higher amongst equal second-class", () => {
-    const zoneFits = [
-      { side: "Top", width: 50, height: 50, popoverNegAreaPercent: 1 },
-      { side: "Bottom", width: 100, height: 100, popoverNegAreaPercent: 1 },
-    ]
-    expect(Forto.rankZones({}, zoneFits)).toEqual([
-      { side: "Bottom", width: 100, height: 100, popoverNegAreaPercent: 1 },
-      { side: "Top", width: 50, height: 50, popoverNegAreaPercent: 1 },
-    ])
+    const $b = { ...b, popoverNegAreaPercent: 1 }
+    const $t = { ...t, popoverNegAreaPercent: 1 }
+    test([$t, $b], [$b, $t])
   })
   it("should rank less negative higher amongst non-equal second-classe", () => {
-    const zoneFits = [
-      { side: "Bottom", width: 100, height: 100, popoverNegAreaPercent: 10 },
-      { side: "Top", width: 50, height: 50, popoverNegAreaPercent: 1 },
-    ]
-    expect(Forto.rankZones({}, zoneFits)).toEqual([
-      { side: "Top", width: 50, height: 50, popoverNegAreaPercent: 1 },
-      { side: "Bottom", width: 100, height: 100, popoverNegAreaPercent: 10 },
-    ])
+    const $b = { ...b, popoverNegAreaPercent: 10 }
+    const $t = { ...t, popoverNegAreaPercent: 1 }
+    test([$b, $t], [$t, $b])
   })
   it("if two zones are of equal worth maintain their existing order", () => {
-    const zoneFits = [
-      { side: "Bottom", width: 1, height: 1, popoverNegAreaPercent: 0 },
-      { side: "Top", width: 2, height: 2, popoverNegAreaPercent: 0 },
-      { side: "Right", width: 2, height: 2, popoverNegAreaPercent: 0 },
-      { side: "Left", width: 2, height: 2, popoverNegAreaPercent: 0 },
-    ]
-    expect(Forto.rankZones({}, zoneFits)).toEqual([
-      { side: "Top", width: 2, height: 2, popoverNegAreaPercent: 0 },
-      { side: "Right", width: 2, height: 2, popoverNegAreaPercent: 0 },
-      { side: "Left", width: 2, height: 2, popoverNegAreaPercent: 0 },
-      { side: "Bottom", width: 1, height: 1, popoverNegAreaPercent: 0 },
-    ])
+    const $b = { side: "Bottom", width: 1, height: 1, popoverNegAreaPercent: 0 }
+    const $t = { side: "Top", width: 2, height: 2, popoverNegAreaPercent: 0 }
+    const $r = { side: "Right", width: 2, height: 2, popoverNegAreaPercent: 0 }
+    const $l = { side: "Left", width: 2, height: 2, popoverNegAreaPercent: 0 }
+    const zoneFits = [$b, $t, $l, $r]
+    test(zoneFits, zoneFits)
   })
 })
 
 describe("rankZones with preference", () => {
+  const b = {
+    side: "Bottom",
+    width: 100,
+    height: 100,
+    popoverNegAreaPercent: 1,
+  }
+  const t = { side: "Top", width: 50, height: 50, popoverNegAreaPercent: 0 }
+  const test = (zoneFits, preferredZones, zoneFitsRanked) => {
+    expect(Forto.rankZones({ preferredZones }, zoneFits)).toEqual(
+      zoneFitsRanked
+    )
+  }
   it("if mixed classes, if single pref in second-class, still rank first-class better", () => {
-    const zoneFits = [
-      { side: "Bottom", width: 100, height: 100, popoverNegAreaPercent: 1 },
-      { side: "Top", width: 50, height: 50, popoverNegAreaPercent: 0 },
-    ]
-    expect(Forto.rankZones({ preferredZones: ["Bottom"] }, zoneFits)).toEqual([
-      { side: "Top", width: 50, height: 50, popoverNegAreaPercent: 0 },
-      { side: "Bottom", width: 100, height: 100, popoverNegAreaPercent: 1 },
-    ])
+    test([b, t], "Bottom", [t, b])
   })
   it("if mixed classes, if multiple prefs in mixed classes, then ignore prefs of second class and rank preferred first class best even if not greatest area", () => {
-    const zoneFits = [
-      { side: "Bottom", width: 100, height: 100, popoverNegAreaPercent: 0 },
-      { side: "Top", width: 50, height: 50, popoverNegAreaPercent: 1 },
-      { side: "Left", width: 200, height: 200, popoverNegAreaPercent: 0 },
-    ]
-    expect(
-      Forto.rankZones({ preferredZones: ["Top", "Bottom"] }, zoneFits)
-    ).toEqual([
-      { side: "Bottom", width: 100, height: 100, popoverNegAreaPercent: 0 },
-      { side: "Left", width: 200, height: 200, popoverNegAreaPercent: 0 },
-      { side: "Top", width: 50, height: 50, popoverNegAreaPercent: 1 },
-    ])
+    const $b = { ...b, popoverNegAreaPercent: 0 }
+    const $t = { ...b, popoverNegAreaPercent: 1 }
+    const l = {
+      side: "Left",
+      width: 200,
+      height: 200,
+      popoverNegAreaPercent: 0,
+    }
+    test([$b, $t, l], ["Top", "Bottom"], [$b, l, $t])
   })
   it("if first classes, if single pref in first class then it should be ranked highest even if not greatest area", () => {
-    const zoneFits = [
-      { side: "Bottom", width: 100, height: 100, popoverNegAreaPercent: 0 },
-      { side: "Top", width: 50, height: 50, popoverNegAreaPercent: 0 },
-    ]
-    expect(Forto.rankZones({ preferredZones: ["Top"] }, zoneFits)).toEqual([
-      { side: "Top", width: 50, height: 50, popoverNegAreaPercent: 0 },
-      { side: "Bottom", width: 100, height: 100, popoverNegAreaPercent: 0 },
-    ])
+    const $b = { ...b, popoverNegAreaPercent: 0 }
+    test([$b, t], ["Top"], [t, $b])
   })
   it("if first classes, if multiple prefs in first class, rank best pref that with greatest area", () => {
-    const zoneFits = [
-      { side: "Bottom", width: 100, height: 100, popoverNegAreaPercent: 0 },
-      { side: "Top", width: 50, height: 50, popoverNegAreaPercent: 0 },
-    ]
-    expect(
-      Forto.rankZones({ preferredZones: ["Top", "Bottom"] }, zoneFits)
-    ).toEqual([
-      { side: "Bottom", width: 100, height: 100, popoverNegAreaPercent: 0 },
-      { side: "Top", width: 50, height: 50, popoverNegAreaPercent: 0 },
-    ])
+    const $b = { ...b, popoverNegAreaPercent: 0 }
+    test([t, $b], ["Top", "Bottom"], [$b, t])
   })
   it("if second classes, if single pref in second class, then it should be ranked highest even if not least cropped area", () => {
-    const zoneFits = [
-      { side: "Bottom", width: 100, height: 100, popoverNegAreaPercent: 2 },
-      { side: "Top", width: 50, height: 50, popoverNegAreaPercent: 1 },
-    ]
-    expect(Forto.rankZones({ preferredZones: ["Top"] }, zoneFits)).toEqual([
-      { side: "Top", width: 50, height: 50, popoverNegAreaPercent: 1 },
-      { side: "Bottom", width: 100, height: 100, popoverNegAreaPercent: 2 },
-    ])
+    const $t = { ...t, popoverNegAreaPercent: 1 }
+    const $b = { ...b, popoverNegAreaPercent: 2 }
+    test([$b, $t], ["Top"], [$t, $b])
   })
   it("if second classes, if multiple prefs in second class, rank best pref that with least crop area", () => {
-    const zoneFits = [
-      { side: "Bottom", width: 100, height: 100, popoverNegAreaPercent: 2 },
-      { side: "Top", width: 50, height: 50, popoverNegAreaPercent: 1 },
-    ]
-    expect(
-      Forto.rankZones({ preferredZones: ["Top", "Bottom"] }, zoneFits)
-    ).toEqual([
-      { side: "Top", width: 50, height: 50, popoverNegAreaPercent: 1 },
-      { side: "Bottom", width: 100, height: 100, popoverNegAreaPercent: 2 },
-    ])
+    const $t = { ...t, popoverNegAreaPercent: 1 }
+    const $b = { ...b, popoverNegAreaPercent: 2 }
+    test([$b, $t], ["Top", "Bottom"], [$t, $b])
   })
 })
 
