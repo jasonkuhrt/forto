@@ -1,5 +1,4 @@
 // TODO
-// * thresholds for preferred zones (only prefer up to a given threshold of inferiority)
 // * thresholds for re-zoning (only re-zone if better-enough)
 // * API
 // * dist: transpile to ES5
