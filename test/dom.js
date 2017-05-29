@@ -96,8 +96,7 @@ afterEach(() => {
   document.body.querySelector("#temporary").innerHTML = ""
 })
 
-const makeLayoutStream = () =>
-  FRP.from(Dom.observe(arrangement)).skip(4) // Initial binding fires element resize events
+const makeLayoutStream = () => FRP.from(Dom.observe(arrangement)).skip(4) // Initial binding fires element resize events
 
 describe("observeDomEvent", () => {
   it("observing element resize event fires event upon initial subscribing", () => {

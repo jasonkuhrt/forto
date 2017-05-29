@@ -118,7 +118,9 @@ const observeArrChanges = arrangement =>
 // Main Entry Points
 
 const observe = arrangement =>
-  observeArrChanges(arrangement).map(Main.calcLayout)
+  observeArrChanges(arrangement).map(arrangement =>
+    Main.calcLayout({}, arrangement)
+  )
 
 const observeWithPolling = (intervalMs, arrangement) => {
   let arrangementBounds = calcArrangementBounds(arrangement)
@@ -134,7 +136,7 @@ const observeWithPolling = (intervalMs, arrangement) => {
         arrangementBounds = arrangementBoundsNow
         return !F.isEqual(arrangementBoundsBefore, arrangementBoundsNow)
       })
-  ).map(Main.calcLayout)
+  ).map(arrangement => Main.calcLayout({}, arrangement))
 }
 
 export { observeDomEvent, observe, observeWithPolling }
