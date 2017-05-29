@@ -1,6 +1,6 @@
 import F from "ramda"
-import Forto from "./Main"
-import B from "./BoundingBox"
+import * as Forto from "./Main"
+import * as B from "./BoundingBox"
 
 // TODO Property Test ideas
 // * When measuring zones, the zones along an orientation always have the

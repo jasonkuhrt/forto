@@ -7,20 +7,12 @@ const make = (width, height) => ({
   height,
 })
 
-const translate = (x, y, box) => (
+const translate = (x, y, box) =>
   Object.assign({}, box, {
     top: box.top + y,
     bottom: box.bottom + y,
     left: box.left + x,
     right: box.right + x,
   })
-)
 
-export default {
-  make,
-  translate,
-}
-export {
-  make,
-  translate,
-}
+export { make, translate }

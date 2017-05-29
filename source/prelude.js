@@ -19,13 +19,4 @@ const isExists = x => x !== null && x !== undefined
 
 const defaultsTo = (x, o) => (isExists(o) ? o : x)
 
-export default {
-  defaultsTo,
-  first,
-  mapObject,
-  isEqual,
-  isExists,
-  splitWith,
-}
-
 export { defaultsTo, first, mapObject, isEqual, isExists, splitWith }

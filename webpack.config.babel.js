@@ -2,14 +2,11 @@ const Path = require("path")
 
 const path = Path.join.bind(null, __dirname)
 
-module.exports = {
-  entry: [
-    "./source/Main.js",
-    "./test/Main.js",
-  ],
+export default {
+  entry: ["./source/Main.js", "./test/Main.js"],
   output: {
     filename: "[name].js",
-    path: path("./build")
+    path: path("./build"),
   },
   devtool: "source-map",
   module: {
@@ -17,8 +14,8 @@ module.exports = {
       {
         test: /\.js$/,
         exclude: /node_modules/,
-        loader: "babel-loader"
-      }
-    ]
-  }
+        loader: "babel-loader",
+      },
+    ],
+  },
 }

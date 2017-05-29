@@ -1,11 +1,15 @@
 {
   "name": "library-template",
   "version": "1.0.0",
-  "main": "source/Main.js",
+  "main": "build-umd/bundle.js",
+  "module": "build-esm/bundle.js",
   "license": "MIT",
   "scripts": {
+    "test": "jest",
     "test:dev": "jest --watch",
-    "test:dom": "testem"
+    "test:dom": "testem",
+    "build": "rollup --config",
+    "prepublish": "npm run build"
   },
   "devDependencies": {
     "babel-cli": "^6.24.1",
@@ -13,6 +17,7 @@
     "babel-eslint": "^7.2.3",
     "babel-jest": "^19.0.0",
     "babel-loader": "^7.0.0",
+    "babel-plugin-external-helpers": "^6.22.0",
     "babel-preset-latest": "^6.24.1",
     "babel-preset-stage-1": "^6.24.1",
     "chai": "^3.5.0",
@@ -25,6 +30,8 @@
     "most": "https://github.com/cujojs/most#fix-take-double-dispose",
     "object.assign": "^4.0.4",
     "ramda": "^0.23.0",
+    "rollup": "^0.41.6",
+    "rollup-plugin-babel": "^2.7.1",
     "testem": "^1.16.0",
     "webpack": "^2.4.1"
   },

@@ -1,9 +1,8 @@
 // TODO
 // * thresholds for re-zoning (only re-zone if better-enough)
 // * API
-// * dist: transpile to ES5
 
-import F from "./prelude"
+import * as F from "./prelude"
 
 const min = (x, o) => (x <= o ? x : o)
 const max = (x, o) => (x >= o ? x : o)
@@ -329,16 +328,6 @@ const calcLayout = (settingsUnchecked, arrangementUnchecked) => {
     popover: popoverPosition,
     tip: tipPosition,
   }
-}
-
-export default {
-  measureZones,
-  calcFit,
-  rankZones,
-  optimalZone,
-  calcPopoverPosition,
-  calcTipPosition,
-  calcLayout,
 }
 
 export {

@@ -1,22 +1,22 @@
 /* eslint-disable */
-import Dom from "../source/dom"
+import * as Dom from "../source/dom"
 import F from "ramda"
 import * as FRP from "most"
 
-FRP.Stream.prototype.collect = function (n) {
-  return this.take(n).reduce(
-    (acc, x) => { acc.push(x); return acc },
-    []
-  )
+FRP.Stream.prototype.collect = function(n) {
+  return this.take(n).reduce((acc, x) => {
+    acc.push(x)
+    return acc
+  }, [])
 }
-FRP.Stream.prototype.collectAll = function () {
-  return this.reduce(
-    (acc, x) => { acc.push(x); return acc },
-    []
-  )
+FRP.Stream.prototype.collectAll = function() {
+  return this.reduce((acc, x) => {
+    acc.push(x)
+    return acc
+  }, [])
 }
 
-const makeDiv = (style) => {
+const makeDiv = style => {
   const el = document.createElement("div")
   if (style) {
     Object.assign(el.style, style)
@@ -37,7 +37,7 @@ const arrangement = {
   target: makeDiv(),
   frame: makeDiv(),
   popover: makeDiv(),
-  tip: makeDiv()
+  tip: makeDiv(),
 }
 const arrStyles = {
   frame: {
@@ -54,18 +54,16 @@ const arrStyles = {
     height: "4px",
     position: "absolute",
     top: "0px",
-    left: "0px"
+    left: "0px",
   },
   tip: {
     width: "0px",
     height: "0px",
     position: "absolute",
     top: "0px",
-    left: "0px"
+    left: "0px",
   },
 }
-
-
 
 const temporary = makeDiv()
 
@@ -82,62 +80,44 @@ before(() => {
   divThatIsTall.id = "tallDiv"
   Object.assign(divThatIsTall.style, {
     width: "1px",
-    height: arrangement.frame.offsetHeight + 1000 + "px"
+    height: arrangement.frame.offsetHeight + 1000 + "px",
   })
   arrangement.frame.appendChild(divThatIsTall)
 })
 
 beforeEach(() => {
-  window.scrollTo(0,0)
-  F.forEachObjIndexed(
-    (styles, name) => {
-      Object.assign(arrangement[name].style, styles)
-    },
-    arrStyles
-  )
+  window.scrollTo(0, 0)
+  F.forEachObjIndexed((styles, name) => {
+    Object.assign(arrangement[name].style, styles)
+  }, arrStyles)
 })
 
 afterEach(() => {
   document.body.querySelector("#temporary").innerHTML = ""
 })
 
-const makeLayoutStream = () => (
-  FRP
-  .from(Dom.observe(arrangement))
-  .skip(4) // Initial binding fires element resize events
-)
+const makeLayoutStream = () =>
+  FRP.from(Dom.observe(arrangement)).skip(4) // Initial binding fires element resize events
 
 describe("observeDomEvent", () => {
   it("observing element resize event fires event upon initial subscribing", () => {
     const el = makeDiv()
     temporary.appendChild(el)
     const stream = Dom.observeDomEvent("resize", el)
-    return FRP
-      .from(stream)
-      .collect(1)
-      .then(([el2]) => {
-        Assert(el === el2)
-      })
+    return FRP.from(stream).collect(1).then(([el2]) => {
+      Assert(el === el2)
+    })
   })
   it("can re-observe", () => {
     let el = makeDiv()
     temporary.appendChild(el)
     const stream = Dom.observeDomEvent("resize", el)
-    return FRP
-      .from(stream)
-      .take(1)
-      .drain()
-      .then(() => {
-        const stream2 = Dom.observeDomEvent("resize", el)
-        return FRP
-          .from(stream2)
-          .take(1)
-          .drain()
-      })
+    return FRP.from(stream).take(1).drain().then(() => {
+      const stream2 = Dom.observeDomEvent("resize", el)
+      return FRP.from(stream2).take(1).drain()
+    })
   })
 })
-
-
 
 it("accepts an arrangement, returns an observable", () => {
   const observable = Dom.observe(arrangement)
@@ -152,14 +132,11 @@ F.mapObjIndexed((elem, elemName) => {
   })
 }, arrangement)
 
-
-
 // Test that changes in position of arrangement elements trigger a change
 // if using poll-based observation.
 
 it("if position change of target there is a change event", () => {
-  const promise = FRP
-    .from(Dom.observeWithPolling(1000, arrangement))
+  const promise = FRP.from(Dom.observeWithPolling(1000, arrangement))
     .skip(4) // Initial binding fires element resize events
     .collect(1)
   arrangement.frame.insertBefore(makePixel(), arrangement.target)
@@ -167,8 +144,7 @@ it("if position change of target there is a change event", () => {
 })
 
 it("if position change of frame there is a change event", () => {
-  const promise = FRP
-    .from(Dom.observeWithPolling(1000, arrangement))
+  const promise = FRP.from(Dom.observeWithPolling(1000, arrangement))
     .skip(4) // Initial binding fires element resize events
     .collect(1)
   document.body.insertBefore(makePixel(), arrangement.frame)
@@ -176,8 +152,7 @@ it("if position change of frame there is a change event", () => {
 })
 
 it("if frame can and does scroll a new layout is calculated", () => {
-  const promise = FRP
-    .from(Dom.observeWithPolling(1000, arrangement))
+  const promise = FRP.from(Dom.observeWithPolling(1000, arrangement))
     .skip(4) // Initial binding fires element resize events
     .collect(1)
   arrangement.frame.scrollTop = 1
@@ -197,8 +172,7 @@ it("if window-based frame does scroll a new layout is calculated", () => {
     F.values,
     F.forEach(x => document.body.appendChild(x))
   )(arrangement2)
-  const promise = FRP
-    .from(Dom.observe(arrangement2))
+  const promise = FRP.from(Dom.observe(arrangement2))
     .skip(3) // Initial binding fires element resize events
     .collect(1)
   arrangement2.frame.scrollBy(0, 100)
@@ -217,11 +191,10 @@ it("if window-based frame dimensions change a new layout is calculated", () => {
     F.values,
     F.forEach(x => document.body.appendChild(x))
   )(arrangement2)
-  const promise = FRP
-    .from(Dom.observe(arrangement2))
+  const promise = FRP.from(Dom.observe(arrangement2))
     .skip(3) // Initial binding fires element resize events
     .collect(1)
   // Not possible to change window size via script so we simulate it instead.
-  window.dispatchEvent(new Event('resize'));
+  window.dispatchEvent(new Event("resize"))
   return promise
 })
