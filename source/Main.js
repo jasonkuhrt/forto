@@ -36,8 +36,7 @@ const BoundingBoxFromSizePosition = (size, position) => ({
   right: position.x + size.width,
 })
 
-const measureZones = (target, frame) => {
-  return [
+const measureZones = (target, frame) => [
     {
       side: Sides.Top,
       width: frame.width,
@@ -59,7 +58,6 @@ const measureZones = (target, frame) => {
       height: frame.height,
     },
   ]
-}
 
 const Oris = {
   Horizontal: "Horizontal",
@@ -257,10 +255,9 @@ const calcTipPosition = (orientation, target, popover, tip) => {
   const innerMostBefore = max(popover[crossStart], target[crossStart])
   const innerMostAfter = min(popover[crossEnd], target[crossEnd])
   return {
-    [Ori.crossAxis(orientation)]: centerBetween(
-      innerMostBefore,
-      innerMostAfter
-    ) - centerOf(Ori.opposite(orientation), tip),
+    [Ori.crossAxis(orientation)]:
+      centerBetween(innerMostBefore, innerMostAfter) -
+        centerOf(Ori.opposite(orientation), tip),
     [Ori.mainAxis(orientation)]: 0,
   }
 }

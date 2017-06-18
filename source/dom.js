@@ -1,7 +1,7 @@
-import * as Main from "./Main"
-import * as F from "./prelude"
 import Observable from "zen-observable"
 import ElementResizeDetector from "element-resize-detector"
+import * as Main from "./Main"
+import * as F from "./prelude"
 
 // Constructor tries to run body.insertBefore
 // https://github.com/wnr/element-resize-detector/blob/ad30e37d44a90c3c0bfaeed392755641d8dde469/dist/element-resize-detector.js#L490
@@ -21,8 +21,8 @@ to use CSS animation/transition while another uses React motion while another
 uses React Interpolate. Only the former of the three examples would support
 us directly assigning new positioning results to popover and tip. The other
 examples listed would need to handle the application of positioning results */
-const observeDomEvent = (eventName, element) => {
-  return new Observable(observer => {
+const observeDomEvent = (eventName, element) =>
+  new Observable(observer => {
     const isElementResize = eventName === "resize" && element !== window
     const observerNext = event => {
       observer.next(event)
@@ -40,19 +40,17 @@ const observeDomEvent = (eventName, element) => {
       }
     }
   })
-}
 
-const observePeriodic = everyMs => {
-  return new Observable(observer => {
+const observePeriodic = everyMs =>
+  new Observable(observer => {
     const intervalId = setInterval(() => observer.next(), everyMs)
     return () => {
       clearInterval(intervalId)
     }
   })
-}
 
-const mergeObservables = (a, b) => {
-  return new Observable(observer => {
+const mergeObservables = (a, b) =>
+  new Observable(observer => {
     const subs = [a.subscribe(observer), b.subscribe(observer)]
     return () => {
       subs.forEach(sub => {
@@ -60,7 +58,6 @@ const mergeObservables = (a, b) => {
       })
     }
   })
-}
 
 // Make props enumerable so that we can leverage isEqual later
 const getBoundingClientRect = el => {

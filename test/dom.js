@@ -1,7 +1,7 @@
 /* eslint-disable */
-import * as Dom from "../source/dom"
 import F from "ramda"
 import * as FRP from "most"
+import * as Dom from "../source/dom"
 
 FRP.Stream.prototype.collect = function(n) {
   return this.take(n).reduce((acc, x) => {
@@ -28,7 +28,7 @@ const makePixel = () => {
   const el = makeDiv()
   Object.assign(el.style, {
     width: "1px",
-    height: "1px",
+    height: "1px"
   })
   return el
 }
@@ -37,32 +37,32 @@ const arrangement = {
   target: makeDiv(),
   frame: makeDiv(),
   popover: makeDiv(),
-  tip: makeDiv(),
+  tip: makeDiv()
 }
 const arrStyles = {
   frame: {
     width: "100px",
     height: "100px",
-    overflow: "auto",
+    overflow: "auto"
   },
   target: {
     width: "10px",
-    height: "10px",
+    height: "10px"
   },
   popover: {
     width: "4px",
     height: "4px",
     position: "absolute",
     top: "0px",
-    left: "0px",
+    left: "0px"
   },
   tip: {
     width: "0px",
     height: "0px",
     position: "absolute",
     top: "0px",
-    left: "0px",
-  },
+    left: "0px"
+  }
 }
 
 const temporary = makeDiv()
@@ -80,7 +80,7 @@ before(() => {
   divThatIsTall.id = "tallDiv"
   Object.assign(divThatIsTall.style, {
     width: "1px",
-    height: arrangement.frame.offsetHeight + 1000 + "px",
+    height: arrangement.frame.offsetHeight + 1000 + "px"
   })
   arrangement.frame.appendChild(divThatIsTall)
 })
@@ -164,7 +164,7 @@ it("if window-based frame does scroll a new layout is calculated", () => {
     frame: window,
     popover: makePixel(),
     tip: makePixel(),
-    target: makePixel(),
+    target: makePixel()
   }
   F.pipe(
     F.omit(["frame"]),
@@ -183,7 +183,7 @@ it("if window-based frame dimensions change a new layout is calculated", () => {
     frame: window,
     popover: makePixel(),
     tip: makePixel(),
-    target: makePixel(),
+    target: makePixel()
   }
   F.pipe(
     F.omit(["frame"]),

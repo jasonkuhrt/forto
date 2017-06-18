@@ -2,7 +2,8 @@
 import isEqual from "lodash.isequal"
 
 const splitWith = (f, xs) => {
-  const a = [], b = []
+  const a = [],
+    b = []
   xs.forEach(x => (f(x) ? a : b).push(x))
   return [a, b]
 }
