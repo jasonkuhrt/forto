@@ -100,7 +100,6 @@ Ori.opposite = ori =>
 //   ["Left", "Top"].indexOf(ofASide.side) ? after : before
 // )
 
-// TODO expose fit data...
 const calcFit = (popover, tip, measuredZone) => {
   const popoverTip = Ori.isHorizontal(measuredZone)
     ? { width: popover.width + tip.height, height: popover.height }
@@ -108,11 +107,12 @@ const calcFit = (popover, tip, measuredZone) => {
   const heightRem = measuredZone.height - popoverTip.height
   const widthRem = measuredZone.width - popoverTip.width
   const measuredZoneArea = area(measuredZone)
-  const areaPercentageRemaining = Number(
-    ((measuredZoneArea -
+  const areaPercentageRemaining = F.precision(
+    2,
+    (measuredZoneArea -
       min(popoverTip.height, measuredZone.height) *
         min(popoverTip.width, measuredZone.height)) /
-      measuredZoneArea).toFixed(2)
+      measuredZoneArea
   )
   const popoverNegAreaH = heightRem >= 0
     ? 0
@@ -165,6 +165,7 @@ const rankZonesWithThresholdPreference = (prefZones, threshold, zoneFits) =>
       if (a.popoverNegAreaPercent < b.popoverNegAreaPercent) return -1
       if (a.popoverNegAreaPercent > b.popoverNegAreaPercent) return 1
     }
+    // TODO use new zone rem area value?
     if (prefA && !prefB && (areaB - areaA) / areaB > threshold) return -1
     if (!prefA && prefB && (areaA - areaB) / areaA > threshold) return 1
     return compare(areaA, areaB) * -1
@@ -187,9 +188,10 @@ const adjustRankingForChangeThreshold = (
   )
     return zonesRanked
 
-  const areaPercentageDiff = Number(
-    (topRankedZoneFit.areaPercentageRemaining -
-      previousZoneFitNow.areaPercentageRemaining).toFixed(2)
+  const areaPercentageDiff = F.precision(
+    2,
+    topRankedZoneFit.areaPercentageRemaining -
+      previousZoneFitNow.areaPercentageRemaining
   )
 
   if (areaPercentageDiff < threshold) {
