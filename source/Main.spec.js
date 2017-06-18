@@ -462,3 +462,55 @@ describe("calcLayout", () => {
     })
   })
 })
+
+describe("adjustRankingForChangeThreshold", () => {
+  const t = {
+    side: "Top",
+    width: 10,
+    height: 10,
+    popoverNegAreaPercent: 0,
+    areaPercentageRemaining: 0.5,
+  }
+  const b = {
+    side: "Bottom",
+    width: 50,
+    height: 100,
+    popoverNegAreaPercent: 0,
+    areaPercentageRemaining: 0.4,
+  }
+
+  it("if top ranked zone is class 1 and previous zone is class 2 then maintain rankings", () => {
+    const zonesRanked = [t, { ...b, popoverNegAreaPercent: 5 }]
+    expect(
+      Forto.adjustRankingForChangeThreshold(0.5, zonesRanked, "Bottom")
+    ).toEqual(zonesRanked)
+  })
+
+  it("if top ranked zone is previous zone then maintain rankings", () => {
+    const zonesRanked = [t, b]
+    expect(
+      Forto.adjustRankingForChangeThreshold(0.5, zonesRanked, "Top")
+    ).toEqual(zonesRanked)
+  })
+
+  it("if top ranked zone is below superiority threshold for change then restore previous zone to top rank", () => {
+    const zonesRanked = [t, b]
+    expect(
+      Forto.adjustRankingForChangeThreshold(0.5, zonesRanked, "Bottom")
+    ).toEqual([b, t])
+  })
+
+  it("if top ranked zone is greater than superiority threshold for change then maintain rankings", () => {
+    const zonesRanked = [t, b]
+    expect(
+      Forto.adjustRankingForChangeThreshold(0.05, zonesRanked, "Bottom")
+    ).toEqual([t, b])
+  })
+
+  it("if top ranked zone is equal to superiority threshold for change then maintain rankings", () => {
+    const zonesRanked = [t, b]
+    expect(
+      Forto.adjustRankingForChangeThreshold(0.1, zonesRanked, "Bottom")
+    ).toEqual([t, b])
+  })
+})

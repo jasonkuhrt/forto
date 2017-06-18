@@ -37,27 +37,27 @@ const BoundingBoxFromSizePosition = (size, position) => ({
 })
 
 const measureZones = (target, frame) => [
-    {
-      side: Sides.Top,
-      width: frame.width,
-      height: target.top - frame.top,
-    },
-    {
-      side: Sides.Bottom,
-      width: frame.width,
-      height: frame.bottom - target.bottom,
-    },
-    {
-      side: Sides.Left,
-      width: target.left - frame.left,
-      height: frame.height,
-    },
-    {
-      side: Sides.Right,
-      width: frame.right - target.right,
-      height: frame.height,
-    },
-  ]
+  {
+    side: Sides.Top,
+    width: frame.width,
+    height: target.top - frame.top,
+  },
+  {
+    side: Sides.Bottom,
+    width: frame.width,
+    height: frame.bottom - target.bottom,
+  },
+  {
+    side: Sides.Left,
+    width: target.left - frame.left,
+    height: frame.height,
+  },
+  {
+    side: Sides.Right,
+    width: frame.right - target.right,
+    height: frame.height,
+  },
+]
 
 const Oris = {
   Horizontal: "Horizontal",
@@ -100,6 +100,7 @@ Ori.opposite = ori =>
 //   ["Left", "Top"].indexOf(ofASide.side) ? after : before
 // )
 
+// TODO expose fit data...
 const calcFit = (popover, tip, measuredZone) => {
   const popoverTip = Ori.isHorizontal(measuredZone)
     ? { width: popover.width + tip.height, height: popover.height }
@@ -157,6 +158,35 @@ const rankZonesWithThresholdPreference = (prefZones, threshold, zoneFits) =>
     return compare(areaA, areaB) * -1
   })
 
+const adjustRankingForChangeThreshold = (
+  threshold,
+  zonesRanked,
+  previousZone
+) => {
+  const topRankedZoneFit = zonesRanked[0]
+  if (previousZone === topRankedZoneFit.side) return zonesRanked
+
+  const previousZoneFitNow = zonesRanked.find(
+    ({ side }) => previousZone === side
+  )
+  if (
+    previousZoneFitNow.popoverNegAreaPercent > 0 &&
+    topRankedZoneFit.popoverNegAreaPercent === 0
+  )
+    return zonesRanked
+
+  const areaPercentageDiff = (topRankedZoneFit.areaPercentageRemaining -
+    previousZoneFitNow.areaPercentageRemaining).toFixed(2)
+
+  if (areaPercentageDiff < threshold) {
+    zonesRanked.splice(zonesRanked.indexOf(previousZoneFitNow), 1)
+    zonesRanked.unshift(previousZoneFitNow)
+    return zonesRanked
+  }
+
+  return zonesRanked
+}
+
 const rankZonesSimple = zoneFits =>
   zoneFits.sort((a, b) => {
     if (a.popoverNegAreaPercent < b.popoverNegAreaPercent) return -1
@@ -168,7 +198,7 @@ const rankZonesSimple = zoneFits =>
     return compare(area(a), area(b)) * -1
   })
 
-const rankZones = (settings, zoneFits) => {
+const rankZones = (settings, zoneFits, previousZone) => {
   if (settings.preferredZones) {
     return settings.preferZoneUntilPercentWorse
       ? rankZonesWithThresholdPreference(
@@ -328,6 +358,7 @@ const calcLayout = (settingsUnchecked, arrangementUnchecked) => {
 }
 
 export {
+  adjustRankingForChangeThreshold,
   measureZones,
   calcFit,
   rankZones,
