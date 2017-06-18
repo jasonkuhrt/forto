@@ -105,16 +105,28 @@ const calcFit = (popover, tip, measuredZone) => {
   const popoverTip = Ori.isHorizontal(measuredZone)
     ? { width: popover.width + tip.height, height: popover.height }
     : { width: popover.width, height: popover.height + tip.height }
-  const diffH = measuredZone.height - popoverTip.height
-  const diffW = measuredZone.width - popoverTip.width
-  const popoverNegAreaH = diffH >= 0 ? 0 : Math.abs(diffH * popoverTip.width)
-  const popoverNegAreaW = diffW >= 0
+  const heightRem = measuredZone.height - popoverTip.height
+  const widthRem = measuredZone.width - popoverTip.width
+  const measuredZoneArea = area(measuredZone)
+  const areaPercentageRemaining = Number(
+    ((measuredZoneArea -
+      min(popoverTip.height, measuredZone.height) *
+        min(popoverTip.width, measuredZone.height)) /
+      measuredZoneArea).toFixed(2)
+  )
+  const popoverNegAreaH = heightRem >= 0
     ? 0
-    : Math.abs(diffW * (popoverTip.height - Math.abs(upperLimit(0, diffH))))
+    : Math.abs(heightRem * popoverTip.width)
+  const popoverNegAreaW = widthRem >= 0
+    ? 0
+    : Math.abs(
+        widthRem * (popoverTip.height - Math.abs(upperLimit(0, heightRem)))
+      )
   const popoverNegArea = popoverNegAreaH + popoverNegAreaW
   const popoverNegAreaPercent = popoverNegArea / area(popoverTip)
   return Object.assign({}, measuredZone, {
     popoverNegAreaPercent,
+    areaPercentageRemaining,
   })
 }
 
@@ -175,8 +187,10 @@ const adjustRankingForChangeThreshold = (
   )
     return zonesRanked
 
-  const areaPercentageDiff = (topRankedZoneFit.areaPercentageRemaining -
-    previousZoneFitNow.areaPercentageRemaining).toFixed(2)
+  const areaPercentageDiff = Number(
+    (topRankedZoneFit.areaPercentageRemaining -
+      previousZoneFitNow.areaPercentageRemaining).toFixed(2)
+  )
 
   if (areaPercentageDiff < threshold) {
     zonesRanked.splice(zonesRanked.indexOf(previousZoneFitNow), 1)

@@ -39,12 +39,42 @@ describe("measureZones", () => {
 
 describe("calcFit", () => {
   const zone = { side: "Top", width: 50, height: 50 }
+
+  it("returns percentage area remaining of zone", () => {
+    const popover = B.make(25, 25)
+    const tip = B.make(0, 0)
+    expect(Forto.calcFit(popover, tip, zone).areaPercentageRemaining).toEqual(
+      0.75
+    )
+  })
+
+  it("returns percentage area remaining of zone even if popover exceeds bounds", () => {
+    const popover = B.make(100, 40)
+    const tip = B.make(0, 0)
+    expect(Forto.calcFit(popover, tip, zone).areaPercentageRemaining).toEqual(
+      0.2
+    )
+  })
+
+  it("returns percentage area remaining never lower than 0", () => {
+    const popover = B.make(50, 50)
+    const tip = B.make(0, 0)
+    expect(Forto.calcFit(popover, tip, zone).areaPercentageRemaining).toEqual(0)
+  })
+
+  it("returns percentage area remaining never lower than 0 even if popover exceeds bounds", () => {
+    const popover = B.make(100, 100)
+    const tip = B.make(0, 0)
+    expect(Forto.calcFit(popover, tip, zone).areaPercentageRemaining).toEqual(0)
+  })
+
   it("returns percentage area of popover that would be cropped", () => {
-    const popover = B.make(10, 10)
+    const popover = B.make(25, 50)
     const tip = B.make(0, 0)
     expect(Forto.calcFit(popover, tip, zone)).toEqual({
       ...zone,
       popoverNegAreaPercent: 0,
+      areaPercentageRemaining: 0.5,
     })
   })
 
@@ -52,55 +82,48 @@ describe("calcFit", () => {
     it("width", () => {
       const popover = B.make(10 + 90, 10)
       const tip = B.make(0, 0)
-      expect(Forto.calcFit(popover, tip, zone)).toEqual({
-        ...zone,
-        popoverNegAreaPercent: 0.5,
-      })
+      expect(Forto.calcFit(popover, tip, zone).popoverNegAreaPercent).toEqual(
+        0.5
+      )
     })
     it("height", () => {
       const popover = B.make(10, 10 + 90)
       const tip = B.make(0, 0)
-      expect(Forto.calcFit(popover, tip, zone)).toEqual({
-        ...zone,
-        popoverNegAreaPercent: 0.5,
-      })
+      expect(Forto.calcFit(popover, tip, zone).popoverNegAreaPercent).toEqual(
+        0.5
+      )
     })
     it("width/height", () => {
       const popover = B.make(10 + 90, 10 + 90)
       const tip = B.make(0, 0)
-      expect(Forto.calcFit(popover, tip, zone)).toEqual({
-        ...zone,
-        popoverNegAreaPercent: 0.75,
-      })
+      expect(Forto.calcFit(popover, tip, zone).popoverNegAreaPercent).toEqual(
+        0.75
+      )
     })
   })
   it("if zone size is 0 then returns 100 percent cropped", () => {
     const zone2 = Object.assign({}, zone, { width: 0, height: 0 })
     const popover = B.make(10, 10)
     const tip = B.make(0, 0)
-    expect(Forto.calcFit(popover, tip, zone2)).toEqual({
-      ...zone2,
-      popoverNegAreaPercent: 1,
-    })
+    expect(Forto.calcFit(popover, tip, zone2).popoverNegAreaPercent).toEqual(1)
   })
 
   describe("measures the bounding-box around popover + tip's main-length added to main-axis", () => {
     it("cropped height", () => {
       const popover = B.make(1, 1 + 90)
       const tip = B.make(1, 9)
-      expect(Forto.calcFit(popover, tip, zone)).toEqual({
-        ...zone,
-        popoverNegAreaPercent: 0.5,
-      })
+      expect(Forto.calcFit(popover, tip, zone).popoverNegAreaPercent).toEqual(
+        0.5
+      )
     })
+
     it("cropped width", () => {
       const zone2 = Object.assign({}, zone, { side: "Right" })
       const popover = B.make(1 + 90, 1)
       const tip = B.make(1, 9)
-      expect(Forto.calcFit(popover, tip, zone2)).toEqual({
-        ...zone2,
-        popoverNegAreaPercent: 0.5,
-      })
+      expect(Forto.calcFit(popover, tip, zone2).popoverNegAreaPercent).toEqual(
+        0.5
+      )
     })
   })
 })
@@ -246,12 +269,14 @@ describe("optimalZone (elligible unspecified)", () => {
     tip: B.make(1, 1),
   }
   const optimalZone = Forto.optimalZone.bind(null, { elligibleZones: null })
+
   it("should return the optimal zone", () => {
     expect(optimalZone(arrangement)).toEqual({
       side: "Bottom",
       height: 90,
       width: 110,
       popoverNegAreaPercent: 0,
+      areaPercentageRemaining: 0.99,
     })
   })
 })
@@ -263,6 +288,7 @@ describe("optimalZone (elligible specified)", () => {
     popover: B.make(9, 9),
     tip: B.make(1, 1),
   }
+
   it("should only return a single possible zone if elligible choice is singular", () => {
     const zone = Forto.optimalZone({ elligibleZones: ["Top"] }, arrangement)
     expect(zone).toEqual({
@@ -270,8 +296,10 @@ describe("optimalZone (elligible specified)", () => {
       height: 10,
       width: 110,
       popoverNegAreaPercent: 0,
+      areaPercentageRemaining: 0.92,
     })
   })
+
   it("should return optimal zone within those elligible", () => {
     const zone = Forto.optimalZone(
       { elligibleZones: ["Top", "Bottom"] },
@@ -282,6 +310,7 @@ describe("optimalZone (elligible specified)", () => {
       height: 90,
       width: 110,
       popoverNegAreaPercent: 0,
+      areaPercentageRemaining: 0.99,
     })
   })
 })
