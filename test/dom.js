@@ -3,6 +3,12 @@ import F from "ramda"
 import * as FRP from "most"
 import * as Dom from "../source/dom"
 
+const A = {
+  true: x => {
+    if (!x) throw new Error(`Expected ${x} to be true`)
+  }
+}
+
 FRP.Stream.prototype.collect = function(n) {
   return this.take(n).reduce((acc, x) => {
     acc.push(x)
@@ -96,7 +102,7 @@ afterEach(() => {
   document.body.querySelector("#temporary").innerHTML = ""
 })
 
-const makeLayoutStream = () => FRP.from(Dom.observe(arrangement)).skip(4) // Initial binding fires element resize events
+const makeLayoutStream = () => FRP.from(Dom.observe({}, arrangement)).skip(4) // Initial binding fires element resize events
 
 describe("observeDomEvent", () => {
   it("observing element resize event fires event upon initial subscribing", () => {
@@ -119,7 +125,7 @@ describe("observeDomEvent", () => {
 })
 
 it("accepts an arrangement, returns an observable", () => {
-  const observable = Dom.observe(arrangement)
+  const observable = Dom.observe({}, arrangement)
   Assert(observable.subscribe, "has .subscribe")
 })
 
@@ -171,29 +177,41 @@ it("if window-based frame does scroll a new layout is calculated", () => {
     F.values,
     F.forEach(x => document.body.appendChild(x))
   )(arrangement2)
-  const promise = FRP.from(Dom.observe(arrangement2))
+  const promise = FRP.from(Dom.observe({}, arrangement2))
     .skip(3) // Initial binding fires element resize events
     .collect(1)
   arrangement2.frame.scrollBy(0, 100)
   return promise
 })
 
-it("if window-based frame dimensions change a new layout is calculated", () => {
-  const arrangement2 = {
-    frame: window,
-    popover: makePixel(),
-    tip: makePixel(),
-    target: makePixel()
-  }
-  F.pipe(
-    F.omit(["frame"]),
-    F.values,
-    F.forEach(x => document.body.appendChild(x))
-  )(arrangement2)
-  const promise = FRP.from(Dom.observe(arrangement2))
+it("a new zone will be assigned if it becomes the new best fit", () => {
+  const a = arrangement
+  const promise = FRP.from(Dom.observe({}, a))
     .skip(3) // Initial binding fires element resize events
-    .collect(1)
-  // Not possible to change window size via script so we simulate it instead.
-  window.dispatchEvent(new Event("resize"))
+    .collect(2)
+    .then(([r1, r2]) => {
+      A.true(r1.zone.side === "Bottom")
+      A.true(r2.zone.side === "Right")
+    })
+  setTimeout(() => {
+    a.target.style.height = "80px"
+  }, 10)
+  return promise
+})
+
+it("if ZCT set, does not change zone unless good enough", () => {
+  const a = arrangement
+  a.popover.style.height = "50px"
+  a.popover.style.width = "50px"
+  const promise = FRP.from(Dom.observe({ zoneChangeThreshold: 0.23 }, a))
+    .skip(3) // Initial binding fires element resize events
+    .collect(2)
+    .then(([r1, r2]) => {
+      A.true(r1.zone.side === "Bottom")
+      A.true(r2.zone.side === "Bottom")
+    })
+  setTimeout(() => {
+    a.target.style.height = "50px"
+  }, 10)
   return promise
 })

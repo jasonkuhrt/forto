@@ -279,6 +279,7 @@ describe("optimalZone (elligible unspecified)", () => {
       areaPercentageRemaining: 0.99,
     })
   })
+  // TODO test that optimal zone given a previous zone side and zone threshold setting will honour the
 })
 
 describe("optimalZone (elligible specified)", () => {
@@ -482,12 +483,26 @@ describe("calcLayout", () => {
     expect(Forto.calcLayout(settings, arrangement)).toEqual({
       popover: { x: 80, y: 50 },
       tip: { x: 0, y: 54 },
+      zone: {
+        side: "Left",
+        height: 100,
+        width: 90,
+        areaPercentageRemaining: 0.99,
+        popoverNegAreaPercent: 0,
+      },
     })
   })
   it("tip is optional", () => {
     expect(Forto.calcLayout(settings, { ...arrangement, tip: null })).toEqual({
       popover: { x: 80, y: 50 },
       tip: null,
+      zone: {
+        side: "Left",
+        width: 90,
+        height: 100,
+        areaPercentageRemaining: 0.99,
+        popoverNegAreaPercent: 0,
+      },
     })
   })
 })
