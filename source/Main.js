@@ -1,5 +1,4 @@
 // TODO
-// * thresholds for re-zoning (only re-zone if better-enough)
 // * API
 
 import * as F from "./prelude"
