@@ -203,6 +203,9 @@ it("if ZCT set, does not change zone unless good enough", () => {
   const a = arrangement
   a.popover.style.height = "50px"
   a.popover.style.width = "50px"
+  // In this test zone-right is an improvement of 22% therefore not meeting the
+  // threshold set below and therefore preventing Forto from changing the
+  // popover's zone.
   const promise = FRP.from(Dom.observe({ zoneChangeThreshold: 0.23 }, a))
     .skip(3) // Initial binding fires element resize events
     .collect(2)
