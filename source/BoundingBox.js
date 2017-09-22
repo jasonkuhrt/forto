@@ -4,15 +4,15 @@ const make = (width, height) => ({
   left: 0,
   right: width,
   width,
-  height
-});
+  height,
+})
 
 const translate = (x, y, box) =>
   Object.assign({}, box, {
     top: box.top + y,
     bottom: box.bottom + y,
     left: box.left + x,
-    right: box.right + x
-  });
+    right: box.right + x,
+  })
 
-export { make, translate };
+export { make, translate }
