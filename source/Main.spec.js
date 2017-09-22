@@ -477,15 +477,15 @@ describe("calcTipPosition", () => {
 })
 
 describe("calcLayout", () => {
-  const settings = {}
-  const arrangement = {
+  const settingsDefault = {}
+  const arrangementDefault = {
     frame: B.make(100, 100),
     target: B.translate(90, 50, B.make(10, 10)),
     popover: B.make(10, 10),
     tip: B.make(2, 2),
   }
   it("calculates the layout start to finish", () => {
-    expect(Forto.calcLayout(settings, arrangement)).toEqual({
+    expect(Forto.calcLayout(settingsDefault, arrangementDefault)).toEqual({
       popover: { x: 80, y: 50 },
       tip: { x: 0, y: 54 },
       zone: {
@@ -498,7 +498,9 @@ describe("calcLayout", () => {
     })
   })
   it("tip is optional", () => {
-    expect(Forto.calcLayout(settings, { ...arrangement, tip: null })).toEqual({
+    expect(
+      Forto.calcLayout(settingsDefault, { ...arrangementDefault, tip: null })
+    ).toEqual({
       popover: { x: 80, y: 50 },
       tip: null,
       zone: {
@@ -508,6 +510,50 @@ describe("calcLayout", () => {
         areaPercentageRemaining: 0.99,
         popoverNegAreaPercent: 0,
       },
+    })
+  })
+
+  // These tests are intentionally lightweight, given we have test coverage
+  // for adjustRankingForChangeThreshold
+  describe("with setting zone-change-threshold", () => {
+    const prevZone = "Top"
+    const arrangement = {
+      frame: B.make(10, 40),
+      target: B.translate(0, 11, B.make(10, 10)),
+      popover: B.make(10, 10),
+      tip: null,
+    }
+
+    it("upon recalc if top-ranked zone is not superior to previous zone by given threshold then remain with previous zone", () => {
+      const settings = { zoneChangeThreshold: 10 }
+      const layout = Forto.calcLayout(settings, arrangement, prevZone)
+      expect(layout).toEqual({
+        popover: { x: 0, y: 1 },
+        tip: null,
+        zone: {
+          side: "Top",
+          width: 10,
+          height: 11,
+          areaPercentageRemaining: 0.09,
+          popoverNegAreaPercent: 0,
+        },
+      })
+    })
+
+    it("upon recalc if top-ranked zone is superior to previous zone by given threshold then change to new zone", () => {
+      const settings = { zoneChangeThreshold: 1 }
+      const layout = Forto.calcLayout(settings, arrangement, prevZone)
+      expect(layout).toEqual({
+        popover: { x: 0, y: 21 },
+        tip: null,
+        zone: {
+          side: "Bottom",
+          width: 10,
+          height: 19,
+          areaPercentageRemaining: 0.47,
+          popoverNegAreaPercent: 0,
+        },
+      })
     })
   })
 })

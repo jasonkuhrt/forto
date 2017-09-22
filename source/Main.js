@@ -182,6 +182,7 @@ const adjustRankingForChangeThreshold = (
   const previousZoneFitNow = zonesRanked.find(
     ({ side }) => previousZone === side
   )
+
   if (
     previousZoneFitNow.popoverNegAreaPercent > 0 &&
     topRankedZoneFit.popoverNegAreaPercent === 0
@@ -190,8 +191,10 @@ const adjustRankingForChangeThreshold = (
 
   const newZoneImprovementPercentage = F.precision(
     2,
-    topRankedZoneFit.areaPercentageRemaining -
+    F.percentageDifference(
+      topRankedZoneFit.areaPercentageRemaining,
       previousZoneFitNow.areaPercentageRemaining
+    )
   )
 
   if (newZoneImprovementPercentage < threshold) {
