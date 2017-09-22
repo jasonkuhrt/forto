@@ -22,8 +22,8 @@ const plugins = [
 
 export default {
   entry: "source/Main.js",
-  plugins: plugins,
-  external: external,
+  plugins,
+  external,
   targets: [
     {
       dest: pkg.main,
