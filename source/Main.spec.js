@@ -39,12 +39,42 @@ describe("measureZones", () => {
 
 describe("calcFit", () => {
   const zone = { side: "Top", width: 50, height: 50 }
+
+  it("returns percentage area remaining of zone", () => {
+    const popover = B.make(25, 25)
+    const tip = B.make(0, 0)
+    expect(Forto.calcFit(popover, tip, zone).areaPercentageRemaining).toEqual(
+      0.75
+    )
+  })
+
+  it("returns percentage area remaining of zone even if popover exceeds bounds", () => {
+    const popover = B.make(100, 40)
+    const tip = B.make(0, 0)
+    expect(Forto.calcFit(popover, tip, zone).areaPercentageRemaining).toEqual(
+      0.2
+    )
+  })
+
+  it("returns percentage area remaining never lower than 0", () => {
+    const popover = B.make(50, 50)
+    const tip = B.make(0, 0)
+    expect(Forto.calcFit(popover, tip, zone).areaPercentageRemaining).toEqual(0)
+  })
+
+  it("returns percentage area remaining never lower than 0 even if popover exceeds bounds", () => {
+    const popover = B.make(100, 100)
+    const tip = B.make(0, 0)
+    expect(Forto.calcFit(popover, tip, zone).areaPercentageRemaining).toEqual(0)
+  })
+
   it("returns percentage area of popover that would be cropped", () => {
-    const popover = B.make(10, 10)
+    const popover = B.make(25, 50)
     const tip = B.make(0, 0)
     expect(Forto.calcFit(popover, tip, zone)).toEqual({
       ...zone,
       popoverNegAreaPercent: 0,
+      areaPercentageRemaining: 0.5,
     })
   })
 
@@ -52,55 +82,48 @@ describe("calcFit", () => {
     it("width", () => {
       const popover = B.make(10 + 90, 10)
       const tip = B.make(0, 0)
-      expect(Forto.calcFit(popover, tip, zone)).toEqual({
-        ...zone,
-        popoverNegAreaPercent: 0.5,
-      })
+      expect(Forto.calcFit(popover, tip, zone).popoverNegAreaPercent).toEqual(
+        0.5
+      )
     })
     it("height", () => {
       const popover = B.make(10, 10 + 90)
       const tip = B.make(0, 0)
-      expect(Forto.calcFit(popover, tip, zone)).toEqual({
-        ...zone,
-        popoverNegAreaPercent: 0.5,
-      })
+      expect(Forto.calcFit(popover, tip, zone).popoverNegAreaPercent).toEqual(
+        0.5
+      )
     })
     it("width/height", () => {
       const popover = B.make(10 + 90, 10 + 90)
       const tip = B.make(0, 0)
-      expect(Forto.calcFit(popover, tip, zone)).toEqual({
-        ...zone,
-        popoverNegAreaPercent: 0.75,
-      })
+      expect(Forto.calcFit(popover, tip, zone).popoverNegAreaPercent).toEqual(
+        0.75
+      )
     })
   })
   it("if zone size is 0 then returns 100 percent cropped", () => {
     const zone2 = Object.assign({}, zone, { width: 0, height: 0 })
     const popover = B.make(10, 10)
     const tip = B.make(0, 0)
-    expect(Forto.calcFit(popover, tip, zone2)).toEqual({
-      ...zone2,
-      popoverNegAreaPercent: 1,
-    })
+    expect(Forto.calcFit(popover, tip, zone2).popoverNegAreaPercent).toEqual(1)
   })
 
   describe("measures the bounding-box around popover + tip's main-length added to main-axis", () => {
     it("cropped height", () => {
       const popover = B.make(1, 1 + 90)
       const tip = B.make(1, 9)
-      expect(Forto.calcFit(popover, tip, zone)).toEqual({
-        ...zone,
-        popoverNegAreaPercent: 0.5,
-      })
+      expect(Forto.calcFit(popover, tip, zone).popoverNegAreaPercent).toEqual(
+        0.5
+      )
     })
+
     it("cropped width", () => {
       const zone2 = Object.assign({}, zone, { side: "Right" })
       const popover = B.make(1 + 90, 1)
       const tip = B.make(1, 9)
-      expect(Forto.calcFit(popover, tip, zone2)).toEqual({
-        ...zone2,
-        popoverNegAreaPercent: 0.5,
-      })
+      expect(Forto.calcFit(popover, tip, zone2).popoverNegAreaPercent).toEqual(
+        0.5
+      )
     })
   })
 })
@@ -134,7 +157,12 @@ describe("rankZones", () => {
     test([$b, $t], [$t, $b])
   })
   it("if two zones are of equal worth maintain their existing order", () => {
-    const $b = { side: "Bottom", width: 1, height: 1, popoverNegAreaPercent: 0 }
+    const $b = {
+      side: "Bottom",
+      width: 1,
+      height: 1,
+      popoverNegAreaPercent: 0,
+    }
     const $t = { side: "Top", width: 2, height: 2, popoverNegAreaPercent: 0 }
     const $r = { side: "Right", width: 2, height: 2, popoverNegAreaPercent: 0 }
     const $l = { side: "Left", width: 2, height: 2, popoverNegAreaPercent: 0 }
@@ -246,14 +274,17 @@ describe("optimalZone (elligible unspecified)", () => {
     tip: B.make(1, 1),
   }
   const optimalZone = Forto.optimalZone.bind(null, { elligibleZones: null })
+
   it("should return the optimal zone", () => {
     expect(optimalZone(arrangement)).toEqual({
       side: "Bottom",
       height: 90,
       width: 110,
       popoverNegAreaPercent: 0,
+      areaPercentageRemaining: 0.99,
     })
   })
+  // TODO test that optimal zone given a previous zone side and zone threshold setting will honour the
 })
 
 describe("optimalZone (elligible specified)", () => {
@@ -263,6 +294,7 @@ describe("optimalZone (elligible specified)", () => {
     popover: B.make(9, 9),
     tip: B.make(1, 1),
   }
+
   it("should only return a single possible zone if elligible choice is singular", () => {
     const zone = Forto.optimalZone({ elligibleZones: ["Top"] }, arrangement)
     expect(zone).toEqual({
@@ -270,8 +302,10 @@ describe("optimalZone (elligible specified)", () => {
       height: 10,
       width: 110,
       popoverNegAreaPercent: 0,
+      areaPercentageRemaining: 0.92,
     })
   })
+
   it("should return optimal zone within those elligible", () => {
     const zone = Forto.optimalZone(
       { elligibleZones: ["Top", "Bottom"] },
@@ -282,6 +316,7 @@ describe("optimalZone (elligible specified)", () => {
       height: 90,
       width: 110,
       popoverNegAreaPercent: 0,
+      areaPercentageRemaining: 0.99,
     })
   })
 })
@@ -442,23 +477,135 @@ describe("calcTipPosition", () => {
 })
 
 describe("calcLayout", () => {
-  const settings = {}
-  const arrangement = {
+  const settingsDefault = {}
+  const arrangementDefault = {
     frame: B.make(100, 100),
     target: B.translate(90, 50, B.make(10, 10)),
     popover: B.make(10, 10),
     tip: B.make(2, 2),
   }
   it("calculates the layout start to finish", () => {
-    expect(Forto.calcLayout(settings, arrangement)).toEqual({
+    expect(Forto.calcLayout(settingsDefault, arrangementDefault)).toEqual({
       popover: { x: 80, y: 50 },
       tip: { x: 0, y: 54 },
+      zone: {
+        side: "Left",
+        height: 100,
+        width: 90,
+        areaPercentageRemaining: 0.99,
+        popoverNegAreaPercent: 0,
+      },
     })
   })
   it("tip is optional", () => {
-    expect(Forto.calcLayout(settings, { ...arrangement, tip: null })).toEqual({
+    expect(
+      Forto.calcLayout(settingsDefault, { ...arrangementDefault, tip: null })
+    ).toEqual({
       popover: { x: 80, y: 50 },
       tip: null,
+      zone: {
+        side: "Left",
+        width: 90,
+        height: 100,
+        areaPercentageRemaining: 0.99,
+        popoverNegAreaPercent: 0,
+      },
     })
+  })
+
+  // These tests are intentionally lightweight, given we have test coverage
+  // for adjustRankingForChangeThreshold
+  describe("with setting zone-change-threshold", () => {
+    const prevZone = "Top"
+    const arrangement = {
+      frame: B.make(10, 40),
+      target: B.translate(0, 11, B.make(10, 10)),
+      popover: B.make(10, 10),
+      tip: null,
+    }
+
+    it("upon recalc if top-ranked zone is not superior to previous zone by given threshold then remain with previous zone", () => {
+      const settings = { zoneChangeThreshold: 10 }
+      const layout = Forto.calcLayout(settings, arrangement, prevZone)
+      expect(layout).toEqual({
+        popover: { x: 0, y: 1 },
+        tip: null,
+        zone: {
+          side: "Top",
+          width: 10,
+          height: 11,
+          areaPercentageRemaining: 0.09,
+          popoverNegAreaPercent: 0,
+        },
+      })
+    })
+
+    it("upon recalc if top-ranked zone is superior to previous zone by given threshold then change to new zone", () => {
+      const settings = { zoneChangeThreshold: 1 }
+      const layout = Forto.calcLayout(settings, arrangement, prevZone)
+      expect(layout).toEqual({
+        popover: { x: 0, y: 21 },
+        tip: null,
+        zone: {
+          side: "Bottom",
+          width: 10,
+          height: 19,
+          areaPercentageRemaining: 0.47,
+          popoverNegAreaPercent: 0,
+        },
+      })
+    })
+  })
+})
+
+describe("adjustRankingForChangeThreshold", () => {
+  const t = {
+    side: "Top",
+    width: 10,
+    height: 10,
+    popoverNegAreaPercent: 0,
+    areaPercentageRemaining: 0.5,
+  }
+  const b = {
+    side: "Bottom",
+    width: 50,
+    height: 100,
+    popoverNegAreaPercent: 0,
+    areaPercentageRemaining: 0.4,
+  }
+
+  it("if top ranked zone is class 1 and previous zone is class 2 then maintain rankings", () => {
+    const zonesRanked = [t, { ...b, popoverNegAreaPercent: 5 }]
+    expect(
+      Forto.adjustRankingForChangeThreshold(0.5, zonesRanked, "Bottom")
+    ).toEqual(zonesRanked)
+  })
+
+  it("if top ranked zone is previous zone then maintain rankings", () => {
+    const zonesRanked = [t, b]
+    expect(
+      Forto.adjustRankingForChangeThreshold(0.5, zonesRanked, "Top")
+    ).toEqual(zonesRanked)
+  })
+
+  it("if top ranked zone is below superiority threshold for change then restore previous zone to top rank", () => {
+    const zonesRanked = [t, b]
+    expect(
+      Forto.adjustRankingForChangeThreshold(0.5, zonesRanked, "Bottom")
+    ).toEqual([b, t])
+  })
+
+  it("if top ranked zone is greater than superiority threshold for change then maintain rankings", () => {
+    const zonesRanked = [t, b]
+    expect(
+      Forto.adjustRankingForChangeThreshold(0.05, zonesRanked, "Bottom")
+    ).toEqual([t, b])
+  })
+
+  it("if top ranked zone is equal to superiority threshold for change then maintain rankings", () => {
+    const zonesRanked = [t, b]
+    expect(
+      Forto.adjustRankingForChangeThreshold(0.1, zonesRanked, "Bottom")
+    ).toEqual([t, b])
   })
 })

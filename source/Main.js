@@ -1,5 +1,4 @@
 // TODO
-// * thresholds for re-zoning (only re-zone if better-enough)
 // * API
 
 import * as F from "./prelude"
@@ -37,27 +36,27 @@ const BoundingBoxFromSizePosition = (size, position) => ({
 })
 
 const measureZones = (target, frame) => [
-    {
-      side: Sides.Top,
-      width: frame.width,
-      height: target.top - frame.top,
-    },
-    {
-      side: Sides.Bottom,
-      width: frame.width,
-      height: frame.bottom - target.bottom,
-    },
-    {
-      side: Sides.Left,
-      width: target.left - frame.left,
-      height: frame.height,
-    },
-    {
-      side: Sides.Right,
-      width: frame.right - target.right,
-      height: frame.height,
-    },
-  ]
+  {
+    side: Sides.Top,
+    width: frame.width,
+    height: target.top - frame.top,
+  },
+  {
+    side: Sides.Bottom,
+    width: frame.width,
+    height: frame.bottom - target.bottom,
+  },
+  {
+    side: Sides.Left,
+    width: target.left - frame.left,
+    height: frame.height,
+  },
+  {
+    side: Sides.Right,
+    width: frame.right - target.right,
+    height: frame.height,
+  },
+]
 
 const Oris = {
   Horizontal: "Horizontal",
@@ -104,16 +103,30 @@ const calcFit = (popover, tip, measuredZone) => {
   const popoverTip = Ori.isHorizontal(measuredZone)
     ? { width: popover.width + tip.height, height: popover.height }
     : { width: popover.width, height: popover.height + tip.height }
-  const diffH = measuredZone.height - popoverTip.height
-  const diffW = measuredZone.width - popoverTip.width
-  const popoverNegAreaH = diffH >= 0 ? 0 : Math.abs(diffH * popoverTip.width)
-  const popoverNegAreaW = diffW >= 0
-    ? 0
-    : Math.abs(diffW * (popoverTip.height - Math.abs(upperLimit(0, diffH))))
+  const heightRem = measuredZone.height - popoverTip.height
+  const widthRem = measuredZone.width - popoverTip.width
+  const measuredZoneArea = area(measuredZone)
+  const areaPercentageRemaining = F.precision(
+    2,
+    (measuredZoneArea -
+      min(popoverTip.height, measuredZone.height) *
+        min(popoverTip.width, measuredZone.height)) /
+      measuredZoneArea
+  )
+  // console.log(measuredZone.side, measuredZoneArea, areaPercentageRemaining)
+  const popoverNegAreaH =
+    heightRem >= 0 ? 0 : Math.abs(heightRem * popoverTip.width)
+  const popoverNegAreaW =
+    widthRem >= 0
+      ? 0
+      : Math.abs(
+          widthRem * (popoverTip.height - Math.abs(upperLimit(0, heightRem)))
+        )
   const popoverNegArea = popoverNegAreaH + popoverNegAreaW
   const popoverNegAreaPercent = popoverNegArea / area(popoverTip)
   return Object.assign({}, measuredZone, {
     popoverNegAreaPercent,
+    areaPercentageRemaining,
   })
 }
 
@@ -152,10 +165,46 @@ const rankZonesWithThresholdPreference = (prefZones, threshold, zoneFits) =>
       if (a.popoverNegAreaPercent < b.popoverNegAreaPercent) return -1
       if (a.popoverNegAreaPercent > b.popoverNegAreaPercent) return 1
     }
+    // TODO use new zone rem area value?
     if (prefA && !prefB && (areaB - areaA) / areaB > threshold) return -1
     if (!prefA && prefB && (areaA - areaB) / areaA > threshold) return 1
     return compare(areaA, areaB) * -1
   })
+
+const adjustRankingForChangeThreshold = (
+  threshold,
+  zonesRanked,
+  previousZone
+) => {
+  const topRankedZoneFit = zonesRanked[0]
+  if (previousZone === topRankedZoneFit.side) return zonesRanked
+
+  const previousZoneFitNow = zonesRanked.find(
+    ({ side }) => previousZone === side
+  )
+
+  if (
+    previousZoneFitNow.popoverNegAreaPercent > 0 &&
+    topRankedZoneFit.popoverNegAreaPercent === 0
+  )
+    return zonesRanked
+
+  const newZoneImprovementPercentage = F.precision(
+    2,
+    F.percentageDifference(
+      topRankedZoneFit.areaPercentageRemaining,
+      previousZoneFitNow.areaPercentageRemaining
+    )
+  )
+
+  if (newZoneImprovementPercentage < threshold) {
+    zonesRanked.splice(zonesRanked.indexOf(previousZoneFitNow), 1)
+    zonesRanked.unshift(previousZoneFitNow)
+    return zonesRanked
+  }
+
+  return zonesRanked
+}
 
 const rankZonesSimple = zoneFits =>
   zoneFits.sort((a, b) => {
@@ -168,20 +217,33 @@ const rankZonesSimple = zoneFits =>
     return compare(area(a), area(b)) * -1
   })
 
-const rankZones = (settings, zoneFits) => {
+const rankZones = (settings, zoneFits, previousZone) => {
+  let zoneFitsRanked
+
   if (settings.preferredZones) {
-    return settings.preferZoneUntilPercentWorse
+    zoneFitsRanked = settings.preferZoneUntilPercentWorse
       ? rankZonesWithThresholdPreference(
           settings.preferredZones,
           settings.preferZoneUntilPercentWorse,
           zoneFits
         )
       : rankZonesWithPreference(settings.preferredZones, zoneFits)
+  } else {
+    zoneFitsRanked = rankZonesSimple(zoneFits)
   }
-  return rankZonesSimple(zoneFits)
+
+  if (settings.zoneChangeThreshold && previousZone) {
+    zoneFitsRanked = adjustRankingForChangeThreshold(
+      settings.zoneChangeThreshold,
+      zoneFitsRanked,
+      previousZone
+    )
+  }
+
+  return zoneFitsRanked
 }
 
-const optimalZone = (settings, arrangement) => {
+const optimalZone = (settings, arrangement, previousZoneSide) => {
   // TODO We can optimize measureZones to apply the elligibleZones logic
   // so that it does not needlessly create objects.
   const zonesMeasured = settings.elligibleZones
@@ -199,7 +261,8 @@ const optimalZone = (settings, arrangement) => {
       settings,
       zonesMeasured.map(zone =>
         calcFit(arrangement.popover, arrangement.tip, zone)
-      )
+      ),
+      previousZoneSide
     )
   )
 }
@@ -213,9 +276,10 @@ const calcPopoverPosition = (settings, frame, target, popover, zone) => {
   const crossLength = Ori.crossLength(ori)
 
   /* Place the popover next to the target. */
-  p[Ori.mainAxis(ori)] = ["Left", "Top"].indexOf(zone.side) !== -1
-    ? target[Ori.mainStart(ori)] - popover[Ori.mainDim(ori)]
-    : target[Ori.mainEnd(ori)]
+  p[Ori.mainAxis(ori)] =
+    ["Left", "Top"].indexOf(zone.side) !== -1
+      ? target[Ori.mainStart(ori)] - popover[Ori.mainDim(ori)]
+      : target[Ori.mainEnd(ori)]
 
   /* Align the popover's cross-axis center with that of target. Only the
   target length within frame should be considered. That is, find the
@@ -257,7 +321,7 @@ const calcTipPosition = (orientation, target, popover, tip) => {
   return {
     [Ori.crossAxis(orientation)]:
       centerBetween(innerMostBefore, innerMostAfter) -
-        centerOf(Ori.opposite(orientation), tip),
+      centerOf(Ori.opposite(orientation), tip),
     [Ori.mainAxis(orientation)]: 0,
   }
 }
@@ -272,6 +336,7 @@ const expandSideShorthand = elligibleZones => {
 
 const checkAndNormalizeSettings = settings => {
   const isBounded = F.defaultsTo(true, settings.isBounded)
+  const zoneChangeThreshold = settings.zoneChangeThreshold || null
   const elligibleZones = F.isExists(settings.elligibleZones)
     ? expandSideShorthand(settings.elligibleZones)
     : null
@@ -292,16 +357,21 @@ const checkAndNormalizeSettings = settings => {
     isBounded,
     elligibleZones,
     preferredZones,
+    zoneChangeThreshold,
   }
 }
 
-const calcLayout = (settingsUnchecked, arrangementUnchecked) => {
+const calcLayout = (
+  settingsUnchecked,
+  arrangementUnchecked,
+  previousZoneSide
+) => {
   const settings = checkAndNormalizeSettings(settingsUnchecked)
   const isTipEnabled = Boolean(arrangementUnchecked.tip)
   const arrangement = isTipEnabled
     ? arrangementUnchecked
     : { ...arrangementUnchecked, tip: { width: 0, height: 0 } }
-  const zone = optimalZone(settings, arrangement)
+  const zone = optimalZone(settings, arrangement, previousZoneSide)
   const popoverPosition = calcPopoverPosition(
     settings,
     arrangement.frame,
@@ -324,10 +394,12 @@ const calcLayout = (settingsUnchecked, arrangementUnchecked) => {
   return {
     popover: popoverPosition,
     tip: tipPosition,
+    zone,
   }
 }
 
 export {
+  adjustRankingForChangeThreshold,
   measureZones,
   calcFit,
   rankZones,

@@ -16,8 +16,21 @@ const mapObject = (object, f) =>
     return objectNew
   }, {})
 
+const precision = (p, n) => Number(n.toFixed(p))
+
+const percentageDifference = (a, b) => (a - b) / b
+
 const isExists = x => x !== null && x !== undefined
 
 const defaultsTo = (x, o) => (isExists(o) ? o : x)
 
-export { defaultsTo, first, mapObject, isEqual, isExists, splitWith }
+export {
+  defaultsTo,
+  first,
+  mapObject,
+  isEqual,
+  isExists,
+  splitWith,
+  precision,
+  percentageDifference,
+}

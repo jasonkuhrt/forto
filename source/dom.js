@@ -74,16 +74,17 @@ const getBoundingClientRect = el => {
 
 const calcArrangementBounds = ({ frame, ...elems }) => {
   const elemsBounds = F.mapObject(elems, getBoundingClientRect)
-  const frameBounds = frame === window
-    ? {
-        width: window.outerWidth,
-        height: window.outerHeight,
-        top: 0,
-        bottom: window.outerHeight,
-        left: 0,
-        right: window.outerWidth,
-      }
-    : getBoundingClientRect(frame)
+  const frameBounds =
+    frame === window
+      ? {
+          width: window.outerWidth,
+          height: window.outerHeight,
+          top: 0,
+          bottom: window.outerHeight,
+          left: 0,
+          right: window.outerWidth,
+        }
+      : getBoundingClientRect(frame)
   return {
     frame: frameBounds,
     ...elemsBounds,
@@ -114,10 +115,14 @@ const observeArrChanges = arrangement =>
 
 // Main Entry Points
 
-const observe = arrangement =>
-  observeArrChanges(arrangement).map(arrangement =>
-    Main.calcLayout({}, arrangement)
-  )
+const observe = (settings, arrangement) => {
+  let previousZoneSide = null
+  return observeArrChanges(arrangement).map(arrangementNow => {
+    const result = Main.calcLayout(settings, arrangementNow, previousZoneSide)
+    previousZoneSide = result.zone.side
+    return result
+  })
+}
 
 const observeWithPolling = (intervalMs, arrangement) => {
   let arrangementBounds = calcArrangementBounds(arrangement)
@@ -133,7 +138,7 @@ const observeWithPolling = (intervalMs, arrangement) => {
         arrangementBounds = arrangementBoundsNow
         return !F.isEqual(arrangementBoundsBefore, arrangementBoundsNow)
       })
-  ).map(arrangement => Main.calcLayout({}, arrangement))
+  ).map(arrangementNow => Main.calcLayout({}, arrangementNow))
 }
 
 export { observeDomEvent, observe, observeWithPolling }
