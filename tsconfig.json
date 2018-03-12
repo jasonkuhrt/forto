@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "noImplicitReturns": true,
+    "esModuleInterop": true,
+    "target": "es5",
+    "module": "commonjs",
+    "outDir": "./build",
+    "declaration": true,
+    "sourceMap": true,
+    "lib": ["DOM", "ES5", "ScriptHost", "ES2015.Promise"]
+  },
+  "include": ["./source/**/*.ts"],
+  "exclude": ["./source/**/*.spec.ts", "./source/SpecHelpers.ts"]
+}

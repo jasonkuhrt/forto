@@ -111,7 +111,7 @@ const calcFit = (popover, tip, measuredZone) => {
     (measuredZoneArea -
       min(popoverTip.height, measuredZone.height) *
         min(popoverTip.width, measuredZone.height)) /
-      measuredZoneArea
+      measuredZoneArea,
   )
   // console.log(measuredZone.side, measuredZoneArea, areaPercentageRemaining)
   const popoverNegAreaH =
@@ -120,7 +120,7 @@ const calcFit = (popover, tip, measuredZone) => {
     widthRem >= 0
       ? 0
       : Math.abs(
-          widthRem * (popoverTip.height - Math.abs(upperLimit(0, heightRem)))
+          widthRem * (popoverTip.height - Math.abs(upperLimit(0, heightRem))),
         )
   const popoverNegArea = popoverNegAreaH + popoverNegAreaW
   const popoverNegAreaPercent = popoverNegArea / area(popoverTip)
@@ -174,13 +174,13 @@ const rankZonesWithThresholdPreference = (prefZones, threshold, zoneFits) =>
 const adjustRankingForChangeThreshold = (
   threshold,
   zonesRanked,
-  previousZone
+  previousZone,
 ) => {
   const topRankedZoneFit = zonesRanked[0]
   if (previousZone === topRankedZoneFit.side) return zonesRanked
 
   const previousZoneFitNow = zonesRanked.find(
-    ({ side }) => previousZone === side
+    ({ side }) => previousZone === side,
   )
 
   if (
@@ -193,8 +193,8 @@ const adjustRankingForChangeThreshold = (
     2,
     F.percentageDifference(
       topRankedZoneFit.areaPercentageRemaining,
-      previousZoneFitNow.areaPercentageRemaining
-    )
+      previousZoneFitNow.areaPercentageRemaining,
+    ),
   )
 
   if (newZoneImprovementPercentage < threshold) {
@@ -225,7 +225,7 @@ const rankZones = (settings, zoneFits, previousZone) => {
       ? rankZonesWithThresholdPreference(
           settings.preferredZones,
           settings.preferZoneUntilPercentWorse,
-          zoneFits
+          zoneFits,
         )
       : rankZonesWithPreference(settings.preferredZones, zoneFits)
   } else {
@@ -236,7 +236,7 @@ const rankZones = (settings, zoneFits, previousZone) => {
     zoneFitsRanked = adjustRankingForChangeThreshold(
       settings.zoneChangeThreshold,
       zoneFitsRanked,
-      previousZone
+      previousZone,
     )
   }
 
@@ -248,7 +248,7 @@ const optimalZone = (settings, arrangement, previousZoneSide) => {
   // so that it does not needlessly create objects.
   const zonesMeasured = settings.elligibleZones
     ? measureZones(arrangement.target, arrangement.frame).filter(
-        zone => settings.elligibleZones.indexOf(zone.side) > -1
+        zone => settings.elligibleZones.indexOf(zone.side) > -1,
       )
     : measureZones(arrangement.target, arrangement.frame)
 
@@ -260,10 +260,10 @@ const optimalZone = (settings, arrangement, previousZoneSide) => {
     rankZones(
       settings,
       zonesMeasured.map(zone =>
-        calcFit(arrangement.popover, arrangement.tip, zone)
+        calcFit(arrangement.popover, arrangement.tip, zone),
       ),
-      previousZoneSide
-    )
+      previousZoneSide,
+    ),
   )
 }
 
@@ -349,7 +349,7 @@ const checkAndNormalizeSettings = settings => {
       console.warn(
         "Your preferred zones (%s) are impossible to use because you specified elligible zones that do not include them (%s)",
         preferredZones,
-        elligibleZones
+        elligibleZones,
       )
     }
   }
@@ -361,10 +361,24 @@ const checkAndNormalizeSettings = settings => {
   }
 }
 
+type Side = "Left" | "Right" | "Above" | "Below"
+
+type zone = {
+  side: Side
+  height: number
+  width: number
+  areaPercentageRemaining: number
+  popoverNegAreaPercent: number
+}
+
+type Settings = {
+  zoneChangeThreshold: number
+}
+
 const calcLayout = (
   settingsUnchecked,
   arrangementUnchecked,
-  previousZoneSide
+  previousZoneSide,
 ) => {
   const settings = checkAndNormalizeSettings(settingsUnchecked)
   const isTipEnabled = Boolean(arrangementUnchecked.tip)
@@ -377,18 +391,18 @@ const calcLayout = (
     arrangement.frame,
     arrangement.target,
     arrangement.popover,
-    zone
+    zone,
   )
   const popoverBoundingBox = BoundingBoxFromSizePosition(
     arrangement.popover,
-    popoverPosition
+    popoverPosition,
   )
   const tipPosition = isTipEnabled
     ? calcTipPosition(
         Ori.fromSide(zone),
         arrangement.target,
         popoverBoundingBox,
-        arrangement.tip
+        arrangement.tip,
       )
     : null
   return {
