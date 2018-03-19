@@ -2,102 +2,115 @@
 // * API
 
 import * as F from "./prelude"
+import * as BB from "./BoundingBox"
+import * as Ori from "./Ori"
 
-const centerBetween = (x, o) => (x > o ? 0 : x + (o - x) / 2)
-const centerOf = (orientation, x) =>
-  orientation === "Horizontal" ? x.width / 2 : x.height / 2
-const upperLimit = (ceiling, n) => (n <= ceiling ? n : ceiling)
-const area = size => size.width * size.height
-
-const compare = (a, b) => (a < b ? -1 : a > b ? 1 : 0)
-
-const center = n => n / 2
-
-const Sides = {
-  Top: "Top",
-  Bottom: "Bottom",
-  Left: "Left",
-  Right: "Right",
+type Pos = {
+  x: number
+  y: number
 }
 
-const Orders = {
-  Before: "Before",
-  After: "After",
+type Size = {
+  height: number
+  width: number
 }
 
-const BoundingBoxFromSizePosition = (size, position) => ({
+type Orientation = "Horizontal" | "Vertical"
+
+/**
+ * Calculate the mid point between two numbers.
+ */
+const centerBetween = (x: number, o: number): number => {
+  return x > o ? 0 : x + (o - x) / 2
+}
+
+const centerOf = (orientation: Orientation, x: Size) => {
+  return orientation === "Horizontal" ? x.width / 2 : x.height / 2
+}
+
+/**
+ * Return a number no greater than a certain maximum.
+ */
+const upperLimit = (ceiling: number, n: number): number => {
+  return n <= ceiling ? n : ceiling
+}
+
+/**
+ * Calculate the area of a rectangular shape.
+ */
+const area = (size: Size): number => {
+  return size.width * size.height
+}
+
+/**
+ * Numeric comparator.
+ */
+const compare = (a: number, b: number): number => {
+  return a < b ? -1 : a > b ? 1 : 0
+}
+
+/**
+ * Calculate the half of a number.
+ */
+const center = (n: number): number => {
+  return n / 2
+}
+
+enum Order {
+  Before = "Before",
+  After = "After",
+}
+
+/**
+ * Create a bounding box from size and position data.
+ */
+const BoundingBoxFromSizePosition = (size: Size, pos: Pos): BB.BoundingBox => ({
   ...size,
-  left: position.x,
-  top: position.y,
-  bottom: position.y + size.height,
-  right: position.x + size.width,
+  left: pos.x,
+  top: pos.y,
+  bottom: pos.y + size.height,
+  right: pos.x + size.width,
 })
 
-const measureZones = (target, frame) => [
-  {
-    side: Sides.Top,
-    width: frame.width,
-    height: target.top - frame.top,
-  },
-  {
-    side: Sides.Bottom,
-    width: frame.width,
-    height: frame.bottom - target.bottom,
-  },
-  {
-    side: Sides.Left,
-    width: target.left - frame.left,
-    height: frame.height,
-  },
-  {
-    side: Sides.Right,
-    width: frame.right - target.right,
-    height: frame.height,
-  },
-]
+type MeasuredZone = Size & Ori.OfASidea
 
-const Oris = {
-  Horizontal: "Horizontal",
-  Vertical: "Vertical",
+const measureZones = (
+  target: BB.BoundingBox,
+  frame: BB.BoundingBox,
+): MeasuredZone[] => {
+  return [
+    {
+      side: Ori.Side.Top,
+      width: frame.width,
+      height: target.top - frame.top,
+    },
+    {
+      side: Ori.Side.Bottom,
+      width: frame.width,
+      height: frame.bottom - target.bottom,
+    },
+    {
+      side: Ori.Side.Left,
+      width: target.left - frame.left,
+      height: frame.height,
+    },
+    {
+      side: Ori.Side.Right,
+      width: frame.right - target.right,
+      height: frame.height,
+    },
+  ]
 }
-
-const Ori = {}
-
-Ori.isHorizontal = ofASide =>
-  [Sides.Right, Sides.Left].indexOf(ofASide.side) !== -1
-
-Ori.fromSide = ofASide =>
-  [Sides.Right, Sides.Left].indexOf(ofASide.side) !== -1
-    ? Oris.Horizontal
-    : Oris.Vertical
-
-Ori.crossDim = ori => (ori === Oris.Horizontal ? "height" : "width")
-
-Ori.mainDim = ori => (ori === Oris.Vertical ? "width" : "height")
-
-Ori.mainAxis = ori => (ori === Oris.Horizontal ? "x" : "y")
-
-Ori.crossAxis = ori => (ori === Oris.Horizontal ? "y" : "x")
-
-Ori.mainEnd = ori => (ori === Oris.Horizontal ? "right" : "bottom")
-
-Ori.mainStart = ori => (ori === Oris.Horizontal ? "left" : "top")
-
-Ori.crossEnd = ori => (ori === Oris.Horizontal ? "bottom" : "right")
-
-Ori.crossStart = ori => (ori === Oris.Horizontal ? "top" : "left")
-
-Ori.mainLength = ori => (ori === Oris.Horizontal ? "width" : "height")
-
-Ori.crossLength = ori => (ori === Oris.Horizontal ? "height" : "width")
-Ori.opposite = ori =>
-  ori === Oris.Horizontal ? Oris.Vertical : Oris.Horizontal
 
 // Ori.orderOf = (ofASide) : Order => (
 //   ["Left", "Top"].indexOf(ofASide.side) ? after : before
 // )
 
-const calcFit = (popover, tip, measuredZone) => {
+const calcFit = (
+  popover: BB.BoundingBox,
+  tip: BB.BoundingBox,
+  measuredZone: MeasuredZone,
+) => {
   const popoverTip = Ori.isHorizontal(measuredZone)
     ? { width: popover.width + tip.height, height: popover.height }
     : { width: popover.width, height: popover.height + tip.height }
@@ -122,13 +135,15 @@ const calcFit = (popover, tip, measuredZone) => {
         )
   const popoverNegArea = popoverNegAreaH + popoverNegAreaW
   const popoverNegAreaPercent = popoverNegArea / area(popoverTip)
-  return Object.assign({}, measuredZone, {
+
+  return {
+    ...measuredZone,
     popoverNegAreaPercent,
     areaPercentageRemaining,
-  })
+  }
 }
 
-const rankZonesWithPreference = (prefZones, zoneFits) =>
+const rankZonesWithPreference = (prefZones: Ori.Side[], zoneFits: Zone[]) =>
   zoneFits.sort((a, b) => {
     if (a.popoverNegAreaPercent < b.popoverNegAreaPercent) return -1
     if (a.popoverNegAreaPercent > b.popoverNegAreaPercent) return 1
@@ -139,7 +154,11 @@ const rankZonesWithPreference = (prefZones, zoneFits) =>
     return compare(area(a), area(b)) * -1
   })
 
-const rankZonesWithThresholdPreference = (prefZones, threshold, zoneFits) =>
+const rankZonesWithThresholdPreference = (
+  prefZones: Ori.Side[],
+  threshold: number,
+  zoneFits: Zone[],
+) =>
   zoneFits.sort((a, b) => {
     if (!a.popoverNegAreaPercent && b.popoverNegAreaPercent) return -1
     if (a.popoverNegAreaPercent && !b.popoverNegAreaPercent) return 1
@@ -170,16 +189,17 @@ const rankZonesWithThresholdPreference = (prefZones, threshold, zoneFits) =>
   })
 
 const adjustRankingForChangeThreshold = (
-  threshold,
-  zonesRanked,
-  previousZone,
+  threshold: number,
+  zonesRanked: Zone[],
+  previousZone: Ori.Side,
 ) => {
   const topRankedZoneFit = zonesRanked[0]
   if (previousZone === topRankedZoneFit.side) return zonesRanked
 
-  const previousZoneFitNow = zonesRanked.find(
+  const previousZoneFitNow = F.find(
     ({ side }) => previousZone === side,
-  )
+    zonesRanked,
+  )! // TODO document why we have this non-null guarantee
 
   if (
     previousZoneFitNow.popoverNegAreaPercent > 0 &&
@@ -204,8 +224,8 @@ const adjustRankingForChangeThreshold = (
   return zonesRanked
 }
 
-const rankZonesSimple = zoneFits =>
-  zoneFits.sort((a, b) => {
+const rankZonesSimple = (zoneFits: Zone[]): Zone[] => {
+  return zoneFits.sort((a, b) => {
     if (a.popoverNegAreaPercent < b.popoverNegAreaPercent) return -1
     if (a.popoverNegAreaPercent > b.popoverNegAreaPercent) return 1
     // Either neither have negative area or both have equally negative area.
@@ -214,8 +234,13 @@ const rankZonesSimple = zoneFits =>
     // but for us larger is better and hence should come first.
     return compare(area(a), area(b)) * -1
   })
+}
 
-const rankZones = (settings, zoneFits, previousZone) => {
+const rankZones = (
+  settings: Settings,
+  zoneFits: Zone[],
+  previousZone: Ori.Side,
+) => {
   let zoneFitsRanked
 
   if (settings.preferredZones) {
@@ -241,20 +266,32 @@ const rankZones = (settings, zoneFits, previousZone) => {
   return zoneFitsRanked
 }
 
-const optimalZone = (settings, arrangement, previousZoneSide) => {
+type Arrangement = {
+  frame: BB.BoundingBox
+  target: BB.BoundingBox
+  popover: BB.BoundingBox
+  tip: BB.BoundingBox
+}
+
+const optimalZone = (
+  settings: Settings,
+  arrangement: Arrangement,
+  previousZoneSide: Ori.Side,
+): Zone => {
   // TODO We can optimize measureZones to apply the elligibleZones logic
   // so that it does not needlessly create objects.
-  const zonesMeasured = settings.elligibleZones
-    ? measureZones(arrangement.target, arrangement.frame).filter(
-        zone => settings.elligibleZones.indexOf(zone.side) > -1,
-      )
-    : measureZones(arrangement.target, arrangement.frame)
+  const zonesMeasured =
+    settings.elligibleZones === null
+      ? measureZones(arrangement.target, arrangement.frame)
+      : measureZones(arrangement.target, arrangement.frame).filter(
+          zone => settings.elligibleZones!.indexOf(zone.side) > -1,
+        )
 
   // Preferred zones
   // Pick the preferred First Class zone or if none specifed that with the
   // greatest area. If there are no First Class zones then pick the preferred
   // Second Class zone or if none specified that with the least area cropped.
-  return F.first(
+  return F.head(
     rankZones(
       settings,
       zonesMeasured.map(zone =>
@@ -262,10 +299,16 @@ const optimalZone = (settings, arrangement, previousZoneSide) => {
       ),
       previousZoneSide,
     ),
-  )
+  )! // TODO Document why we have non-null guarantee.
 }
 
-const calcPopoverPosition = (settings, frame, target, popover, zone) => {
+const calcPopoverPosition = (
+  settings: Settings,
+  frame: BB.BoundingBox,
+  target: BB.BoundingBox,
+  popover: BB.BoundingBox,
+  zone: Zone,
+) => {
   const ori = Ori.fromSide(zone)
   const p = { x: 0, y: 0 }
   const crossAxis = Ori.crossAxis(ori)
@@ -310,7 +353,12 @@ const calcPopoverPosition = (settings, frame, target, popover, zone) => {
   return p
 }
 
-const calcTipPosition = (orientation, target, popover, tip) => {
+const calcTipPosition = (
+  orientation: Ori.Ori,
+  target: BB.BoundingBox,
+  popover: BB.BoundingBox,
+  tip: BB.BoundingBox,
+) => {
   const crossStart = Ori.crossStart(orientation)
   const crossEnd = Ori.crossEnd(orientation)
   // const crossLength = Ori.crossEnd(orientation)
@@ -324,23 +372,34 @@ const calcTipPosition = (orientation, target, popover, tip) => {
   }
 }
 
-const expandSideShorthand = elligibleZones => {
-  if (elligibleZones === Oris.Horizontal) return [Sides.Left, Sides.Right]
-  if (elligibleZones === Oris.Vertical) return [Sides.Top, Sides.Bottom]
-  if (elligibleZones === Orders.Before) return [Sides.Top, Sides.Left]
-  if (elligibleZones === Orders.After) return [Sides.Bottom, Sides.Right]
-  return [elligibleZones]
+type SidesShorthand = Ori.Ori | Order | Ori.Side
+
+const expandSideShorthand = (elligibleZones: SidesShorthand): Ori.Side[] => {
+  switch (elligibleZones) {
+    case Ori.Ori.Horizontal:
+      return [Ori.Side.Left, Ori.Side.Right]
+    case Ori.Ori.Vertical:
+      return [Ori.Side.Top, Ori.Side.Bottom]
+    case Order.Before:
+      return [Ori.Side.Top, Ori.Side.Left]
+    case Order.After:
+      return [Ori.Side.Bottom, Ori.Side.Right]
+    default:
+      return [elligibleZones]
+  }
 }
 
-const checkAndNormalizeSettings = settings => {
+const checkAndNormalizeSettings = (settings: SettingsUnchecked): Settings => {
   const isBounded = F.defaultsTo(true, settings.isBounded)
   const zoneChangeThreshold = settings.zoneChangeThreshold || null
-  const elligibleZones = F.isExists(settings.elligibleZones)
-    ? expandSideShorthand(settings.elligibleZones)
-    : null
-  const preferredZones = F.isExists(settings.preferredZones)
-    ? expandSideShorthand(settings.preferredZones)
-    : null
+  const elligibleZones =
+    settings.elligibleZones === undefined || settings.elligibleZones === null
+      ? null
+      : expandSideShorthand(settings.elligibleZones)
+  const preferredZones =
+    settings.preferredZones === undefined || settings.preferredZones === null
+      ? null
+      : expandSideShorthand(settings.preferredZones)
   if (elligibleZones && preferredZones) {
     const impossiblePreferredZones = F.omit(elligibleZones, preferredZones)
     if (impossiblePreferredZones.length) {
@@ -351,6 +410,7 @@ const checkAndNormalizeSettings = settings => {
       )
     }
   }
+
   return {
     isBounded,
     elligibleZones,
@@ -359,30 +419,43 @@ const checkAndNormalizeSettings = settings => {
   }
 }
 
-type Side = "Left" | "Right" | "Above" | "Below"
-
-type zone = {
-  side: Side
-  height: number
-  width: number
+type Zone = Size & {
+  side: Ori.Side
   areaPercentageRemaining: number
   popoverNegAreaPercent: number
 }
 
+type SettingsUnchecked = {
+  zoneChangeThreshold?: number
+  isBounded?: boolean
+  elligibleZones?: SidesShorthand
+  preferredZones?: SidesShorthand
+}
+
 type Settings = {
-  zoneChangeThreshold: number
+  isBounded: boolean
+  zoneChangeThreshold: null | number
+  elligibleZones: null | Ori.Side[]
+  preferredZones: null | Ori.Side[]
+}
+
+type ArrangementUnchecked = Arrangement & {
+  tip: null | BB.BoundingBox
 }
 
 const calcLayout = (
-  settingsUnchecked,
-  arrangementUnchecked,
-  previousZoneSide,
+  settingsUnchecked: SettingsUnchecked,
+  arrangementUnchecked: ArrangementUnchecked,
+  previousZoneSide: Ori.Side,
 ) => {
   const settings = checkAndNormalizeSettings(settingsUnchecked)
   const isTipEnabled = Boolean(arrangementUnchecked.tip)
-  const arrangement = isTipEnabled
+  const arrangement: Arrangement = isTipEnabled
     ? arrangementUnchecked
-    : { ...arrangementUnchecked, tip: { width: 0, height: 0 } }
+    : {
+        ...arrangementUnchecked,
+        tip: BB.make(0, 0),
+      }
   const zone = optimalZone(settings, arrangement, previousZoneSide)
   const popoverPosition = calcPopoverPosition(
     settings,
@@ -419,4 +492,5 @@ export {
   calcPopoverPosition,
   calcTipPosition,
   calcLayout,
+  Order,
 }

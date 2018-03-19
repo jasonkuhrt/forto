@@ -58,7 +58,7 @@ const percentageDifference = (a: number, b: number): number => (a - b) / b
 /**
  * Determin if something is either null or defined.
  */
-const isExists = <A>(x: A): boolean => x !== null && x !== undefined
+const isExists = <A>(x: A): x is {} => x !== null && x !== undefined
 
 /**
  * Use given default value if some value in practice does not exist.
@@ -93,6 +93,16 @@ const omit = <A>(blacklist: A[], values: A[]): A[] => {
   return valuesPassed
 }
 
+/**
+ * Return the first list member that passes predicate or else null.
+ */
+const find = <A>(f: (a: A) => boolean, xs: A[]): null | A => {
+  for (const x of xs) {
+    if (f(x)) return x
+  }
+  return null
+}
+
 export {
   defaultsTo,
   head,
@@ -105,4 +115,5 @@ export {
   min,
   max,
   omit,
+  find,
 }
