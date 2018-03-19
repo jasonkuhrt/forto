@@ -3,8 +3,6 @@
 
 import * as F from "./prelude"
 
-const min = (x, o) => (x <= o ? x : o)
-const max = (x, o) => (x >= o ? x : o)
 const centerBetween = (x, o) => (x > o ? 0 : x + (o - x) / 2)
 const centerOf = (orientation, x) =>
   orientation === "Horizontal" ? x.width / 2 : x.height / 2
@@ -109,8 +107,8 @@ const calcFit = (popover, tip, measuredZone) => {
   const areaPercentageRemaining = F.precision(
     2,
     (measuredZoneArea -
-      min(popoverTip.height, measuredZone.height) *
-        min(popoverTip.width, measuredZone.height)) /
+      F.min(popoverTip.height, measuredZone.height) *
+        F.min(popoverTip.width, measuredZone.height)) /
       measuredZoneArea,
   )
   // console.log(measuredZone.side, measuredZoneArea, areaPercentageRemaining)
@@ -316,8 +314,8 @@ const calcTipPosition = (orientation, target, popover, tip) => {
   const crossStart = Ori.crossStart(orientation)
   const crossEnd = Ori.crossEnd(orientation)
   // const crossLength = Ori.crossEnd(orientation)
-  const innerMostBefore = max(popover[crossStart], target[crossStart])
-  const innerMostAfter = min(popover[crossEnd], target[crossEnd])
+  const innerMostBefore = F.max(popover[crossStart], target[crossStart])
+  const innerMostAfter = F.min(popover[crossEnd], target[crossEnd])
   return {
     [Ori.crossAxis(orientation)]:
       centerBetween(innerMostBefore, innerMostAfter) -

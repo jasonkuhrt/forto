@@ -69,12 +69,16 @@ const defaultsTo = <A, B>(x: A, o: undefined | null | B) =>
 /**
  * Return the smaller of two numbers.
  */
-const min = (x: number, o: number): number => (x <= o ? x : o)
+const min = (x: number, o: number): number => {
+  return x <= o ? x : o
+}
 
 /**
  * Return the larger of two numbers.
  */
-const max = (x: number, o: number): number => (x >= o ? x : o)
+const max = (x: number, o: number): number => {
+  return x >= o ? x : o
+}
 
 /**
  * Omit values in a given list found in a given blacklist.
