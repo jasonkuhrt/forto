@@ -392,6 +392,11 @@ const expandSideShorthand = (elligibleZones: SidesShorthand): Ori.Side[] => {
 const checkAndNormalizeSettings = (settings: SettingsUnchecked): Settings => {
   const isBounded = F.defaultsTo(true, settings.isBounded)
   const zoneChangeThreshold = settings.zoneChangeThreshold || null
+  const preferZoneUntilPercentWorse = F.isExists(
+    settings.preferZoneUntilPercentWorse,
+  )
+    ? settings.preferZoneUntilPercentWorse
+    : null
   const elligibleZones =
     settings.elligibleZones === undefined || settings.elligibleZones === null
       ? null
@@ -416,6 +421,7 @@ const checkAndNormalizeSettings = (settings: SettingsUnchecked): Settings => {
     elligibleZones,
     preferredZones,
     zoneChangeThreshold,
+    preferZoneUntilPercentWorse,
   }
 }
 
@@ -427,6 +433,7 @@ type Zone = Size & {
 
 type SettingsUnchecked = {
   zoneChangeThreshold?: number
+  preferZoneUntilPercentWorse?: number
   isBounded?: boolean
   elligibleZones?: SidesShorthand
   preferredZones?: SidesShorthand
@@ -437,6 +444,7 @@ type Settings = {
   zoneChangeThreshold: null | number
   elligibleZones: null | Ori.Side[]
   preferredZones: null | Ori.Side[]
+  preferZoneUntilPercentWorse: null | number
 }
 
 type ArrangementUnchecked = Arrangement & {
