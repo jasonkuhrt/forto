@@ -3,6 +3,12 @@ import ElementResizeDetector from "element-resize-detector"
 import * as Main from "./Main"
 import * as F from "./prelude"
 
+type Obs<A> = any
+
+type Observer<A> = {
+  next(event: A): void
+}
+
 // Constructor tries to run body.insertBefore
 // https://github.com/wnr/element-resize-detector/blob/ad30e37d44a90c3c0bfaeed392755641d8dde469/dist/element-resize-detector.js#L490
 // so we must wait for after DOM ready event
@@ -21,17 +27,22 @@ to use CSS animation/transition while another uses React motion while another
 uses React Interpolate. Only the former of the three examples would support
 us directly assigning new positioning results to popover and tip. The other
 examples listed would need to handle the application of positioning results */
-const observeDomEvent = (eventName, element) =>
+const observeDomEvent = (
+  eventName: string,
+  element: Element | Window,
+): Obs<any> =>
   new Observable(observer => {
     const isElementResize = eventName === "resize" && element !== window
     const observerNext = event => {
       observer.next(event)
     }
+
     if (isElementResize) {
       erd.listenTo(element, observerNext)
     } else {
       element.addEventListener(eventName, observerNext)
     }
+
     return function dispose() {
       if (isElementResize) {
         erd.removeListener(element, observerNext)
@@ -41,8 +52,8 @@ const observeDomEvent = (eventName, element) =>
     }
   })
 
-const observePeriodic = everyMs =>
-  new Observable(observer => {
+const observePeriodic = <A extends void>(everyMs: number): Obs<A> =>
+  new Observable((observer: Observer<A>) => {
     const intervalId = setInterval(() => observer.next(), everyMs)
     return () => {
       clearInterval(intervalId)
@@ -50,7 +61,7 @@ const observePeriodic = everyMs =>
   })
 
 const mergeObservables = (a, b) =>
-  new Observable(observer => {
+  new Observable((observer: Observer<any>) => {
     const subs = [a.subscribe(observer), b.subscribe(observer)]
     return () => {
       subs.forEach(sub => {
@@ -102,7 +113,7 @@ const observeArrChanges = arrangement =>
       ...Object.values(arrangement).map(el =>
         observeDomEvent("resize", el).subscribe(() => {
           observer.next()
-        })
+        }),
       ),
     ]
     const cleanUp = () => {
@@ -124,7 +135,7 @@ const observe = (settings, arrangement) => {
   })
 }
 
-const observeWithPolling = (intervalMs, arrangement) => {
+const observeWithPolling = (intervalMs: number, arrangement): Obs<any> => {
   let arrangementBounds = calcArrangementBounds(arrangement)
   return mergeObservables(
     observeArrChanges(arrangement),
@@ -137,7 +148,7 @@ const observeWithPolling = (intervalMs, arrangement) => {
         const arrangementBoundsBefore = arrangementBounds
         arrangementBounds = arrangementBoundsNow
         return !F.isEqual(arrangementBoundsBefore, arrangementBoundsNow)
-      })
+      }),
   ).map(arrangementNow => Main.calcLayout({}, arrangementNow))
 }
 
