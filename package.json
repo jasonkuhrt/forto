@@ -19,11 +19,13 @@
     }
   },
   "devDependencies": {
+    "@types/element-resize-detector": "^1.1.0",
     "@types/jest": "^22.1.4",
     "@types/lodash": "^4.14.104",
     "@types/lodash-es": "^4.17.0",
     "@types/lodash.isequal": "^4.5.2",
     "@types/ramda": "types/npm-ramda#dist",
+    "@types/zen-observable": "^0.5.3",
     "chai": "^3.5.0",
     "core-js": "^2.4.1",
     "husky": "^0.14.3",

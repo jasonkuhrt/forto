@@ -239,7 +239,7 @@ const rankZonesSimple = (zoneFits: Zone[]): Zone[] => {
 const rankZones = (
   settings: Settings,
   zoneFits: Zone[],
-  previousZone: Ori.Side,
+  previousZone: null | Ori.Side,
 ) => {
   let zoneFitsRanked
 
@@ -276,7 +276,7 @@ type Arrangement = {
 const optimalZone = (
   settings: Settings,
   arrangement: Arrangement,
-  previousZoneSide: Ori.Side,
+  previousZoneSide: null | Ori.Side,
 ): Zone => {
   // TODO We can optimize measureZones to apply the elligibleZones logic
   // so that it does not needlessly create objects.
@@ -358,7 +358,7 @@ const calcTipPosition = (
   target: BB.BoundingBox,
   popover: BB.BoundingBox,
   tip: BB.BoundingBox,
-) => {
+): Pos => {
   const crossStart = Ori.crossStart(orientation)
   const crossEnd = Ori.crossEnd(orientation)
   // const crossLength = Ori.crossEnd(orientation)
@@ -369,7 +369,7 @@ const calcTipPosition = (
       centerBetween(innerMostBefore, innerMostAfter) -
       centerOf(Ori.opposite(orientation), tip),
     [Ori.mainAxis(orientation)]: 0,
-  }
+  } as Pos
 }
 
 type SidesShorthand = Ori.Ori | Order | Ori.Side
@@ -451,11 +451,17 @@ type ArrangementUnchecked = Arrangement & {
   tip: null | BB.BoundingBox
 }
 
+type Calculation = {
+  popover: Pos
+  tip: null | Pos
+  zone: Zone
+}
+
 const calcLayout = (
   settingsUnchecked: SettingsUnchecked,
   arrangementUnchecked: ArrangementUnchecked,
-  previousZoneSide: Ori.Side,
-) => {
+  previousZoneSide: null | Ori.Side,
+): Calculation => {
   const settings = checkAndNormalizeSettings(settingsUnchecked)
   const isTipEnabled = Boolean(arrangementUnchecked.tip)
   const arrangement: Arrangement = isTipEnabled
@@ -484,6 +490,7 @@ const calcLayout = (
         arrangement.tip,
       )
     : null
+
   return {
     popover: popoverPosition,
     tip: tipPosition,
@@ -501,4 +508,10 @@ export {
   calcTipPosition,
   calcLayout,
   Order,
+  Arrangement,
+  SettingsUnchecked,
+  SidesShorthand,
+  Calculation,
+  Zone,
+  Pos,
 }
