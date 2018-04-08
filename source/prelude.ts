@@ -57,9 +57,8 @@ const percentageDifference = (a: number, b: number): number => (a - b) / b
 
 /**
  * Determin if something is either null or defined.
- * TODO Use TS 2.8 to implement.
  */
-const isExists = <A>(x: A): x is {} => x !== null && x !== undefined
+const isExists = <A>(x: A): x is NonNullable<A> => x !== null && x !== undefined
 
 /**
  * Use given default value if some value in practice does not exist.
