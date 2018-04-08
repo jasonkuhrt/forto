@@ -44,7 +44,7 @@ describe("calcFit", () => {
     const popover = B.make(25, 25)
     const tip = B.make(0, 0)
     expect(Forto.calcFit(popover, tip, zone).areaPercentageRemaining).toEqual(
-      0.75
+      0.75,
     )
   })
 
@@ -52,7 +52,7 @@ describe("calcFit", () => {
     const popover = B.make(100, 40)
     const tip = B.make(0, 0)
     expect(Forto.calcFit(popover, tip, zone).areaPercentageRemaining).toEqual(
-      0.2
+      0.2,
     )
   })
 
@@ -83,21 +83,21 @@ describe("calcFit", () => {
       const popover = B.make(10 + 90, 10)
       const tip = B.make(0, 0)
       expect(Forto.calcFit(popover, tip, zone).popoverNegAreaPercent).toEqual(
-        0.5
+        0.5,
       )
     })
     it("height", () => {
       const popover = B.make(10, 10 + 90)
       const tip = B.make(0, 0)
       expect(Forto.calcFit(popover, tip, zone).popoverNegAreaPercent).toEqual(
-        0.5
+        0.5,
       )
     })
     it("width/height", () => {
       const popover = B.make(10 + 90, 10 + 90)
       const tip = B.make(0, 0)
       expect(Forto.calcFit(popover, tip, zone).popoverNegAreaPercent).toEqual(
-        0.75
+        0.75,
       )
     })
   })
@@ -113,7 +113,7 @@ describe("calcFit", () => {
       const popover = B.make(1, 1 + 90)
       const tip = B.make(1, 9)
       expect(Forto.calcFit(popover, tip, zone).popoverNegAreaPercent).toEqual(
-        0.5
+        0.5,
       )
     })
 
@@ -122,7 +122,7 @@ describe("calcFit", () => {
       const popover = B.make(1 + 90, 1)
       const tip = B.make(1, 9)
       expect(Forto.calcFit(popover, tip, zone2).popoverNegAreaPercent).toEqual(
-        0.5
+        0.5,
       )
     })
   })
@@ -181,7 +181,7 @@ describe("rankZones with preference", () => {
   const t = { side: "Top", width: 50, height: 50, popoverNegAreaPercent: 0 }
   const test = (zoneFits, preferredZones, zoneFitsRanked) => {
     expect(Forto.rankZones({ preferredZones }, zoneFits)).toEqual(
-      zoneFitsRanked
+      zoneFitsRanked,
     )
   }
   it("if mixed classes, if single pref in second-class, still rank first-class better", () => {
@@ -230,10 +230,13 @@ describe("rankZones with preference up to thrshold", () => {
     zoneFits,
     preferredZones,
     preferZoneUntilPercentWorse,
-    zoneFitsRanked
+    zoneFitsRanked,
   ) => {
     expect(
-      Forto.rankZones({ preferredZones, preferZoneUntilPercentWorse }, zoneFits)
+      Forto.rankZones(
+        { preferredZones, preferZoneUntilPercentWorse },
+        zoneFits,
+      ),
     ).toEqual(zoneFitsRanked)
   }
   it("preference is taken if better than alternatives", () => {
@@ -309,7 +312,7 @@ describe("optimalZone (elligible specified)", () => {
   it("should return optimal zone within those elligible", () => {
     const zone = Forto.optimalZone(
       { elligibleZones: ["Top", "Bottom"] },
-      arrangement
+      arrangement,
     )
     expect(zone).toEqual({
       side: "Bottom",
@@ -418,32 +421,32 @@ describe("calcPopoverPosition (unbounded)", () => {
   it("popover can exceed frame end bounds to match cross-axis", () => {
     const target2 = B.translate(400 - 10, 100, B.make(10, 10))
     const popover = B.make(20, 20)
-    expect(
-      calcPopoverPositionUnbounded(frame, target2, popover, zone)
-    ).toEqual({
-      x: 400 - 15,
-      y: 100 + 10,
-    })
+    expect(calcPopoverPositionUnbounded(frame, target2, popover, zone)).toEqual(
+      {
+        x: 400 - 15,
+        y: 100 + 10,
+      },
+    )
   })
   it("popover can exceed frame start bounds to match cross-axis", () => {
     const target2 = B.translate(0, 100, B.make(10, 10))
     const popover = B.make(20, 20)
-    expect(
-      calcPopoverPositionUnbounded(frame, target2, popover, zone)
-    ).toEqual({
-      x: -5,
-      y: 100 + 10,
-    })
+    expect(calcPopoverPositionUnbounded(frame, target2, popover, zone)).toEqual(
+      {
+        x: -5,
+        y: 100 + 10,
+      },
+    )
   })
   it("if popover does not fit within frame cross-length then center it within frame", () => {
     const target2 = B.translate(0, 100, B.make(10, 10))
     const popover = B.make(400 + 10, 10)
-    expect(
-      calcPopoverPositionUnbounded(frame, target2, popover, zone)
-    ).toEqual({
-      x: -200,
-      y: 100 + 10,
-    })
+    expect(calcPopoverPositionUnbounded(frame, target2, popover, zone)).toEqual(
+      {
+        x: -200,
+        y: 100 + 10,
+      },
+    )
   })
 })
 
@@ -499,7 +502,7 @@ describe("calcLayout", () => {
   })
   it("tip is optional", () => {
     expect(
-      Forto.calcLayout(settingsDefault, { ...arrangementDefault, tip: null })
+      Forto.calcLayout(settingsDefault, { ...arrangementDefault, tip: null }),
     ).toEqual({
       popover: { x: 80, y: 50 },
       tip: null,
@@ -577,35 +580,35 @@ describe("adjustRankingForChangeThreshold", () => {
   it("if top ranked zone is class 1 and previous zone is class 2 then maintain rankings", () => {
     const zonesRanked = [t, { ...b, popoverNegAreaPercent: 5 }]
     expect(
-      Forto.adjustRankingForChangeThreshold(0.5, zonesRanked, "Bottom")
+      Forto.adjustRankingForChangeThreshold(0.5, zonesRanked, "Bottom"),
     ).toEqual(zonesRanked)
   })
 
   it("if top ranked zone is previous zone then maintain rankings", () => {
     const zonesRanked = [t, b]
     expect(
-      Forto.adjustRankingForChangeThreshold(0.5, zonesRanked, "Top")
+      Forto.adjustRankingForChangeThreshold(0.5, zonesRanked, "Top"),
     ).toEqual(zonesRanked)
   })
 
   it("if top ranked zone is below superiority threshold for change then restore previous zone to top rank", () => {
     const zonesRanked = [t, b]
     expect(
-      Forto.adjustRankingForChangeThreshold(0.5, zonesRanked, "Bottom")
+      Forto.adjustRankingForChangeThreshold(0.5, zonesRanked, "Bottom"),
     ).toEqual([b, t])
   })
 
   it("if top ranked zone is greater than superiority threshold for change then maintain rankings", () => {
     const zonesRanked = [t, b]
     expect(
-      Forto.adjustRankingForChangeThreshold(0.05, zonesRanked, "Bottom")
+      Forto.adjustRankingForChangeThreshold(0.05, zonesRanked, "Bottom"),
     ).toEqual([t, b])
   })
 
   it("if top ranked zone is equal to superiority threshold for change then maintain rankings", () => {
     const zonesRanked = [t, b]
     expect(
-      Forto.adjustRankingForChangeThreshold(0.1, zonesRanked, "Bottom")
+      Forto.adjustRankingForChangeThreshold(0.1, zonesRanked, "Bottom"),
     ).toEqual([t, b])
   })
 })

@@ -6,7 +6,7 @@ import * as Dom from "../source/dom"
 const A = {
   true: x => {
     if (!x) throw new Error(`Expected ${x} to be true`)
-  }
+  },
 }
 
 FRP.Stream.prototype.collect = function(n) {
@@ -34,7 +34,7 @@ const makePixel = () => {
   const el = makeDiv()
   Object.assign(el.style, {
     width: "1px",
-    height: "1px"
+    height: "1px",
   })
   return el
 }
@@ -43,32 +43,32 @@ const arrangement = {
   target: makeDiv(),
   frame: makeDiv(),
   popover: makeDiv(),
-  tip: makeDiv()
+  tip: makeDiv(),
 }
 const arrStyles = {
   frame: {
     width: "100px",
     height: "100px",
-    overflow: "auto"
+    overflow: "auto",
   },
   target: {
     width: "10px",
-    height: "10px"
+    height: "10px",
   },
   popover: {
     width: "4px",
     height: "4px",
     position: "absolute",
     top: "0px",
-    left: "0px"
+    left: "0px",
   },
   tip: {
     width: "0px",
     height: "0px",
     position: "absolute",
     top: "0px",
-    left: "0px"
-  }
+    left: "0px",
+  },
 }
 
 const temporary = makeDiv()
@@ -86,7 +86,7 @@ before(() => {
   divThatIsTall.id = "tallDiv"
   Object.assign(divThatIsTall.style, {
     width: "1px",
-    height: arrangement.frame.offsetHeight + 1000 + "px"
+    height: arrangement.frame.offsetHeight + 1000 + "px",
   })
   arrangement.frame.appendChild(divThatIsTall)
 })
@@ -177,12 +177,12 @@ it("if window-based frame does scroll a new layout is calculated", () => {
     frame: window,
     popover: makePixel(),
     tip: makePixel(),
-    target: makePixel()
+    target: makePixel(),
   }
   F.pipe(
     F.omit(["frame"]),
     F.values,
-    F.forEach(x => document.body.appendChild(x))
+    F.forEach(x => document.body.appendChild(x)),
   )(arrangement2)
   const promise = FRP.from(Dom.observe({}, arrangement2))
     .skip(3) // Initial binding fires element resize events
