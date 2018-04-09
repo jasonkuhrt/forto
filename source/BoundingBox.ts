@@ -31,4 +31,21 @@ const translate = (x: number, y: number, box: BoundingBox): BoundingBox => ({
   right: box.right + x,
 })
 
-export { make, translate, BoundingBox }
+/**
+ * Get the Bounding Box of an HTML Element.
+ */
+const fromHTMLElement = (el: HTMLElement): BoundingBox => {
+  // Create object literal so that props become enumerable and we
+  // can leverage isEqual later.
+  const { width, height, top, bottom, left, right } = el.getBoundingClientRect()
+  return {
+    width,
+    height,
+    top,
+    bottom,
+    left,
+    right,
+  }
+}
+
+export { make, translate, fromHTMLElement, BoundingBox }

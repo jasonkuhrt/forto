@@ -2,8 +2,6 @@ import isEqual from "lodash.isequal"
 
 type Predicate<A> = (x: A) => boolean
 
-type Mapper<A, B> = (a: A) => B
-
 /**
  * Partition a list based on a predicate.
  */
@@ -23,20 +21,17 @@ const splitWith = <A>(f: Predicate<A>, xs: A[]): [A[], A[]] => {
 /**
  * Map over values of an object.
  */
-const mapObject = <
-  O1 extends Record<string, any>,
-  O2 extends Record<keyof O1, any>
->(
-  o1: O1,
-  f: Mapper<O1[keyof O1], O2[keyof O2]>,
-): O2 => {
-  const keys: (keyof O1)[] = Object.keys(o1)
+const mapObject = <A extends Record<string, any>, B>(
+  o: A,
+  f: (a: A[keyof A]) => B,
+): Record<keyof A, B> => {
+  const keys: (keyof A)[] = Object.keys(o)
   return keys.reduce(
     (o2, key) => {
-      o2[key] = f(o1[key])
+      o2[key] = f(o[key])
       return o2
     },
-    {} as O2,
+    {} as Record<keyof A, B>,
   )
 }
 
@@ -103,6 +98,21 @@ const find = <A>(f: (a: A) => boolean, xs: A[]): null | A => {
   return null
 }
 
+/**
+ * Extract the values of the given object into an array.
+ */
+const values = <O extends Record<string, any>>(o: O): O[keyof O][] => {
+  const values = []
+
+  for (const k in o) {
+    if (o.hasOwnProperty(k)) {
+      values.push(o[k])
+    }
+  }
+
+  return values
+}
+
 export {
   defaultsTo,
   head,
@@ -116,4 +126,5 @@ export {
   max,
   omit,
   find,
+  values,
 }

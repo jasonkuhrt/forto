@@ -5,6 +5,8 @@ import * as Main from "./Main"
 import * as F from "./prelude"
 import * as Ori from "./Ori"
 
+type HTMLElementArrangement = { [k in keyof Main.Arrangement]: HTMLElement }
+
 // Constructor tries to run body.insertBefore
 // https://github.com/wnr/element-resize-detector/blob/ad30e37d44a90c3c0bfaeed392755641d8dde469/dist/element-resize-detector.js#L490
 // so we must wait for after DOM ready event
@@ -85,25 +87,14 @@ const mergeObservables = <A, B>(
 }
 
 /**
- * Get the Bounding Box of an HTML Element.
+ * TODO
  */
-const getBoundingClientRect = (el: HTMLElement): BB.BoundingBox => {
-  // Create object literal so that props become enumerable and we
-  // can leverage isEqual later.
-  const { width, height, top, bottom, left, right } = el.getBoundingClientRect()
-  return {
-    width,
-    height,
-    top,
-    bottom,
-    left,
-    right,
-  }
-}
-
-const calcArrangementBounds = ({ frame, ...elems }: any): Main.Arrangement => {
-  const elemsBounds = F.mapObject(elems, getBoundingClientRect)
-  const frameBounds = isWindow(frame)
+const calcArrangementBounds = ({
+  frame,
+  ...elems
+}: HTMLElementArrangement): Main.Arrangement => {
+  const elemsBounds = F.mapObject(elems, BB.fromHTMLElement)
+  const frameBounds: BB.BoundingBox = isWindow(frame)
     ? {
         width: window.outerWidth,
         height: window.outerHeight,
@@ -112,14 +103,19 @@ const calcArrangementBounds = ({ frame, ...elems }: any): Main.Arrangement => {
         left: 0,
         right: window.outerWidth,
       }
-    : getBoundingClientRect(frame)
+    : BB.fromHTMLElement(frame)
   return {
     frame: frameBounds,
     ...elemsBounds,
   }
 }
 
-const observeArrChanges = (arrangement: any): Observable<Main.Arrangement> => {
+/**
+ * TODO
+ */
+const observeArrChanges = (
+  arrangement: HTMLElementArrangement,
+): Observable<Main.Arrangement> => {
   return new Observable<void>(observer => {
     const subs = [
       // Watch for scroll events in the frame
@@ -127,7 +123,7 @@ const observeArrChanges = (arrangement: any): Observable<Main.Arrangement> => {
         observer.next(undefined)
       }),
       // Watch all elements in the arrangement for resizes
-      ...Object.values(arrangement).map(el =>
+      ...F.values(arrangement).map(el =>
         observeDomEvent("resize", el).subscribe(() => {
           observer.next(undefined)
         }),
@@ -144,9 +140,12 @@ const observeArrChanges = (arrangement: any): Observable<Main.Arrangement> => {
 
 // Main Entry Points
 
+/**
+ * TODO
+ */
 const observe = (
   settings: Main.SettingsUnchecked,
-  arrangement,
+  arrangement: HTMLElementArrangement,
 ): Observable<Main.Calculation> => {
   let previousZoneSide: Ori.Side
   return observeArrChanges(arrangement).map(arrangementNow => {
@@ -160,9 +159,12 @@ const observe = (
   })
 }
 
+/**
+ * TODO
+ */
 const observeWithPolling = (
   intervalMs: number,
-  arrangement,
+  arrangement: HTMLElementArrangement,
 ): Observable<Main.Calculation> => {
   let arrangementBounds = calcArrangementBounds(arrangement)
   return mergeObservables(
