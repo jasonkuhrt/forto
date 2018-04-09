@@ -117,7 +117,7 @@ const values = <O extends Record<string, any>>(o: O): O[keyof O][] => {
  * Flatten one level of nest listing. E.g.: [[1,2],[3,4]] becomes [1,2,3,4].
  */
 const flatten = <A>(aa: A[][]): A[] => {
-  return [].concat.apply(null, aa)
+  return [].concat.apply([], aa)
 }
 
 export {

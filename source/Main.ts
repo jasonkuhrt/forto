@@ -1,6 +1,5 @@
 // TODO
 // * API
-// elligibleZones setting should be a list type
 
 import * as F from "./Prelude"
 import * as BB from "./BoundingBox"
