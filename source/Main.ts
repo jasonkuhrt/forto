@@ -398,14 +398,12 @@ const checkAndNormalizeSettings = (settings: SettingsUnchecked): Settings => {
   )
     ? settings.preferZoneUntilPercentWorse
     : null
-  const elligibleZones =
-    settings.elligibleZones === undefined || settings.elligibleZones === null
-      ? null
-      : expandSideShorthand(settings.elligibleZones)
-  const preferredZones =
-    settings.preferredZones === undefined || settings.preferredZones === null
-      ? null
-      : expandSideShorthand(settings.preferredZones)
+  const elligibleZones = F.isExists(settings.elligibleZones)
+    ? F.flatten(settings.elligibleZones.map(expandSideShorthand))
+    : null
+  const preferredZones = F.isExists(settings.preferredZones)
+    ? expandSideShorthand(settings.preferredZones)
+    : null
   if (elligibleZones && preferredZones) {
     const impossiblePreferredZones = F.omit(elligibleZones, preferredZones)
     if (impossiblePreferredZones.length) {
@@ -436,7 +434,7 @@ type SettingsUnchecked = {
   zoneChangeThreshold?: number
   preferZoneUntilPercentWorse?: number
   isBounded?: boolean
-  elligibleZones?: SidesShorthand
+  elligibleZones?: SidesShorthand[]
   preferredZones?: SidesShorthand
 }
 

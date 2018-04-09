@@ -346,7 +346,9 @@ describe("optimalZone (elligible specified)", () => {
 
   it("should return optimal zone within those elligible", () => {
     const zone = Forto.optimalZone(
-      { elligibleZones: [Ori.Side.Top, Ori.Side.Bottom] },
+      Forto.checkAndNormalizeSettings({
+        elligibleZones: [Ori.Side.Top, Ori.Side.Bottom],
+      }),
       arrangement,
       null,
     )
