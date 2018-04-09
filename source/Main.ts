@@ -1,7 +1,8 @@
 // TODO
 // * API
+// elligibleZones setting should be a list type
 
-import * as F from "./prelude"
+import * as F from "./Prelude"
 import * as BB from "./BoundingBox"
 import * as Ori from "./Ori"
 
@@ -513,5 +514,8 @@ export {
   SidesShorthand,
   Calculation,
   Zone,
+  MeasuredZone,
+  Size,
   Pos,
+  checkAndNormalizeSettings,
 }

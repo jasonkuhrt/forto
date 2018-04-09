@@ -2,7 +2,7 @@ import Observable from "zen-observable"
 import ElementResizeDetector from "element-resize-detector"
 import * as BB from "./BoundingBox"
 import * as Main from "./Main"
-import * as F from "./prelude"
+import * as F from "./Prelude"
 import * as Ori from "./Ori"
 
 type HTMLElementArrangement = { [k in keyof Main.Arrangement]: HTMLElement }
