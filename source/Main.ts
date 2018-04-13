@@ -102,10 +102,6 @@ const measureZones = (
   ]
 }
 
-// Ori.orderOf = (ofASide) : Order => (
-//   ["Left", "Top"].indexOf(ofASide.side) ? after : before
-// )
-
 const calcFit = (
   popover: BB.BoundingBox,
   tip: BB.BoundingBox,
