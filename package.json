@@ -5,9 +5,9 @@
   "module": "build-esm/bundle.js",
   "license": "MIT",
   "scripts": {
-    "dev:test": "jest --watch",
     "dev:test:dom": "testem",
-    "test": "jest",
+    "test": "jest --coverage",
+    "test:dev": "jest --watch",
     "test:dom": "testem ci",
     "lint": "eslint source",
     "build": "rollup --config",
