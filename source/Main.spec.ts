@@ -207,7 +207,7 @@ describe("rankZones with preference", () => {
     ).toEqual(zoneFitsRanked)
   }
   it("if mixed classes, if single pref in second-class, still rank first-class better", () => {
-    test([b, t], Ori.Side.Bottom, [t, b])
+    test([b, t], [Ori.Side.Bottom], [t, b])
   })
   it("if mixed classes, if multiple prefs in mixed classes, then ignore prefs of second class and rank preferred first class best even if not greatest area", () => {
     const $b = { ...b, popoverNegAreaPercent: 0 }
@@ -271,10 +271,10 @@ describe("rankZones with preference up to thrshold", () => {
     ).toEqual(zoneFitsRanked)
   }
   it("preference is taken if better than alternatives", () => {
-    test([b, t], Ori.Side.Top, 0.49, [t, b])
+    test([b, t], [Ori.Side.Top], 0.49, [t, b])
   })
   it("preference is not taken if worse than an alternative by equal to or greater than threshold", () => {
-    test([b, t], Ori.Side.Top, 0.5, [b, t])
+    test([b, t], [Ori.Side.Top], 0.5, [b, t])
   })
   it("given threshold has no effect between selecting two preferences", () => {
     test([t, b], [Ori.Side.Top, Ori.Side.Bottom], 0.9, [b, t])
@@ -296,7 +296,7 @@ describe("rankZones with preference up to thrshold", () => {
   it("preference threshold amongst class 2 zones, one prefered, ignores preference when gte threshold", () => {
     const $b = { ...b, popoverNegAreaPercent: 50 }
     const $t = { ...t, popoverNegAreaPercent: 25 }
-    test([$b, $t], Ori.Side.Bottom, 0.5, [$t, $b])
+    test([$b, $t], [Ori.Side.Bottom], 0.5, [$t, $b])
   })
 })
 
