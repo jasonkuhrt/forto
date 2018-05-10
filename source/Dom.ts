@@ -5,17 +5,22 @@ import * as Main from "./Main"
 import * as F from "./Prelude"
 import * as Ori from "./Ori"
 
-type HTMLElementArrangement = { [k in keyof Main.Arrangement]: HTMLElement }
-
 // Constructor tries to run body.insertBefore
 // https://github.com/wnr/element-resize-detector/blob/ad30e37d44a90c3c0bfaeed392755641d8dde469/dist/element-resize-detector.js#L490
 // so we must wait for after DOM ready event
 let erd: ElementResizeDetector.Erd
-document.addEventListener("DOMContentLoaded", () => {
+
+const initializeERD = () => {
   erd = ElementResizeDetector({
     strategy: "scroll",
   })
-})
+}
+
+if (document.readyState === "complete") {
+  initializeERD()
+} else {
+  document.addEventListener("DOMContentLoaded", initializeERD)
+}
 
 /**
  * Determine if the given value is the window.
@@ -35,10 +40,10 @@ examples listed would need to handle the application of positioning results */
 const observeDomEvent = (
   eventName: string,
   element: HTMLElement | Window,
-): Observable<void> => {
-  return new Observable<void>(observer => {
-    const observerNext = () => {
-      observer.next(undefined)
+): Observable<Event | HTMLElement> => {
+  return new Observable<Event | HTMLElement>(observer => {
+    const observerNext = (elem: Event | HTMLElement): void => {
+      observer.next(elem)
     }
 
     if (!isWindow(element) && eventName === "resize") {
