@@ -60,3 +60,4 @@ typings/
 flow-typed/
 build*
 .vscode
+.cache
