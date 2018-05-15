@@ -5,6 +5,18 @@ type Attributes = {
   style?: object
 }
 
+const insertTallerChild = (parent: HTMLElement): void => {
+  parent.appendChild(
+    makeDiv({
+      id: "tallDiv",
+      style: {
+        width: "1px",
+        height: parent.offsetHeight + 1000 + "px",
+      },
+    }),
+  )
+}
+
 const makeDiv = (attributes?: Attributes): HTMLElement => {
   const el = document.createElement("div")
   if (attributes) {
@@ -17,4 +29,4 @@ const makeDiv = (attributes?: Attributes): HTMLElement => {
   return el
 }
 
-export { makeDiv }
+export { makeDiv, insertTallerChild }
