@@ -7,7 +7,7 @@
   "scripts": {
     "dev:test:dom": "testem",
     "test": "jest --coverage",
-    "test:dev": "jest --watch",
+    "test:dev": "jest --watch --verbose",
     "test:dom": "testem ci",
     "lint": "eslint source",
     "build": "rollup --config",
@@ -65,13 +65,7 @@
       "^.+\\.ts$": "ts-jest"
     },
     "testRegex": ".*spec.ts$",
-    "moduleFileExtensions": [
-      "ts",
-      "js"
-    ],
-    "collectCoverageFrom": [
-      "**/source/**/*.ts",
-      "!**/build/**/*"
-    ]
+    "moduleFileExtensions": ["ts", "js"],
+    "collectCoverageFrom": ["**/source/**/*.ts", "!**/build/**/*"]
   }
 }

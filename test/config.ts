@@ -1,6 +1,5 @@
 /* eslint-disable */
 import * as F from "ramda"
-// import { Stream } from "most"
 import * as FRP from "most"
 import * as Dom from "../source/dom"
 import * as Main from "../source/Main"

@@ -29,4 +29,13 @@ const makeDiv = (attributes?: Attributes): HTMLElement => {
   return el
 }
 
-export { makeDiv, insertTallerChild }
+const makePixel = () => {
+  return makeDiv({
+    style: {
+      width: "1px",
+      height: "1px",
+    },
+  })
+}
+
+export { makeDiv, makePixel, insertTallerChild }
