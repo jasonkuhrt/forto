@@ -1,7 +1,8 @@
 // import * as F from "ramda"
-import * as Pup from "puppeteer"
-import * as Main from "./Main"
-import * as TH from "../test/Helpers"
+// import * as Pup from "puppeteer"
+// import * as Main from "./Main"
+// import * as TH from "../test/Helpers"
+// import * as Dom from "./Dom"
 
 const width = 1920
 const height = 1080
@@ -27,30 +28,31 @@ beforeAll(async () => {
 //     }, arrangementStyles)
 //   })
 // })
-//
-// afterEach(async () => {
-//   await page.evaluate(() => {
-//     document.body.querySelector("#temporary").innerHTML = ""
-//   })
-// })
+
+afterEach(async () => {
+  await page.evaluate(() => {
+    const el = document.body.querySelector("#test")
+    if (el) el.remove()
+  })
+})
 
 describe("observeDomEvent", () => {
   it("observing element resize event fires event upon initial subscribing", async () => {
     const { el, el2 } = await page.evaluate(() => {
-      const el = H.makeDiv()
-      temporary.appendChild(el)
+      const el = H.makeDiv({ id: "test" })
+      document.body.appendChild(el)
       const stream = Dom.observeDomEvent("resize", el)
       return FRP.from(stream)
         .collect(1)
-        .then(([el2]) => ({ el, el2 }))
+        .then(([el2]: HTMLElement[]) => ({ el, el2 }))
     })
     expect(el).toEqual(el2)
   })
 
   it("can re-observe", async () => {
     await page.evaluate(() => {
-      let el = H.makeDiv()
-      temporary.appendChild(el)
+      let el = H.makeDiv({ id: "test" })
+      document.body.appendChild(el)
       const stream = Dom.observeDomEvent("resize", el)
       return FRP.from(stream)
         .take(1)

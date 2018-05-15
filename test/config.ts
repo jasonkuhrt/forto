@@ -1,9 +1,10 @@
 /* eslint-disable */
 import * as F from "ramda"
+// import { Stream } from "most"
 import * as FRP from "most"
 import * as Dom from "../source/dom"
 import * as Main from "../source/Main"
-import * as TH from "./Helpers"
+import * as H from "./Helpers"
 
 FRP.Stream.prototype.collect = function(n) {
   return this.take(n).reduce((acc, x) => {
@@ -17,6 +18,18 @@ FRP.Stream.prototype.collectAll = function() {
     acc.push(x)
     return acc
   }, [])
+}
+
+const insertTallerChild = (parent: HTMLElement): void => {
+  parent.appendChild(
+    H.makeDiv({
+      id: "tallDiv",
+      style: {
+        width: "1px",
+        height: parent.offsetHeight + 1000 + "px",
+      },
+    }),
+  )
 }
 
 const arrangementStyles = {
@@ -45,38 +58,24 @@ const arrangementStyles = {
   },
 }
 
-const temporary = TH.makeDiv()
-let arrangement: Record<keyof Main.Arrangement, HTMLElement> = {
-  target: TH.makeDiv(),
-  frame: TH.makeDiv(),
-  popover: TH.makeDiv(),
-  tip: TH.makeDiv(),
+let arrangement: Dom.Arrangement = {
+  target: H.makeDiv(),
+  frame: H.makeDiv(),
+  popover: H.makeDiv(),
+  tip: H.makeDiv(),
 }
-
-temporary.id = "temporary"
-document.body.appendChild(temporary)
 
 document.body.appendChild(arrangement.frame)
 document.body.appendChild(arrangement.popover)
 document.body.appendChild(arrangement.tip)
 arrangement.frame.appendChild(arrangement.target)
-
-// /* Force a scroll on frame */
-const divThatIsTall = TH.makeDiv()
-divThatIsTall.id = "tallDiv"
-
-Object.assign(divThatIsTall.style, {
-  width: "1px",
-  height: arrangement.frame.offsetHeight + 1000 + "px",
-})
-
-arrangement.frame.appendChild(divThatIsTall)
+/* Force a scroll on frame */
+insertTallerChild(arrangement.frame)
 
 // Expose globals
 window.arrangementStyles = arrangementStyles
-window.temporary = temporary
 window.arrangementStyles = arrangementStyles
 window.F = F
 window.Dom = Dom
 window.FRP = FRP
-window.H = TH
+window.H = H

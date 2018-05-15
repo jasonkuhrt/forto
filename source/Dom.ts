@@ -5,6 +5,8 @@ import * as Main from "./Main"
 import * as F from "./Prelude"
 import * as Ori from "./Ori"
 
+type Arrangement = Record<keyof Main.Arrangement, HTMLElement>
+
 // Constructor tries to run body.insertBefore
 // https://github.com/wnr/element-resize-detector/blob/ad30e37d44a90c3c0bfaeed392755641d8dde469/dist/element-resize-detector.js#L490
 // so we must wait for after DOM ready event
@@ -97,7 +99,7 @@ const mergeObservables = <A, B>(
 const calcArrangementBounds = ({
   frame,
   ...elems
-}: HTMLElementArrangement): Main.Arrangement => {
+}: Arrangement): Main.Arrangement => {
   const elemsBounds = F.mapObject(elems, BB.fromHTMLElement)
   const frameBounds: BB.BoundingBox = isWindow(frame)
     ? {
@@ -119,7 +121,7 @@ const calcArrangementBounds = ({
  * TODO
  */
 const observeArrChanges = (
-  arrangement: HTMLElementArrangement,
+  arrangement: Arrangement,
 ): Observable<Main.Arrangement> => {
   return new Observable<void>(observer => {
     const subs = [
@@ -150,7 +152,7 @@ const observeArrChanges = (
  */
 const observe = (
   settings: Main.SettingsUnchecked,
-  arrangement: HTMLElementArrangement,
+  arrangement: Arrangement,
 ): Observable<Main.Calculation> => {
   let previousZoneSide: Ori.Side
   return observeArrChanges(arrangement).map(arrangementNow => {
@@ -169,7 +171,7 @@ const observe = (
  */
 const observeWithPolling = (
   intervalMs: number,
-  arrangement: HTMLElementArrangement,
+  arrangement: Arrangement,
 ): Observable<Main.Calculation> => {
   let arrangementBounds = calcArrangementBounds(arrangement)
   return mergeObservables(
@@ -187,4 +189,4 @@ const observeWithPolling = (
   ).map(arrangementNow => Main.calcLayout({}, arrangementNow, null))
 }
 
-export { observeDomEvent, observe, observeWithPolling }
+export { observeDomEvent, observe, observeWithPolling, Arrangement }
