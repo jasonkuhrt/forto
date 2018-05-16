@@ -1,12 +1,3 @@
-// import * as F from "ramda"
-// import * as Pup from "puppeteer"
-// import * as Main from "./Main"
-// import * as TH from "../test/Helpers"
-// import * as Dom from "./Dom"
-
-const width = 1920
-const height = 1080
-
 beforeAll(async () => {
   page.on("console", msg => {
     for (const arg of msg.args()) {
@@ -19,7 +10,7 @@ beforeAll(async () => {
     path: "./dist/config.js",
   })
 
-  await page.setViewport({ width, height })
+  await page.setViewport({ width: 1920, height: 1080 })
 
   await page.evaluate(() => {
     const arrangementStyles = {
