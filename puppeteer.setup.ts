@@ -1,4 +1,18 @@
 import * as F from "ramda"
+import * as FRP from "most"
+import * as Dom from "./source/Dom"
+import * as Main from "./source/Main"
+
+// Extend Most with a function to ease collection for result inspection
+
+FRP.Stream.prototype.collect = function(n) {
+  return this.take(n).reduce((acc, x) => {
+    acc.push(x)
+    return acc
+  }, [])
+}
+
+// General DOM helpers
 
 type Attributes = {
   id?: string
@@ -44,4 +58,14 @@ const makePixel = () => {
   })
 }
 
-export { makeDiv, makePixel, insertTallerChild, incWidth }
+const H = {
+  makeDiv,
+  makePixel,
+  insertTallerChild,
+  incWidth,
+}
+
+window.Dom = Dom
+window.FRP = FRP
+window.F = F
+window.H = H

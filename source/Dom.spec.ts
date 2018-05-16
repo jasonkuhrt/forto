@@ -1,4 +1,10 @@
+import Par from "parcel-bundler"
+import * as Path from "path"
+import FS from "fs"
+import CP from "child_process"
+
 beforeAll(async () => {
+  CP.execSync("yarn build:test")
   page.on("console", msg => {
     for (const arg of msg.args()) {
       console.log(arg._remoteObject)
@@ -7,7 +13,11 @@ beforeAll(async () => {
   })
 
   await page.addScriptTag({
-    path: "./dist/config.js",
+    // path: "./dist/config.js",
+    content: FS.readFileSync(
+      Path.join(__dirname, "../dist/puppeteer.setup.js"),
+      "utf8",
+    ),
   })
 
   await page.setViewport({ width: 1920, height: 1080 })
