@@ -75,7 +75,7 @@ beforeAll(async () => {
       window.scrollTo(0, 0)
     }
 
-    const makeLayoutStream = () =>
+    const makeLayoutStream = arrangement =>
       FRP.from(Dom.observe({}, arrangement)).skip(4) // Initial binding fires element resize events
 
     // Expose globals
@@ -132,20 +132,16 @@ it("accepts an arrangement, returns an observable", async () => {
   expect(subscribeType).toEqual("function")
 })
 
-// it(`if any arrangement elements' dimensions change a new layout is calculated`, async () => {
-//   const a = await page.evaluate(() => {
-//     const promise = makeLayoutStream().collect(1)
-//     console.log(3)
-//     setTimeout(() => {
-//       arrangement.target.style.width = `${parseInt(
-//         arrangement.target.style.width,
-//         10,
-//       ) + 1}px`
-//     }, 1000)
-//     return promise
-//   })
-//   console.log(a)
-// })
+it(`if any arrangement elements' dimensions change a new layout is calculated`, async () => {
+  await page.evaluate(() => {
+    const arrangement = initArrangement()
+    const promise = makeLayoutStream(arrangement).collect(1)
+    setTimeout(() => {
+      H.incWidth(1, arrangement.target)
+    }, 1000)
+    return promise
+  })
+})
 
 it("if position change of target there is a change event", async () => {
   await page.evaluate(() => {

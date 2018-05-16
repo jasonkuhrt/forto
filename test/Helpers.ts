@@ -5,6 +5,12 @@ type Attributes = {
   style?: object
 }
 
+const incWidth = (amount: number, el: HTMLElement): HTMLElement => {
+  const currentWidth = parseInt(el.style.width, 10)
+  el.style.width = `${currentWidth + amount}px`
+  return el
+}
+
 const insertTallerChild = (parent: HTMLElement): void => {
   parent.appendChild(
     makeDiv({
@@ -38,4 +44,4 @@ const makePixel = () => {
   })
 }
 
-export { makeDiv, makePixel, insertTallerChild }
+export { makeDiv, makePixel, insertTallerChild, incWidth }
