@@ -165,14 +165,38 @@ it("if position change of frame there is a change event", async () => {
   })
 })
 
-// TODO
-// F.mapObjIndexed((elem, elemName) => {
-//   it(`if any arrangement elements' dimensions change a new layout is calculated, via ${elemName}`, () => {
-//     const promise = makeLayoutStream().collect(1)
-//     elem.style.width = `${parseInt(elem.style.width, 10) + 1}px`
-//     return promise
-//   })
-// }, arrangement)
+describe("if any arrangement elements' dimensions change a new layout is calculated", () => {
+  beforeEach(async () => {
+    await page.evaluate(() => {
+      window.testForElement = (elemName: string): Promise => {
+        const arrangement = initArrangement()
+        const promise = makeLayoutStream(arrangement).collect(1)
+        H.incWidth(1, arrangement[elemName])
+        return promise
+      }
+    })
+  })
+  it(`via change of frame`, async () => {
+    await page.evaluate(() => {
+      return testForElement("frame")
+    })
+  })
+  it(`via change of popover`, async () => {
+    await page.evaluate(() => {
+      return testForElement("popover")
+    })
+  })
+  it(`via change of target`, async () => {
+    await page.evaluate(() => {
+      return testForElement("target")
+    })
+  })
+  it(`via change of tip`, async () => {
+    await page.evaluate(() => {
+      return testForElement("tip")
+    })
+  })
+})
 
 // Test that changes in position of arrangement elements trigger a change
 // if using poll-based observation.
