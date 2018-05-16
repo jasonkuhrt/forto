@@ -1,64 +1,64 @@
 {
-  "name": "library-template",
-  "version": "1.0.0",
+  "name": "forto",
+  "version": "0.0.0",
   "main": "build-umd/bundle.js",
   "module": "build-esm/bundle.js",
   "license": "MIT",
   "scripts": {
-    "dev:test": "jest --watch",
-    "dev:test:dom": "testem",
-    "test": "jest",
-    "test:dom": "testem ci",
-    "lint": "eslint source",
+    "build:test": "parcel build puppeteer.setup.ts",
+    "test:dev": "jest --watch --verbose",
+    "test": "jest --coverage",
     "build": "rollup --config",
     "prepublish": "npm run build"
   },
-  "devDependencies": {
-    "babel-cli": "^6.24.1",
-    "babel-core": "^6.24.1",
-    "babel-eslint": "^7.2.3",
-    "babel-jest": "^19.0.0",
-    "babel-loader": "^7.0.0",
-    "babel-plugin-external-helpers": "^6.22.0",
-    "babel-preset-latest": "^6.24.1",
-    "babel-preset-stage-1": "^6.24.1",
-    "chai": "^3.5.0",
-    "core-js": "^2.4.1",
-    "eslint": "^3.19.0",
-    "eslint-config-airbnb-base": "^11.2.0",
-    "eslint-config-prettier": "^2.2.0",
-    "eslint-config-ssense": "^0.2.0",
-    "eslint-plugin-flowtype": "^2.34.0",
-    "eslint-plugin-fp": "^2.3.0",
-    "eslint-plugin-import": "^2.3.0",
-    "jest": "^19.0.2",
-    "jest-cli": "^19.0.2",
-    "mocha": "^3.2.0",
-    "most": "https://github.com/cujojs/most#fix-take-double-dispose",
-    "object.assign": "^4.0.4",
-    "prettier": "^1.4.4",
-    "ramda": "^0.23.0",
-    "rollup": "^0.41.6",
-    "rollup-plugin-babel": "^2.7.1",
-    "testem": "^1.16.0",
-    "webpack": "^2.4.1"
-  },
-  "eslintConfig": {
-    "extends": "ssense",
-    "rules": {
-      "semi": [
-        1,
-        "never"
-      ],
-      "comma-dangle": [
-        1,
-        "always-multiline"
-      ]
+  "husky": {
+    "hooks": {
+      "pre-commit": "pretty-quick --staged"
     }
+  },
+  "devDependencies": {
+    "@types/element-resize-detector": "^1.1.0",
+    "@types/jest": "^22.1.4",
+    "@types/jest-environment-puppeteer": "^2.2.0",
+    "@types/lodash": "^4.14.104",
+    "@types/lodash-es": "^4.17.0",
+    "@types/lodash.isequal": "^4.5.2",
+    "@types/puppeteer": "^1.3.2",
+    "@types/ramda": "^0.25.28",
+    "@types/zen-observable": "^0.5.3",
+    "husky": "^0.14.3",
+    "jest": "^22.4.3",
+    "jest-puppeteer-preset": "^3.0.1",
+    "most": "^1.7.3",
+    "object.assign": "^4.0.4",
+    "parcel-bundler": "^1.8.1",
+    "prettier": "^1.11.1",
+    "pretty-quick": "^1.4.1",
+    "puppeteer": "^1.2.0",
+    "ramda": "^0.25.0",
+    "rollup": "^0.59.0",
+    "rollup-plugin-node-resolve": "^3.0.3",
+    "rollup-plugin-typescript": "^0.8.1",
+    "ts-jest": "^22.4.1",
+    "typescript": "^2.8.1"
+  },
+  "prettier": {
+    "semi": false,
+    "trailingComma": "all"
   },
   "dependencies": {
     "element-resize-detector": "^1.1.11",
+    "lodash-es": "^4.17.7",
     "lodash.isequal": "^4.5.0",
-    "zen-observable": "^0.5.1"
+    "zen-observable": "^0.8.8"
+  },
+  "jest": {
+    "preset": "jest-puppeteer-preset",
+    "transform": {
+      "^.+\\.ts$": "ts-jest"
+    },
+    "testRegex": ".*spec.ts$",
+    "moduleFileExtensions": ["ts", "js"],
+    "collectCoverageFrom": ["**/source/**/*.ts", "!**/build/**/*"]
   }
 }

@@ -1,40 +1,31 @@
-import babel from "rollup-plugin-babel"
+import rollupTypesript from "rollup-plugin-typescript"
+import typescript from "typescript"
+import resolve from "rollup-plugin-node-resolve"
+import * as F from "ramda"
 
 const pkg = require("./package.json")
-const external = Object.keys(pkg.dependencies)
-
-const plugins = [
-  babel({
-    babelrc: false,
-    ignore: ["node_modules/**"],
-    presets: [
-      [
-        "es2015",
-        {
-          modules: false,
-        },
-      ],
-      "stage-1",
-    ],
-    plugins: ["external-helpers"],
-  }),
-]
+const external = F.keys(F.omit(["lodash-es"], pkg.dependencies))
 
 export default {
-  entry: "source/Main.js",
-  plugins,
+  input: "source/Main.ts",
+  plugins: [
+    rollupTypesript({
+      typescript,
+    }),
+    resolve(),
+  ],
   external,
-  targets: [
+  output: [
     {
-      dest: pkg.main,
+      file: pkg.main,
       format: "umd",
-      moduleName: pkg.name,
-      sourceMap: true,
+      name: pkg.name,
+      sourcemap: true,
     },
     {
-      dest: pkg.module,
+      file: pkg.module,
       format: "es",
-      sourceMap: true,
+      sourcemap: true,
     },
   ],
 }

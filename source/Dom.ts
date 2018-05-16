@@ -1,17 +1,35 @@
 import Observable from "zen-observable"
 import ElementResizeDetector from "element-resize-detector"
+import * as BB from "./BoundingBox"
 import * as Main from "./Main"
-import * as F from "./prelude"
+import * as F from "./Prelude"
+import * as Ori from "./Ori"
+
+type Arrangement = Record<keyof Main.Arrangement, HTMLElement>
 
 // Constructor tries to run body.insertBefore
 // https://github.com/wnr/element-resize-detector/blob/ad30e37d44a90c3c0bfaeed392755641d8dde469/dist/element-resize-detector.js#L490
 // so we must wait for after DOM ready event
-let erd
-document.addEventListener("DOMContentLoaded", () => {
+let erd: ElementResizeDetector.Erd
+
+const initializeERD = () => {
   erd = ElementResizeDetector({
     strategy: "scroll",
   })
-})
+}
+
+if (document.readyState === "complete") {
+  initializeERD()
+} else {
+  document.addEventListener("DOMContentLoaded", initializeERD)
+}
+
+/**
+ * Determine if the given value is the window.
+ */
+const isWindow = (x: any): x is Window => {
+  return x === window
+}
 
 /* We want to calculate the popover positon for a DOM UI and if there are
 any changes in the given arrangement then re-calculate said position. We do
@@ -21,110 +39,140 @@ to use CSS animation/transition while another uses React motion while another
 uses React Interpolate. Only the former of the three examples would support
 us directly assigning new positioning results to popover and tip. The other
 examples listed would need to handle the application of positioning results */
-const observeDomEvent = (eventName, element) =>
-  new Observable(observer => {
-    const isElementResize = eventName === "resize" && element !== window
-    const observerNext = event => {
-      observer.next(event)
+const observeDomEvent = (
+  eventName: string,
+  element: HTMLElement | Window,
+): Observable<Event | HTMLElement> => {
+  return new Observable<Event | HTMLElement>(observer => {
+    const observerNext = (elem: Event | HTMLElement): void => {
+      observer.next(elem)
     }
-    if (isElementResize) {
+
+    if (!isWindow(element) && eventName === "resize") {
       erd.listenTo(element, observerNext)
     } else {
       element.addEventListener(eventName, observerNext)
     }
+
     return function dispose() {
-      if (isElementResize) {
+      if (!isWindow(element)) {
         erd.removeListener(element, observerNext)
       } else {
         element.removeEventListener(eventName, observerNext)
       }
     }
   })
+}
 
-const observePeriodic = everyMs =>
-  new Observable(observer => {
-    const intervalId = setInterval(() => observer.next(), everyMs)
-    return () => {
+/**
+ * Create an observable that signals periodically.
+ */
+const observePeriodic = (everyMs: number): Observable<void> => {
+  return new Observable(observer => {
+    const intervalId = setInterval(() => observer.next(undefined), everyMs)
+    return function dispose() {
       clearInterval(intervalId)
     }
   })
-
-const mergeObservables = (a, b) =>
-  new Observable(observer => {
-    const subs = [a.subscribe(observer), b.subscribe(observer)]
-    return () => {
-      subs.forEach(sub => {
-        sub.unsubscribe()
-      })
-    }
-  })
-
-// Make props enumerable so that we can leverage isEqual later
-const getBoundingClientRect = el => {
-  const { width, height, top, bottom, left, right } = el.getBoundingClientRect()
-  return {
-    width,
-    height,
-    top,
-    bottom,
-    left,
-    right,
-  }
 }
 
-const calcArrangementBounds = ({ frame, ...elems }) => {
-  const elemsBounds = F.mapObject(elems, getBoundingClientRect)
-  const frameBounds =
-    frame === window
-      ? {
-          width: window.outerWidth,
-          height: window.outerHeight,
-          top: 0,
-          bottom: window.outerHeight,
-          left: 0,
-          right: window.outerWidth,
-        }
-      : getBoundingClientRect(frame)
+/**
+ * Merge two observables together.
+ */
+const mergeObservables = <A, B>(
+  a: Observable<A>,
+  b: Observable<B>,
+): Observable<A & B> => {
+  return new Observable(observer => {
+    const subs = [a.subscribe(observer), b.subscribe(observer)]
+    return () => {
+      for (const sub of subs) {
+        sub.unsubscribe()
+      }
+    }
+  })
+}
+
+/**
+ * TODO
+ */
+const calcArrangementBounds = ({
+  frame,
+  ...elems
+}: Arrangement): Main.Arrangement => {
+  const elemsBounds = F.mapObject(elems, BB.fromHTMLElement)
+  const frameBounds: BB.BoundingBox = isWindow(frame)
+    ? {
+        width: window.outerWidth,
+        height: window.outerHeight,
+        top: 0,
+        bottom: window.outerHeight,
+        left: 0,
+        right: window.outerWidth,
+      }
+    : BB.fromHTMLElement(frame)
   return {
     frame: frameBounds,
     ...elemsBounds,
   }
 }
 
-const observeArrChanges = arrangement =>
-  new Observable(observer => {
+/**
+ * TODO
+ */
+const observeArrChanges = (
+  arrangement: Arrangement,
+): Observable<Main.Arrangement> => {
+  return new Observable<void>(observer => {
     const subs = [
       // Watch for scroll events in the frame
       observeDomEvent("scroll", arrangement.frame).subscribe(() => {
-        observer.next()
+        observer.next(undefined)
       }),
       // Watch all elements in the arrangement for resizes
-      ...Object.values(arrangement).map(el =>
+      ...F.values(arrangement).map(el =>
         observeDomEvent("resize", el).subscribe(() => {
-          observer.next()
-        })
+          observer.next(undefined)
+        }),
       ),
     ]
     const cleanUp = () => {
-      subs.forEach(sub => {
+      for (const sub of subs) {
         sub.unsubscribe()
-      })
+      }
     }
     return cleanUp
   }).map(() => calcArrangementBounds(arrangement))
+}
 
 // Main Entry Points
 
-const observe = (settings, arrangement) => {
-  let previousZoneSide = null
+/**
+ * TODO
+ */
+const observe = (
+  settings: Main.SettingsUnchecked,
+  arrangement: Arrangement,
+): Observable<Main.Calculation> => {
+  let previousZoneSide: Ori.Side
   return observeArrChanges(arrangement).map(arrangementNow => {
-    const result = Main.calcLayout(settings, arrangementNow, previousZoneSide)
+    const result = Main.calcLayout(
+      settings,
+      arrangementNow,
+      previousZoneSide || null,
+    )
     previousZoneSide = result.zone.side
     return result
   })
 }
 
-const observeWithPolling = (intervalMs, arrangement) => {
+/**
+ * TODO
+ */
+const observeWithPolling = (
+  intervalMs: number,
+  arrangement: Arrangement,
+): Observable<Main.Calculation> => {
   let arrangementBounds = calcArrangementBounds(arrangement)
   return mergeObservables(
     observeArrChanges(arrangement),
@@ -137,8 +185,8 @@ const observeWithPolling = (intervalMs, arrangement) => {
         const arrangementBoundsBefore = arrangementBounds
         arrangementBounds = arrangementBoundsNow
         return !F.isEqual(arrangementBoundsBefore, arrangementBoundsNow)
-      })
-  ).map(arrangementNow => Main.calcLayout({}, arrangementNow))
+      }),
+  ).map(arrangementNow => Main.calcLayout({}, arrangementNow, null))
 }
 
-export { observeDomEvent, observe, observeWithPolling }
+export { observeDomEvent, observe, observeWithPolling, Arrangement }
