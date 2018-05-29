@@ -14,7 +14,6 @@ import ElementResizeDetector from "element-resize-detector"
 import * as BB from "./BoundingBox"
 import * as Main from "./Main"
 import * as F from "./Prelude"
-import * as Ori from "./Ori"
 
 type Arrangement = Record<keyof Main.Arrangement, HTMLElement>
 
@@ -162,16 +161,9 @@ const observe = (
   settings: Main.SettingsUnchecked,
   arrangement: Arrangement,
 ): Observable<Main.Calculation> => {
-  let previousZoneSide: Ori.Side
-  return observeArrChanges(arrangement).map(arrangementNow => {
-    const result = Main.calcLayout(
-      settings,
-      arrangementNow,
-      previousZoneSide || null,
-    )
-    previousZoneSide = result.zone.side
-    return result
-  })
+  return observeArrChanges(arrangement).map(
+    Main.createLayoutCalculator(settings),
+  )
 }
 
 /**
@@ -182,8 +174,9 @@ const observe = (
  * For example async content that once loaded increases the size of Popover.
  */
 const observeWithPolling = (
-  intervalMs: number,
+  settings: Main.SettingsUnchecked,
   arrangement: Arrangement,
+  intervalMs: number,
 ): Observable<Main.Calculation> => {
   // We will hold some local state in order to detect when a change of bounds
   // in some part of the arrangement has occured.
@@ -201,10 +194,6 @@ const observeWithPolling = (
     return isChange
   }
 
-  const doCalcLayout = (newBounds: Main.Arrangement): Main.Calculation => {
-    return Main.calcLayout({}, newBounds, null)
-  }
-
   currBounds = doMeasures()
 
   const eventedChanges = observeArrChanges(arrangement)
@@ -212,7 +201,9 @@ const observeWithPolling = (
     .map(doMeasures)
     .filter(doCheckChanges)
 
-  return mergeObservables(eventedChanges, uneventedChanges).map(doCalcLayout)
+  return mergeObservables(eventedChanges, uneventedChanges).map(
+    Main.createLayoutCalculator(settings),
+  )
 }
 
 export { observeDomEvent, observe, observeWithPolling, Arrangement }
