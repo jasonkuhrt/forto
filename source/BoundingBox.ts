@@ -48,4 +48,15 @@ const fromHTMLElement = (el: HTMLElement): BoundingBox => {
   }
 }
 
-export { make, translate, fromHTMLElement, BoundingBox }
+const fromWindow = (w: Window) => {
+  return {
+    width: w.outerWidth,
+    height: w.outerHeight,
+    top: 0,
+    bottom: w.outerHeight,
+    left: 0,
+    right: w.outerWidth,
+  }
+}
+
+export { make, translate, fromHTMLElement, BoundingBox, fromWindow }

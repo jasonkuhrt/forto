@@ -103,24 +103,13 @@ const mergeObservables = <A, B>(
 /**
  * Calculate the bounds of each part of the arrangement.
  */
-const calcArrangementBounds = ({
-  frame,
-  ...elems
-}: Arrangement): Main.Arrangement => {
-  const elemsBounds = F.mapObject(elems, BB.fromHTMLElement)
-  const frameBounds: BB.BoundingBox = isWindow(frame)
-    ? {
-        width: window.outerWidth,
-        height: window.outerHeight,
-        top: 0,
-        bottom: window.outerHeight,
-        left: 0,
-        right: window.outerWidth,
-      }
-    : BB.fromHTMLElement(frame)
+const calcArrangementBounds = (arrangement: Arrangement): Main.Arrangement => {
+  // We need to handle frame specially given that it might not be an
+  // HTML element but the window.
+  const { frame, ...rest } = arrangement
   return {
-    frame: frameBounds,
-    ...elemsBounds,
+    frame: isWindow(frame) ? BB.fromWindow(frame) : BB.fromHTMLElement(frame),
+    ...F.mapObject(rest, BB.fromHTMLElement),
   }
 }
 
@@ -131,26 +120,34 @@ const calcArrangementBounds = ({
 const observeArrChanges = (
   arrangement: Arrangement,
 ): Observable<Main.Arrangement> => {
-  return new Observable<void>(observer => {
+  const doMeasures = (): Main.Arrangement => {
+    return calcArrangementBounds(arrangement)
+  }
+
+  const resizesAndFrameScrolls = new Observable<void>(observer => {
+    const observerNext = (): void => {
+      observer.next(undefined)
+    }
+
     const subs = [
-      // Watch for scroll events in the frame
-      observeDomEvent("scroll", arrangement.frame).subscribe(() => {
-        observer.next(undefined)
-      }),
       // Watch all elements in the arrangement for resizes
       ...F.values(arrangement).map(el =>
-        observeDomEvent("resize", el).subscribe(() => {
-          observer.next(undefined)
-        }),
+        observeDomEvent("resize", el).subscribe(observerNext),
       ),
+      // Watch for scroll events in the frame
+      observeDomEvent("scroll", arrangement.frame).subscribe(observerNext),
     ]
-    const cleanUp = () => {
+
+    const tearDown = () => {
       for (const sub of subs) {
         sub.unsubscribe()
       }
     }
-    return cleanUp
-  }).map(() => calcArrangementBounds(arrangement))
+
+    return tearDown
+  })
+
+  return resizesAndFrameScrolls.map(doMeasures)
 }
 
 // Main Entry Points
@@ -188,20 +185,34 @@ const observeWithPolling = (
   intervalMs: number,
   arrangement: Arrangement,
 ): Observable<Main.Calculation> => {
-  let arrangementBounds = calcArrangementBounds(arrangement)
-  return mergeObservables(
-    observeArrChanges(arrangement),
-    // If the position of any arrangement elements change we need to
-    // recalculate layout to see if final layout is affected. There is no
-    // way to do this without polling.
-    observePeriodic(intervalMs)
-      .map(() => calcArrangementBounds(arrangement))
-      .filter(arrangementBoundsNow => {
-        const arrangementBoundsBefore = arrangementBounds
-        arrangementBounds = arrangementBoundsNow
-        return !F.isEqual(arrangementBoundsBefore, arrangementBoundsNow)
-      }),
-  ).map(arrangementNow => Main.calcLayout({}, arrangementNow, null))
+  // We will hold some local state in order to detect when a change of bounds
+  // in some part of the arrangement has occured.
+  let currBounds: Main.Arrangement
+
+  const doMeasures = (): Main.Arrangement => {
+    return calcArrangementBounds(arrangement)
+  }
+
+  const doCheckChanges = (maybeDiffBounds: Main.Arrangement): boolean => {
+    const isChange = !F.isEqual(maybeDiffBounds, currBounds)
+    if (isChange) {
+      currBounds = maybeDiffBounds
+    }
+    return isChange
+  }
+
+  const doCalcLayout = (newBounds: Main.Arrangement): Main.Calculation => {
+    return Main.calcLayout({}, newBounds, null)
+  }
+
+  currBounds = doMeasures()
+
+  const eventedChanges = observeArrChanges(arrangement)
+  const uneventedChanges = observePeriodic(intervalMs)
+    .map(doMeasures)
+    .filter(doCheckChanges)
+
+  return mergeObservables(eventedChanges, uneventedChanges).map(doCalcLayout)
 }
 
 export { observeDomEvent, observe, observeWithPolling, Arrangement }
