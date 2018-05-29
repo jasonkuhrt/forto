@@ -10,7 +10,7 @@
     "sourceMap": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "lib": ["DOM", "ES5", "ScriptHost", "ES2015.Promise"]
+    "lib": ["dom", "es5", "scripthost", "es2015.promise"]
   },
   "include": ["./source/**/*.ts"]
 }
