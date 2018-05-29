@@ -1,3 +1,14 @@
+/* This module is concerned with integrating the forto layout system with the DOM.
+
+We want to calculate the popover positon for a DOM UI and if there are
+any changes in the given arrangement then re-calculate said position. We do
+not want to apply the positioning because the implementation will vary
+according the animation strategy being used. For example one system may want
+to use CSS animation/transition while another uses React motion while another
+uses React Interpolate. Only the former of the three examples would support
+us directly assigning new positioning results to popover and tip. The other
+examples listed would need to handle the application of positioning results */
+
 import Observable from "zen-observable"
 import ElementResizeDetector from "element-resize-detector"
 import * as BB from "./BoundingBox"
@@ -31,14 +42,10 @@ const isWindow = (x: any): x is Window => {
   return x === window
 }
 
-/* We want to calculate the popover positon for a DOM UI and if there are
-any changes in the given arrangement then re-calculate said position. We do
-not want to apply the positioning because the implementation will vary
-according the animation strategy being used. For example one system may want
-to use CSS animation/transition while another uses React motion while another
-uses React Interpolate. Only the former of the three examples would support
-us directly assigning new positioning results to popover and tip. The other
-examples listed would need to handle the application of positioning results */
+/**
+ * Observe a dom event. Handles the case of listening to resize events on
+ * a dom element. Normally this is only possible on window.
+ */
 const observeDomEvent = (
   eventName: string,
   element: HTMLElement | Window,
@@ -94,7 +101,7 @@ const mergeObservables = <A, B>(
 }
 
 /**
- * TODO
+ * Calculate the bounds of each part of the arrangement.
  */
 const calcArrangementBounds = ({
   frame,
@@ -118,7 +125,8 @@ const calcArrangementBounds = ({
 }
 
 /**
- * TODO
+ * Measure all parts of the arrangement every time there is a relevent dom
+ * event that might cause their values to change. This includes window scroll.
  */
 const observeArrChanges = (
   arrangement: Arrangement,
@@ -148,7 +156,10 @@ const observeArrChanges = (
 // Main Entry Points
 
 /**
- * TODO
+ * Observe the arrangement for changes in bounds of any part and if changes
+ * are detected then recalculate the layout. This does not actually execute
+ * the layout changes, it merely provides what the latest coordinates of all
+ * arrangement parts should be.
  */
 const observe = (
   settings: Main.SettingsUnchecked,
@@ -167,7 +178,11 @@ const observe = (
 }
 
 /**
- * TODO
+ * Like `observe` except with the added fact that it will also poll for
+ * arrangement bound changes at the given interval.
+ *
+ * This allows reacting to layout changes that have no event correspondance.
+ * For example async content that once loaded increases the size of Popover.
  */
 const observeWithPolling = (
   intervalMs: number,
