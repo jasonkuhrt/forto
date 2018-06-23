@@ -7,7 +7,7 @@
   "scripts": {
     "build:test": "parcel build puppeteer.setup.ts",
     "test:dev": "jest --watch --verbose",
-    "test": "jest --coverage",
+    "test": "jest --coverage --verbose",
     "build": "rollup --config",
     "prepublish": "npm run build"
   },
