@@ -1,7 +1,0 @@
-# Forto
-
-A robust layout engine ideal for but not limited to popovers.
-
-## About
-
-For a thorough overview of the system refer to the essay https://blog.jasonkuhrt.com/essays/forto[_Forto: The layout engine powering React Popover_].
