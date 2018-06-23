@@ -492,6 +492,28 @@ const calcLayout = (
   }
 }
 
+type LayoutCalculator = (newBounds: Arrangement) => Calculation
+
+/**
+ * Create a layout calculator. The reason it is not pure is that some
+ * local state is kept to track the previous zone, data needed by the
+ * forto algorithm. This function hides the caller from having to manage that
+ * state.
+ */
+const createLayoutCalculator = (
+  settings: SettingsUnchecked,
+): LayoutCalculator => {
+  let previousZoneSide: Ori.Side
+
+  const calc: LayoutCalculator = newBounds => {
+    const layout = calcLayout(settings, newBounds, previousZoneSide || null)
+    previousZoneSide = layout.zone.side
+    return layout
+  }
+
+  return calc
+}
+
 export {
   adjustRankingForChangeThreshold,
   measureZones,
@@ -511,4 +533,5 @@ export {
   Size,
   Pos,
   checkAndNormalizeSettings,
+  createLayoutCalculator,
 }

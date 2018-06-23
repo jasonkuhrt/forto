@@ -1,7 +1,6 @@
-import * as F from "ramda"
 import * as FRP from "most"
+import * as F from "ramda"
 import * as Dom from "./source/Dom"
-import * as Main from "./source/Main"
 
 // Extend Most with a function to ease collection for result inspection
 
@@ -58,6 +57,12 @@ const makePixel = () => {
   })
 }
 
+const sleep = (ms: number) => {
+  return new Promise(resolve => {
+    setTimeout(() => resolve(), ms)
+  })
+}
+
 const H = {
   makeDiv,
   makePixel,
@@ -69,3 +74,4 @@ window.Dom = Dom
 window.FRP = FRP
 window.F = F
 window.H = H
+window.sleep = sleep
