@@ -9,8 +9,8 @@ uses React Interpolate. Only the former of the three examples would support
 us directly assigning new positioning results to popover and tip. The other
 examples listed would need to handle the application of positioning results */
 
-import Observable from "zen-observable"
 import ElementResizeDetector from "element-resize-detector"
+import Observable from "zen-observable"
 import * as BB from "./BoundingBox"
 import * as Main from "./Main"
 import * as F from "./Prelude"

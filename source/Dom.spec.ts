@@ -1,10 +1,10 @@
-import Par from "parcel-bundler"
-import * as Path from "path"
-import FS from "fs"
 import CP from "child_process"
+import FS from "fs"
+import * as Path from "path"
 
 beforeAll(async () => {
   CP.execSync("yarn build:test")
+
   page.on("console", msg => {
     for (const arg of msg.args()) {
       console.log(arg._remoteObject)
@@ -246,25 +246,25 @@ it("if frame is window, and frame scrolls, a new layout is calculated", async ()
 })
 
 it("a new zone will be assigned if it becomes the new best fit", async () => {
-  const [r1, r2] = await page.evaluate(() => {
+  const results = await page.evaluate(() => {
     const arrangement = initArrangement()
     setTimeout(() => {
       arrangement.target.style.height = "80px"
     }, 10)
 
     // Initial binding fires element resize events that we do not care about
-    // The second eventn will be triggered by the height resize above
+    // The second event will be triggered by the height resize above
     return FRP.from(Dom.observe({}, arrangement))
-      .skip(3)
-      .collect(2)
+      .skip(3) // Initial 4 binding fires element resize events
+      .collect(2) // take 4th initial to compare with 5th triggered
   })
   // Check that we went from one zone to another
-  expect(r1.zone.side).toBe("Bottom")
-  expect(r2.zone.side).toBe("Right")
+  expect(results[0].zone.side).toBe("Bottom")
+  expect(results[1].zone.side).toBe("Right")
 })
 
 it("if ZCT set, does not change zone unless good enough", async () => {
-  const [r1, r2] = await page.evaluate(() => {
+  const results = await page.evaluate(() => {
     setTimeout(() => {
       a.target.style.height = "50px"
     }, 10)
@@ -274,9 +274,38 @@ it("if ZCT set, does not change zone unless good enough", async () => {
     // In this test zone-right is an improvement but does not exceed
     // the threshold
     return FRP.from(Dom.observe({ zoneChangeThreshold: 0.45 }, a))
-      .skip(3) // Initial binding fires element resize events
-      .collect(2)
+      .skip(4) // Initial binding fires element resize events
+      .collect(1)
   })
-  expect(r1.zone.side).toEqual("Bottom")
-  expect(r2.zone.side).toEqual("Bottom")
+  expect(results[0].zone.side).toEqual("Bottom")
+})
+
+describe("observe", () => {
+  it("accepts settings e.g. elligibleZones", async () => {
+    const results = await page.evaluate(() => {
+      sleep(10).then(() => {
+        a.target.style.height = "100px"
+      })
+      const a = initArrangement()
+      return FRP.from(Dom.observe({ elligibleZones: ["Bottom"] }, a))
+        .skip(4) // Initial binding fires element resize events
+        .collect(1)
+    })
+    expect(results[0].zone.side).toEqual("Bottom")
+  })
+})
+
+describe("observeWithPolling", () => {
+  it("accepts settings e.g. elligibleZones", async () => {
+    const results = await page.evaluate(() => {
+      sleep(10).then(() => {
+        a.target.style.height = "100px"
+      })
+      const a = initArrangement()
+      return FRP.from(Dom.observeWithPolling({ elligibleZones: ["Bottom"] }, a))
+        .skip(4) // Initial binding fires element resize events
+        .collect(1)
+    })
+    expect(results[0].zone.side).toEqual("Bottom")
+  })
 })
