@@ -411,7 +411,7 @@ describe("calcPopoverPosition (bounded)", () => {
     const target2 = B.translate(0, 100, B.make(10, 10))
     const popover = B.make(400 + 10, 10)
     expect(calcPopoverPositionBounded(frame, target2, popover, zone)).toEqual({
-      x: -1 * 10 / 2,
+      x: (-1 * 10) / 2,
       y: 100 + 10,
     })
   })

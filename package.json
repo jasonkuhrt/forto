@@ -59,7 +59,13 @@
       "^.+\\.ts$": "ts-jest"
     },
     "testRegex": ".*spec.ts$",
-    "moduleFileExtensions": ["ts", "js"],
-    "collectCoverageFrom": ["**/source/**/*.ts", "!**/build/**/*"]
+    "moduleFileExtensions": [
+      "ts",
+      "js"
+    ],
+    "collectCoverageFrom": [
+      "**/source/**/*.ts",
+      "!**/build/**/*"
+    ]
   }
 }
