@@ -7,3 +7,7 @@ A robust layout engine ideal for but not limited to popovers.
 ## About
 
 For an overview of the system refer to my article [Forto: The layout engine powering React Popover](https://blog.jasonkuhrt.com/essays/forto).
+
+## Build
+
+* Using `tslib`: https://github.com/rollup/rollup-plugin-typescript/issues/81

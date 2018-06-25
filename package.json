@@ -53,6 +53,7 @@
     "element-resize-detector": "^1.1.11",
     "lodash-es": "^4.17.7",
     "lodash.isequal": "^4.5.0",
+    "tslib": "^1.9.3",
     "zen-observable": "^0.8.8"
   },
   "jest": {
