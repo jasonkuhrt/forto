@@ -120,6 +120,20 @@ const flatten = <A>(aa: A[][]): A[] => {
   return [].concat.apply([], aa)
 }
 
+/**
+ * Return a number no greater than a certain maximum.
+ */
+const upperLimit = (ceiling: number, n: number): number => {
+  return n <= ceiling ? n : ceiling
+}
+
+/**
+ * Numeric comparator.
+ */
+const compare = (a: number, b: number): number => {
+  return a < b ? -1 : a > b ? 1 : 0
+}
+
 export {
   defaultsTo,
   head,
@@ -135,4 +149,6 @@ export {
   find,
   values,
   flatten,
+  upperLimit,
+  compare,
 }

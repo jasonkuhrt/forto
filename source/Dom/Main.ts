@@ -11,11 +11,13 @@ examples listed would need to handle the application of positioning results */
 
 import ElementResizeDetector from "element-resize-detector"
 import Observable from "zen-observable"
-import * as BB from "./BoundingBox"
-import * as Main from "./Main"
-import * as F from "./Prelude"
+import * as Main from "../Main"
+import * as F from "../Prelude"
+import * as Settings from "../Settings"
+import * as H from "./Helpers"
 
 type Arrangement = Record<keyof Main.Arrangement, HTMLElement>
+type Frame = Window | HTMLElement
 
 // Constructor tries to run body.insertBefore
 // https://github.com/wnr/element-resize-detector/blob/ad30e37d44a90c3c0bfaeed392755641d8dde469/dist/element-resize-detector.js#L490
@@ -28,17 +30,12 @@ const initializeERD = () => {
   })
 }
 
-if (document.readyState === "complete") {
-  initializeERD()
-} else {
-  document.addEventListener("DOMContentLoaded", initializeERD)
-}
-
-/**
- * Determine if the given value is the window.
- */
-const isWindow = (x: any): x is Window => {
-  return x === window
+if (typeof document === "object") {
+  if (document.readyState === "complete") {
+    initializeERD()
+  } else {
+    document.addEventListener("DOMContentLoaded", initializeERD)
+  }
 }
 
 /**
@@ -54,14 +51,14 @@ const observeDomEvent = (
       observer.next(elem)
     }
 
-    if (!isWindow(element) && eventName === "resize") {
+    if (!H.isWindow(element) && eventName === "resize") {
       erd.listenTo(element, observerNext)
     } else {
       element.addEventListener(eventName, observerNext)
     }
 
     return function dispose() {
-      if (!isWindow(element)) {
+      if (!H.isWindow(element)) {
         erd.removeListener(element, observerNext)
       } else {
         element.removeEventListener(eventName, observerNext)
@@ -99,17 +96,8 @@ const mergeObservables = <A, B>(
   })
 }
 
-/**
- * Calculate the bounds of each part of the arrangement.
- */
 const calcArrangementBounds = (arrangement: Arrangement): Main.Arrangement => {
-  // We need to handle frame specially given that it might not be an
-  // HTML element but the window.
-  const { frame, ...rest } = arrangement
-  return {
-    frame: isWindow(frame) ? BB.fromWindow(frame) : BB.fromHTMLElement(frame),
-    ...F.mapObject(rest, BB.fromHTMLElement),
-  }
+  return F.mapObject(arrangement, H.calcBoundingBox)
 }
 
 /**
@@ -149,6 +137,17 @@ const observeArrChanges = (
   return resizesAndFrameScrolls.map(doMeasures)
 }
 
+const createScrollOffseter = (
+  frame: Frame,
+): ((v: Main.Calculation) => Main.Calculation) => {
+  return calculatedLayout => {
+    const frameScrollSize = H.calcScrollSize(frame)
+    calculatedLayout.popover.x += frameScrollSize.width
+    calculatedLayout.popover.y += frameScrollSize.height
+    return calculatedLayout
+  }
+}
+
 // Main Entry Points
 
 /**
@@ -158,12 +157,12 @@ const observeArrChanges = (
  * arrangement parts should be.
  */
 const observe = (
-  settings: Main.SettingsUnchecked,
+  settings: Settings.SettingsUnchecked,
   arrangement: Arrangement,
 ): Observable<Main.Calculation> => {
-  return observeArrChanges(arrangement).map(
-    Main.createLayoutCalculator(settings),
-  )
+  return observeArrChanges(arrangement)
+    .map(Main.createLayoutCalculator(settings))
+    .map(createScrollOffseter(arrangement.frame))
 }
 
 /**
@@ -174,7 +173,7 @@ const observe = (
  * For example async content that once loaded increases the size of Popover.
  */
 const observeWithPolling = (
-  settings: Main.SettingsUnchecked,
+  settings: Settings.SettingsUnchecked,
   arrangement: Arrangement,
   intervalMs: number,
 ): Observable<Main.Calculation> => {
@@ -201,9 +200,9 @@ const observeWithPolling = (
     .map(doMeasures)
     .filter(doCheckChanges)
 
-  return mergeObservables(eventedChanges, uneventedChanges).map(
-    Main.createLayoutCalculator(settings),
-  )
+  return mergeObservables(eventedChanges, uneventedChanges)
+    .map(Main.createLayoutCalculator(settings))
+    .map(createScrollOffseter(arrangement.frame))
 }
 
 export { observeDomEvent, observe, observeWithPolling, Arrangement }

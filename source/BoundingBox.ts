@@ -32,32 +32,14 @@ const translate = (x: number, y: number, box: BoundingBox): BoundingBox => ({
 })
 
 /**
- * Get the Bounding Box of an HTML Element.
+ * Create a bounding box from size and position data.
  */
-const fromHTMLElement = (el: HTMLElement): BoundingBox => {
-  // Create object literal so that props become enumerable and we
-  // can leverage isEqual later.
-  const { width, height, top, bottom, left, right } = el.getBoundingClientRect()
-  return {
-    width,
-    height,
-    top,
-    bottom,
-    left,
-    right,
-  }
-}
+const fromSizePosition = (size: Size, pos: Pos): BoundingBox => ({
+  ...size,
+  left: pos.x,
+  top: pos.y,
+  bottom: pos.y + size.height,
+  right: pos.x + size.width,
+})
 
-// TODO Regression test that we use inner not outer prop for measuring
-const fromWindow = (w: Window) => {
-  return {
-    width: w.innerWidth,
-    height: w.innerHeight,
-    top: 0,
-    bottom: w.innerHeight,
-    left: 0,
-    right: w.innerWidth,
-  }
-}
-
-export { make, translate, fromHTMLElement, BoundingBox, fromWindow }
+export { make, translate, BoundingBox, fromSizePosition }
