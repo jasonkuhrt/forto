@@ -48,14 +48,15 @@ const fromHTMLElement = (el: HTMLElement): BoundingBox => {
   }
 }
 
+// TODO Regression test that we use inner not outer prop for measuring
 const fromWindow = (w: Window) => {
   return {
-    width: w.outerWidth,
-    height: w.outerHeight,
+    width: w.innerWidth,
+    height: w.innerHeight,
     top: 0,
-    bottom: w.outerHeight,
+    bottom: w.innerHeight,
     left: 0,
-    right: w.outerWidth,
+    right: w.innerWidth,
   }
 }
 
