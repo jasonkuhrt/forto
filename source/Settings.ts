@@ -73,4 +73,4 @@ const checkAndNormalize = (settings: SettingsUnchecked): Settings => {
   }
 }
 
-export { checkAndNormalize, SettingsUnchecked }
+export { checkAndNormalize, SettingsUnchecked, Settings }

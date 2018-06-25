@@ -229,7 +229,7 @@ const rankZonesSimple = (zoneFits: Zone[]): Zone[] => {
 }
 
 const rankZones = (
-  settings: Settings,
+  settings: Settings.Settings,
   zoneFits: Zone[],
   previousZone: null | Ori.Side,
 ) => {
@@ -266,7 +266,7 @@ type Arrangement = {
 }
 
 const optimalZone = (
-  settings: Settings,
+  settings: Settings.Settings,
   arrangement: Arrangement,
   previousZoneSide: null | Ori.Side,
 ): Zone => {
@@ -295,7 +295,7 @@ const optimalZone = (
 }
 
 const calcPopoverPosition = (
-  settings: Settings,
+  settings: Settings.Settings,
   frame: BB.BoundingBox,
   target: BB.BoundingBox,
   popover: BB.BoundingBox,
