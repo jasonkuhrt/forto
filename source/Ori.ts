@@ -36,7 +36,7 @@ const fromSide = (ofASide: OfASidea): Ori => {
 
 const crossDim = (ori: Ori) => (ori === Ori.Horizontal ? "height" : "width")
 
-const mainDim = (ori: Ori) => (ori === Ori.Vertical ? "width" : "height")
+const mainDim = (ori: Ori) => (ori === Ori.Horizontal ? "width" : "height")
 
 const mainAxis = (ori: Ori) => (ori === Ori.Horizontal ? "x" : "y")
 
