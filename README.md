@@ -10,4 +10,4 @@ For an overview of the system refer to my article [Forto: The layout engine powe
 
 ## Build
 
-* Using `tslib`: https://github.com/rollup/rollup-plugin-typescript/issues/81
+- Using `tslib`: https://github.com/rollup/rollup-plugin-typescript/issues/81
