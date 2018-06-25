@@ -1,7 +1,7 @@
+import * as F from "ramda"
+import resolve from "rollup-plugin-node-resolve"
 import rollupTypesript from "rollup-plugin-typescript"
 import typescript from "typescript"
-import resolve from "rollup-plugin-node-resolve"
-import * as F from "ramda"
 
 const pkg = require("./package.json")
 const external = F.keys(F.omit(["lodash-es"], pkg.dependencies))
