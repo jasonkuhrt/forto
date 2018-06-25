@@ -1,9 +1,10 @@
 // TODO
 // * API
 
-import * as F from "./Prelude"
 import * as BB from "./BoundingBox"
 import * as Ori from "./Ori"
+import * as F from "./Prelude"
+import * as Settings from "./Settings"
 
 type Pos = {
   x: number
@@ -54,11 +55,6 @@ const compare = (a: number, b: number): number => {
  */
 const center = (n: number): number => {
   return n / 2
-}
-
-enum Order {
-  Before = "Before",
-  After = "After",
 }
 
 /**
@@ -368,77 +364,10 @@ const calcTipPosition = (
   } as Pos
 }
 
-type SidesShorthand = Ori.Ori | Order | Ori.Side
-
-const expandSideShorthand = (elligibleZones: SidesShorthand): Ori.Side[] => {
-  switch (elligibleZones) {
-    case Ori.Ori.Horizontal:
-      return [Ori.Side.Left, Ori.Side.Right]
-    case Ori.Ori.Vertical:
-      return [Ori.Side.Top, Ori.Side.Bottom]
-    case Order.Before:
-      return [Ori.Side.Top, Ori.Side.Left]
-    case Order.After:
-      return [Ori.Side.Bottom, Ori.Side.Right]
-    default:
-      return [elligibleZones]
-  }
-}
-
-const checkAndNormalizeSettings = (settings: SettingsUnchecked): Settings => {
-  const isBounded = F.defaultsTo(true, settings.isBounded)
-  const zoneChangeThreshold = settings.zoneChangeThreshold || null
-  const preferZoneUntilPercentWorse = F.isExists(
-    settings.preferZoneUntilPercentWorse,
-  )
-    ? settings.preferZoneUntilPercentWorse
-    : null
-  const elligibleZones = F.isExists(settings.elligibleZones)
-    ? F.flatten(settings.elligibleZones.map(expandSideShorthand))
-    : null
-  const preferredZones = F.isExists(settings.preferredZones)
-    ? F.flatten(settings.preferredZones.map(expandSideShorthand))
-    : null
-  if (elligibleZones && preferredZones) {
-    const impossiblePreferredZones = F.omit(elligibleZones, preferredZones)
-    if (impossiblePreferredZones.length) {
-      console.warn(
-        "Your preferred zones (%s) are impossible to use because you specified elligible zones that do not include them (%s)",
-        preferredZones,
-        elligibleZones,
-      )
-    }
-  }
-
-  return {
-    isBounded,
-    elligibleZones,
-    preferredZones,
-    zoneChangeThreshold,
-    preferZoneUntilPercentWorse,
-  }
-}
-
 type Zone = Size & {
   side: Ori.Side
   areaPercentageRemaining: number
   popoverNegAreaPercent: number
-}
-
-type SettingsUnchecked = {
-  zoneChangeThreshold?: number
-  preferZoneUntilPercentWorse?: number
-  isBounded?: boolean
-  elligibleZones?: SidesShorthand[]
-  preferredZones?: SidesShorthand[]
-}
-
-type Settings = {
-  isBounded: boolean
-  zoneChangeThreshold: null | number
-  elligibleZones: null | Ori.Side[]
-  preferredZones: null | Ori.Side[]
-  preferZoneUntilPercentWorse: null | number
 }
 
 type ArrangementUnchecked = Arrangement & {
@@ -452,11 +381,11 @@ type Calculation = {
 }
 
 const calcLayout = (
-  settingsUnchecked: SettingsUnchecked,
+  givenSettings: Settings.SettingsUnchecked,
   arrangementUnchecked: ArrangementUnchecked,
   previousZoneSide: null | Ori.Side,
 ): Calculation => {
-  const settings = checkAndNormalizeSettings(settingsUnchecked)
+  const settings = Settings.checkAndNormalize(givenSettings)
   const isTipEnabled = Boolean(arrangementUnchecked.tip)
   const arrangement: Arrangement = isTipEnabled
     ? arrangementUnchecked
@@ -501,7 +430,7 @@ type LayoutCalculator = (newBounds: Arrangement) => Calculation
  * state.
  */
 const createLayoutCalculator = (
-  settings: SettingsUnchecked,
+  settings: Settings.SettingsUnchecked,
 ): LayoutCalculator => {
   let previousZoneSide: Ori.Side
 
@@ -523,15 +452,11 @@ export {
   calcPopoverPosition,
   calcTipPosition,
   calcLayout,
-  Order,
   Arrangement,
-  SettingsUnchecked,
-  SidesShorthand,
   Calculation,
   Zone,
   MeasuredZone,
   Size,
   Pos,
-  checkAndNormalizeSettings,
   createLayoutCalculator,
 }

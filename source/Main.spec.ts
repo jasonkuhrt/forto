@@ -1,7 +1,7 @@
-import * as F from "ramda"
-import * as Forto from "./Main"
 import * as B from "./BoundingBox"
+import * as Forto from "./Main"
 import * as Ori from "./Ori"
+import * as Settings from "./Settings"
 
 // TODO Property Test ideas
 // * When measuring zones, the zones along an orientation always have the
@@ -144,7 +144,7 @@ describe("rankZones", () => {
   }
   const test = (zoneFits, zoneFitsRanked) => {
     expect(
-      Forto.rankZones(Forto.checkAndNormalizeSettings({}), zoneFits, null),
+      Forto.rankZones(Settings.checkAndNormalize({}), zoneFits, null),
     ).toEqual(zoneFitsRanked)
   }
   it("should rank second-class lower than first-class even if smaller area", () => {
@@ -200,7 +200,7 @@ describe("rankZones with preference", () => {
   const test = (zoneFits, preferredZones, zoneFitsRanked) => {
     expect(
       Forto.rankZones(
-        Forto.checkAndNormalizeSettings({ preferredZones }),
+        Settings.checkAndNormalize({ preferredZones }),
         zoneFits,
         null,
       ),
@@ -261,7 +261,7 @@ describe("rankZones with preference up to thrshold", () => {
   ) => {
     expect(
       Forto.rankZones(
-        Forto.checkAndNormalizeSettings({
+        Settings.checkAndNormalize({
           preferredZones,
           preferZoneUntilPercentWorse,
         }),
@@ -331,7 +331,7 @@ describe("optimalZone (elligible specified)", () => {
 
   it("should only return a single possible zone if elligible choice is singular", () => {
     const zone = Forto.optimalZone(
-      Forto.checkAndNormalizeSettings({ elligibleZones: [Ori.Side.Top] }),
+      Settings.checkAndNormalize({ elligibleZones: [Ori.Side.Top] }),
       arrangement,
       null,
     )
@@ -346,7 +346,7 @@ describe("optimalZone (elligible specified)", () => {
 
   it("should return optimal zone within those elligible", () => {
     const zone = Forto.optimalZone(
-      Forto.checkAndNormalizeSettings({
+      Settings.checkAndNormalize({
         elligibleZones: [Ori.Side.Top, Ori.Side.Bottom],
       }),
       arrangement,
