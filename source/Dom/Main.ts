@@ -144,6 +144,10 @@ const createScrollOffseter = (
     const frameScrollSize = H.calcScrollSize(frame)
     calculatedLayout.popover.x += frameScrollSize.width
     calculatedLayout.popover.y += frameScrollSize.height
+    if (calculatedLayout.tip) {
+      calculatedLayout.tip.x += frameScrollSize.width
+      calculatedLayout.tip.y += frameScrollSize.height
+    }
     return calculatedLayout
   }
 }
