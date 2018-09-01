@@ -1,9 +1,9 @@
-import * as BB from "./BoundingBox"
-import * as DOM from "./Dom"
-import * as Layout from "./Layout"
-import * as Ori from "./Ori"
-import * as F from "./Prelude"
-import * as Settings from "./Settings"
+import * as BB from "./BoundingBox";
+import * as DOM from "./Dom";
+import * as Layout from "./Layout";
+import * as Ori from "./Ori";
+import * as F from "./Prelude";
+import * as Settings from "./Settings";
 
 type MeasuredZone = Layout.Size & Ori.OfASidea
 
@@ -11,7 +11,6 @@ const measureZones = (
   target: BB.BoundingBox,
   frame: BB.BoundingBox,
 ): MeasuredZone[] => {
-  console.log(frame.bottom, target.bottom)
   return [
     {
       side: Ori.Side.Top,
@@ -192,7 +191,6 @@ const rankZones = (
     )
   }
 
-  console.log("zoneFitsRanked", zoneFitsRanked)
   return zoneFitsRanked
 }
 
@@ -297,7 +295,6 @@ const calcAbsoluteTipPosition = (
   const crossEnd = Ori.crossEnd(orientation)
 
   const isBefore = zone.side === "Left" || zone.side === "Top"
-  const isAfter = !isBefore
 
   const tipCrossCenterLength = Layout.centerOf(Ori.opposite(orientation), tip)
   const innerMostBefore = F.max(popover[crossStart], target[crossStart])
@@ -323,16 +320,9 @@ const calcAbsoluteTipPosition = (
   "render forward" works in our favour so we don't have to
   "offset" it.
   */
-  const tipMainLengthOffset = isBefore
-    ? tip[Ori.mainLength(orientation)] * -1
-    : 0
-  const targetMainLengthOffset = isAfter
-    ? target[Ori.mainLength(orientation)]
-    : 0
-  const mainAxisPos =
-    target[Ori.mainStart(orientation)] +
-    targetMainLengthOffset +
-    tipMainLengthOffset
+  const mainAxisPos = isBefore
+    ? target[Ori.mainStart(orientation)] - tip[Ori.mainLength(orientation)]
+    : target[Ori.mainEnd(orientation)]
 
   return {
     [Ori.crossAxis(orientation)]: crossAxisPos,
@@ -378,15 +368,11 @@ const calcLayout = (
     arrangement.tip,
     zone,
   )
-  const popoverBoundingBox = BB.fromSizePosition(
-    arrangement.popover,
-    popoverPosition,
-  )
   const tipPosition = isTipEnabled
     ? calcAbsoluteTipPosition(
         zone,
         arrangement.target,
-        popoverBoundingBox,
+        arrangement.popover,
         arrangement.tip,
       )
     : null
@@ -420,20 +406,5 @@ const createLayoutCalculator = (
   return calc
 }
 
-export {
-  DOM,
-  Settings,
-  adjustRankingForChangeThreshold,
-  measureZones,
-  calcFit,
-  rankZones,
-  optimalZone,
-  calcPopoverPosition,
-  calcTipPosition,
-  calcLayout,
-  Arrangement,
-  Calculation,
-  Zone,
-  MeasuredZone,
-  createLayoutCalculator,
-}
+export { DOM, Settings, adjustRankingForChangeThreshold, measureZones, calcFit, rankZones, optimalZone, calcPopoverPosition, calcAbsoluteTipPosition, calcLayout, Arrangement, Calculation, Zone, MeasuredZone, createLayoutCalculator, };
+
