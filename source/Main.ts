@@ -237,6 +237,7 @@ const calcPopoverPosition = (
   frame: BB.BoundingBox,
   target: BB.BoundingBox,
   popover: BB.BoundingBox,
+  tip: null | BB.BoundingBox,
   zone: Zone,
 ) => {
   const ori = Ori.fromSide(zone)
@@ -247,10 +248,11 @@ const calcPopoverPosition = (
   const crossLength = Ori.crossLength(ori)
 
   /* Place the popover next to the target. */
-  p[Ori.mainAxis(ori)] =
-    ["Left", "Top"].indexOf(zone.side) !== -1
-      ? target[Ori.mainStart(ori)] - popover[Ori.mainDim(ori)]
-      : target[Ori.mainEnd(ori)]
+  const isBefore = F.hasAny(["Left", "Top"], zone.side)
+  const tipLength = tip ? tip[Ori.mainLength(ori)] : 0
+  p[Ori.mainAxis(ori)] = isBefore
+    ? target[Ori.mainStart(ori)] - (popover[Ori.mainDim(ori)] + tipLength)
+    : target[Ori.mainEnd(ori)] + tipLength
 
   /* Align the popover's cross-axis center with that of target. Only the
   target length within frame should be considered. That is, find the
@@ -305,9 +307,7 @@ const calcAbsoluteTipPosition = (
     innerMostAfter,
   )
 
-  const withinBounds = (min: number, max: number, x: number): number =>
-    x > max ? max : x < min ? min : x
-  const crossAxisPos = withinBounds(
+  const crossAxisPos = Layout.withinBounds(
     innerMostBefore,
     // max bound factors in element forward-rendering
     innerMostAfter - tip[Ori.crossLength(orientation)],
@@ -375,6 +375,7 @@ const calcLayout = (
     arrangement.frame,
     arrangement.target,
     arrangement.popover,
+    arrangement.tip,
     zone,
   )
   const popoverBoundingBox = BB.fromSizePosition(

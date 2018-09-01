@@ -35,4 +35,16 @@ const area = (size: Size): number => {
   return size.width * size.height
 }
 
-export { area, center, centerOf, centerBetween, Orientation, Pos, Size }
+const withinBounds = (min: number, max: number, x: number): number =>
+  x > max ? max : x < min ? min : x
+
+export {
+  area,
+  center,
+  centerOf,
+  centerBetween,
+  Orientation,
+  Pos,
+  Size,
+  withinBounds,
+}
