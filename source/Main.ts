@@ -284,22 +284,59 @@ const calcPopoverPosition = (
   return p
 }
 
-const calcTipPosition = (
-  orientation: Ori.Ori,
+const calcAbsoluteTipPosition = (
+  zone: Zone,
   target: BB.BoundingBox,
   popover: BB.BoundingBox,
   tip: BB.BoundingBox,
 ): Layout.Pos => {
+  const orientation = Ori.fromSide(zone)
   const crossStart = Ori.crossStart(orientation)
   const crossEnd = Ori.crossEnd(orientation)
-  // const crossLength = Ori.crossEnd(orientation)
+
+  const isBefore = zone.side === "Left" || zone.side === "Top"
+  const isAfter = !isBefore
+
+  const tipCrossCenterLength = Layout.centerOf(Ori.opposite(orientation), tip)
   const innerMostBefore = F.max(popover[crossStart], target[crossStart])
   const innerMostAfter = F.min(popover[crossEnd], target[crossEnd])
+  const innerCenterLength = Layout.centerBetween(
+    innerMostBefore,
+    innerMostAfter,
+  )
+
+  const withinBounds = (min: number, max: number, x: number): number =>
+    x > max ? max : x < min ? min : x
+  const crossAxisPos = withinBounds(
+    innerMostBefore,
+    // max bound factors in element forward-rendering
+    innerMostAfter - tip[Ori.crossLength(orientation)],
+    innerCenterLength - tipCrossCenterLength,
+  )
+
+  /* Position the tip's main-axis position
+  We need to "pull back" the tip if comes before the target
+  in the coordinate system, since elements "render forward".
+
+  We need to "push ahead" the tip if comes after the target
+  in the coordinate system. Note in this case the
+  "render forward" works in our favour so we don't have to
+  "offset" it.
+  */
+  const tipMainLengthOffset = isBefore
+    ? tip[Ori.mainLength(orientation)] * -1
+    : 0
+  const targetMainLengthOffset = isAfter
+    ? target[Ori.mainLength(orientation)]
+    : 0
+  const mainAxisPos =
+    target[Ori.mainStart(orientation)] +
+    targetMainLengthOffset +
+    tipMainLengthOffset
+
   return {
-    [Ori.crossAxis(orientation)]:
-      Layout.centerBetween(innerMostBefore, innerMostAfter) -
-      Layout.centerOf(Ori.opposite(orientation), tip),
-    [Ori.mainAxis(orientation)]: 0,
+    [Ori.crossAxis(orientation)]: crossAxisPos,
+    [Ori.mainAxis(orientation)]: mainAxisPos,
   } as Layout.Pos
 }
 
@@ -345,8 +382,8 @@ const calcLayout = (
     popoverPosition,
   )
   const tipPosition = isTipEnabled
-    ? calcTipPosition(
-        Ori.fromSide(zone),
+    ? calcAbsoluteTipPosition(
+        zone,
         arrangement.target,
         popoverBoundingBox,
         arrangement.tip,
