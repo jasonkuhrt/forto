@@ -9,7 +9,7 @@
     "test:dev": "jest --watch --verbose",
     "test": "jest --coverage --verbose && codecov",
     "build": "rollup --config",
-    "build:dev": "nodemon --exec 'yarn build' --ext .ts",
+    "build:watch": "nodemon --exec 'yarn build' --ext .ts",
     "prepublish": "npm run build"
   },
   "husky": {
