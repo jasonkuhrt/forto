@@ -122,6 +122,7 @@ const observeArrChanges = (
         observeDomEvent("resize", el).subscribe(observerNext),
       ),
       // Watch for scroll events in the frame
+      // TODO throttle
       observeDomEvent("scroll", arrangement.frame).subscribe(observerNext),
     ]
 
@@ -144,15 +145,19 @@ const createScrollOffseter = (
     const frameScrollSize = H.calcScrollSize(frame)
     calculatedLayout.popover.x += frameScrollSize.width
     calculatedLayout.popover.y += frameScrollSize.height
-    if (calculatedLayout.tip) {
-      calculatedLayout.tip.x += frameScrollSize.width
-      calculatedLayout.tip.y += frameScrollSize.height
-    }
+    // TODO Enable this to achieve absolute tip positioning.
+    //      We can make it a configuration option
+    // if (calculatedLayout.tip) {
+    //   calculatedLayout.tip.x += frameScrollSize.width
+    //   calculatedLayout.tip.y += frameScrollSize.height
+    // }
     return calculatedLayout
   }
 }
 
 // Main Entry Points
+
+// TODO Expose a variant where polling is a setting rather than function
 
 /**
  * Observe the arrangement for changes in bounds of any part and if changes
