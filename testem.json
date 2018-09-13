@@ -1,7 +1,0 @@
-{
-  "framework": "mocha",
-  "src_files": ["./source/**/*.js", "./test/**/*.js"],
-  "serve_files": ["./build/**/*.js"],
-  "before_tests": "webpack",
-  "launch_in_dev": ["PhantomJS", "Chrome"]
-}
