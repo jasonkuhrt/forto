@@ -1,5 +1,5 @@
 import * as BB from "../BoundingBox"
-import * as Main from "../Main"
+import * as Layout from "../Layout"
 
 /**
  * Determine if the given value is the window.
@@ -8,7 +8,7 @@ const isWindow = (x: any): x is Window => {
   return x === window
 }
 
-const calcScrollSize = (scrollable: Window | HTMLElement): Main.Size => {
+const calcScrollSize = (scrollable: Window | HTMLElement): Layout.Size => {
   return isWindow(scrollable)
     ? {
         width: scrollable.scrollX || scrollable.pageXOffset,
