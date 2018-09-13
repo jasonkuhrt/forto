@@ -1,10 +1,9 @@
-import * as BB from "./BoundingBox";
-import * as DOM from "./Dom";
-import * as Layout from "./Layout";
-import * as Ori from "./Ori";
-import * as F from "./Prelude";
-import * as Settings from "./Settings";
-
+import * as BB from "./BoundingBox"
+import * as DOM from "./Dom"
+import * as Layout from "./Layout"
+import * as Ori from "./Ori"
+import * as F from "./Prelude"
+import * as Settings from "./Settings"
 type MeasuredZone = Layout.Size & Ori.OfASidea
 
 const measureZones = (
@@ -284,6 +283,28 @@ const calcPopoverPosition = (
   return p
 }
 
+const calcTipPosition = (
+  zone: Zone,
+  target: BB.BoundingBox,
+  popover: BB.BoundingBox,
+  tip: BB.BoundingBox,
+): Layout.Pos => {
+  const isAfter = zone.side === "Left" || zone.side === "Top"
+  const orientation = Ori.fromSide(zone)
+  const crossStart = Ori.crossStart(orientation)
+  const crossEnd = Ori.crossEnd(orientation)
+  const innerMostBefore = F.max(popover[crossStart], target[crossStart])
+  const innerMostAfter = F.min(popover[crossEnd], target[crossEnd])
+  return {
+    [Ori.crossAxis(orientation)]:
+      Layout.centerBetween(innerMostBefore, innerMostAfter) -
+      (Layout.centerOf(Ori.opposite(orientation), tip) + popover[crossStart]),
+    [Ori.mainAxis(orientation)]: isAfter
+      ? popover[Ori.mainDim(orientation)]
+      : tip[Ori.mainDim(orientation)] * -1,
+  } as Layout.Pos
+}
+
 const calcAbsoluteTipPosition = (
   zone: Zone,
   target: BB.BoundingBox,
@@ -369,7 +390,8 @@ const calcLayout = (
     zone,
   )
   const tipPosition = isTipEnabled
-    ? calcAbsoluteTipPosition(
+    ? // Expose calculating absolute tip position via setting
+      calcTipPosition(
         zone,
         arrangement.target,
         arrangement.popover,
@@ -406,5 +428,21 @@ const createLayoutCalculator = (
   return calc
 }
 
-export { DOM, Settings, adjustRankingForChangeThreshold, measureZones, calcFit, rankZones, optimalZone, calcPopoverPosition, calcAbsoluteTipPosition, calcLayout, Arrangement, Calculation, Zone, MeasuredZone, createLayoutCalculator, };
-
+export {
+  DOM,
+  Settings,
+  adjustRankingForChangeThreshold,
+  measureZones,
+  calcFit,
+  rankZones,
+  optimalZone,
+  calcPopoverPosition,
+  calcTipPosition,
+  calcAbsoluteTipPosition,
+  calcLayout,
+  Arrangement,
+  Calculation,
+  Zone,
+  MeasuredZone,
+  createLayoutCalculator,
+}
