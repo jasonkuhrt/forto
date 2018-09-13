@@ -2,6 +2,7 @@
   "name": "forto",
   "version": "0.0.0",
   "main": "build-umd/bundle.js",
+  "types": "build-umd/Main.d.ts",
   "module": "build-esm/bundle.js",
   "license": "MIT",
   "scripts": {
@@ -10,6 +11,7 @@
     "test": "jest --coverage --verbose && codecov",
     "build": "rollup --config",
     "build:watch": "nodemon --exec 'yarn build' --ext .ts",
+    "dev": "yarn build:watch",
     "prepublish": "npm run build"
   },
   "husky": {
@@ -19,17 +21,17 @@
   },
   "devDependencies": {
     "@types/element-resize-detector": "^1.1.0",
-    "@types/jest": "^22.1.4",
+    "@types/jest": "^23.3.2",
     "@types/jest-environment-puppeteer": "^2.2.0",
     "@types/lodash": "^4.14.104",
     "@types/lodash-es": "^4.17.0",
     "@types/lodash.isequal": "^4.5.2",
     "@types/puppeteer": "^1.3.2",
     "@types/ramda": "^0.25.28",
-    "@types/zen-observable": "^0.5.3",
+    "@types/zen-observable": "^0.8.0",
     "codecov": "^3.0.2",
     "husky": "^0.14.3",
-    "jest": "^22.4.3",
+    "jest": "^23.6.0",
     "jest-puppeteer-preset": "^3.0.1",
     "most": "^1.7.3",
     "nodemon": "^1.17.5",
@@ -37,13 +39,13 @@
     "parcel-bundler": "^1.8.1",
     "prettier": "^1.11.1",
     "pretty-quick": "^1.4.1",
-    "puppeteer": "^1.2.0",
+    "puppeteer": "^1.8.0",
     "ramda": "^0.25.0",
-    "rollup": "^0.59.0",
+    "rollup": "^0.65.2",
     "rollup-plugin-node-resolve": "^3.0.3",
-    "rollup-plugin-typescript": "^0.8.1",
-    "ts-jest": "^22.4.1",
-    "typescript": "^2.8.1"
+    "rollup-plugin-typescript2": "^0.17.0",
+    "ts-jest": "^23.1.4",
+    "typescript": "^3.0.3"
   },
   "prettier": {
     "semi": false,
@@ -62,7 +64,13 @@
       "^.+\\.ts$": "ts-jest"
     },
     "testRegex": ".*spec.ts$",
-    "moduleFileExtensions": ["ts", "js"],
-    "collectCoverageFrom": ["**/source/**/*.ts", "!**/build/**/*"]
+    "moduleFileExtensions": [
+      "ts",
+      "js"
+    ],
+    "collectCoverageFrom": [
+      "**/source/**/*.ts",
+      "!**/build/**/*"
+    ]
   }
 }
