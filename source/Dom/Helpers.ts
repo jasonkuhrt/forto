@@ -8,7 +8,7 @@ const isWindow = (x: any): x is Window => {
   return x === window
 }
 
-const calcScrollSize = (scrollable: Window | HTMLElement): Layout.Size => {
+const calcScrollSize = (scrollable: Window | Element): Layout.Size => {
   return isWindow(scrollable)
     ? {
         width: scrollable.scrollX || scrollable.pageXOffset,
@@ -20,7 +20,7 @@ const calcScrollSize = (scrollable: Window | HTMLElement): Layout.Size => {
 /**
  * Get the Bounding Box of an HTML Element.
  */
-const calcHTMLElementBoundingBox = (el: HTMLElement): BB.BoundingBox => {
+const calcHTMLElementBoundingBox = (el: Element): BB.BoundingBox => {
   // Create object literal so that props become enumerable and we
   // can leverage isEqual later.
   const { width, height, top, bottom, left, right } = el.getBoundingClientRect()
@@ -46,7 +46,7 @@ const calcWindowBoundingBox = (w: Window) => {
   }
 }
 
-const calcBoundingBox = (sizable: Window | HTMLElement): BB.BoundingBox => {
+const calcBoundingBox = (sizable: Window | Element): BB.BoundingBox => {
   return isWindow(sizable)
     ? calcWindowBoundingBox(sizable)
     : calcHTMLElementBoundingBox(sizable)

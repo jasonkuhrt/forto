@@ -16,8 +16,14 @@ import * as F from "../Prelude"
 import * as Settings from "../Settings"
 import * as H from "./Helpers"
 
-type Arrangement = Record<keyof Main.Arrangement, HTMLElement>
-type Frame = Window | HTMLElement
+type Frame = Window | Element
+
+type Arrangement = {
+  frame: Frame
+  target: Element
+  tip: Element
+  popover: Element
+}
 
 // Constructor tries to run body.insertBefore
 // https://github.com/wnr/element-resize-detector/blob/ad30e37d44a90c3c0bfaeed392755641d8dde469/dist/element-resize-detector.js#L490
@@ -44,22 +50,30 @@ if (typeof document === "object") {
  */
 const observeDomEvent = (
   eventName: string,
-  element: HTMLElement | Window,
-): Observable<Event | HTMLElement> => {
+  element: Element | Window,
+): Observable<Event | Element> => {
   return new Observable<Event | HTMLElement>(observer => {
     const observerNext = (elem: Event | HTMLElement): void => {
       observer.next(elem)
     }
 
+    // TODO: `any` is a hack here. Its not even clear if this code is correct.
+    // See https://github.com/wnr/element-resize-detector/issues/100.
+    //
+    // If it turns out this is a bug and not just some poorly specified types
+    // then we will need to test element to check if it is of type HTMLElement.
+    //
+    // The reason we accept Element currently is to support react-popover.
+
     if (!H.isWindow(element) && eventName === "resize") {
-      erd.listenTo(element, observerNext)
+      erd.listenTo(element as any, observerNext)
     } else {
       element.addEventListener(eventName, observerNext)
     }
 
     return function dispose() {
       if (!H.isWindow(element)) {
-        erd.removeListener(element, observerNext)
+        erd.removeListener(element as any, observerNext)
       } else {
         element.removeEventListener(eventName, observerNext)
       }
