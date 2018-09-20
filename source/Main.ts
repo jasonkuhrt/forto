@@ -284,6 +284,9 @@ const calcPopoverPosition = (
   return p
 }
 
+/**
+ * Calculate the tip position relative to the popover.
+ */
 const calcTipPosition = (
   zone: Zone,
   target: BB.BoundingBox,
@@ -391,11 +394,16 @@ const calcLayout = (
     zone,
   )
   const tipPosition = isTipEnabled
-    ? // Expose calculating absolute tip position via setting
+    ? // TODO: Expose calculating absolute tip position via setting
       calcTipPosition(
         zone,
         arrangement.target,
-        arrangement.popover,
+        // Since the tip is positionned relative to the popover
+        // and since part of the tip positionning algorithm relies
+        // on the absolute position of popover we therefore must
+        // get an updated boundig box for popover in lieu of the
+        // brand new position we just calculated for it.
+        BB.fromSizePosition(arrangement.popover, popoverPosition),
         arrangement.tip,
       )
     : null
