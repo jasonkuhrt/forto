@@ -8,6 +8,9 @@ const isWindow = (x: any): x is Window => {
   return x === window
 }
 
+/**
+ * Calculate the scroll size of the given widow or element.
+ */
 const calcScrollSize = (scrollable: Window | Element): Layout.Size => {
   return isWindow(scrollable)
     ? {
@@ -18,7 +21,7 @@ const calcScrollSize = (scrollable: Window | Element): Layout.Size => {
 }
 
 /**
- * Get the Bounding Box of an HTML Element.
+ * Calculate the bounding box of the given HTML element.
  */
 const calcHTMLElementBoundingBox = (el: Element): BB.BoundingBox => {
   // Create object literal so that props become enumerable and we
@@ -34,7 +37,10 @@ const calcHTMLElementBoundingBox = (el: Element): BB.BoundingBox => {
   }
 }
 
-// TODO Regression test that we use inner not outer prop for measuring
+/**
+ * Calculate the boundig box of the widnow.
+ * TODO Regression test that we use inner not outer prop for measuring
+ */
 const calcWindowBoundingBox = (w: Window) => {
   return {
     width: w.innerWidth,
@@ -46,6 +52,10 @@ const calcWindowBoundingBox = (w: Window) => {
   }
 }
 
+/**
+ * Calculate the bounding box of the given window or element. Dispatches to
+ * the correct measuring function dependig on which is given
+ */
 const calcBoundingBox = (sizable: Window | Element): BB.BoundingBox => {
   return isWindow(sizable)
     ? calcWindowBoundingBox(sizable)
