@@ -1,5 +1,5 @@
 import * as BB from "./BoundingBox"
-import * as DOM from "./Dom"
+import * as DOM from "./DOM"
 import * as Layout from "./Layout"
 import * as Ori from "./Ori"
 import * as F from "./Prelude"
