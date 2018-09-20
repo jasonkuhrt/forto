@@ -4,6 +4,7 @@ import * as Layout from "./Layout"
 import * as Ori from "./Ori"
 import * as F from "./Prelude"
 import * as Settings from "./Settings"
+
 type MeasuredZone = Layout.Size & Ori.OfASidea
 
 const measureZones = (
@@ -445,4 +446,5 @@ export {
   Zone,
   MeasuredZone,
   createLayoutCalculator,
+  Ori,
 }
