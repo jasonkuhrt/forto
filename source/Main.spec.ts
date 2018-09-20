@@ -167,39 +167,59 @@ describe("rankZones", () => {
     test([$b, $t], [$t, $b])
   })
   it("if two zones are of equal worth maintain their existing order", () => {
-    const $b = {
+    const $b: Forto.Zone = {
       side: Ori.Side.Bottom,
       width: 1,
       height: 1,
       popoverNegAreaPercent: 0,
+      areaPercentageRemaining: 100,
     }
-    const $t = {
+    const $t: Forto.Zone = {
       side: Ori.Side.Top,
       width: 2,
       height: 2,
       popoverNegAreaPercent: 0,
+      areaPercentageRemaining: 100,
     }
-    const $r = { side: "Right", width: 2, height: 2, popoverNegAreaPercent: 0 }
-    const $l = { side: "Left", width: 2, height: 2, popoverNegAreaPercent: 0 }
+    const $r: Forto.Zone = {
+      side: Ori.Side.Right,
+      width: 2,
+      height: 2,
+      popoverNegAreaPercent: 0,
+      areaPercentageRemaining: 100,
+    }
+    const $l: Forto.Zone = {
+      side: Ori.Side.Left,
+      width: 2,
+      height: 2,
+      popoverNegAreaPercent: 0,
+      areaPercentageRemaining: 100,
+    }
     const zoneFits = [$b, $t, $l, $r]
     test(zoneFits, zoneFits)
   })
 })
 
 describe("rankZones with preference", () => {
-  const b = {
+  const b: Forto.Zone = {
     side: Ori.Side.Bottom,
     width: 100,
     height: 100,
     popoverNegAreaPercent: 1,
+    areaPercentageRemaining: 100,
   }
-  const t = {
+  const t: Forto.Zone = {
     side: Ori.Side.Top,
     width: 50,
     height: 50,
     popoverNegAreaPercent: 0,
+    areaPercentageRemaining: 100,
   }
-  const test = (zoneFits, preferredZones, zoneFitsRanked) => {
+  const test = (
+    zoneFits: Forto.Zone[],
+    preferredZones: Forto.Settings.SidesShorthand[],
+    zoneFitsRanked: Forto.Zone[],
+  ) => {
     expect(
       Forto.rankZones(
         Settings.checkAndNormalize({ preferredZones }),
@@ -212,13 +232,14 @@ describe("rankZones with preference", () => {
     test([b, t], [Ori.Side.Bottom], [t, b])
   })
   it("if mixed classes, if multiple prefs in mixed classes, then ignore prefs of second class and rank preferred first class best even if not greatest area", () => {
-    const $b = { ...b, popoverNegAreaPercent: 0 }
-    const $t = { ...b, popoverNegAreaPercent: 1 }
-    const l = {
-      side: "Left",
+    const $b: Forto.Zone = { ...b, popoverNegAreaPercent: 0 }
+    const $t: Forto.Zone = { ...b, popoverNegAreaPercent: 1 }
+    const l: Forto.Zone = {
+      side: Forto.Ori.Side.Left,
       width: 200,
       height: 200,
       popoverNegAreaPercent: 0,
+      areaPercentageRemaining: 100,
     }
     test([$b, $t, l], [Ori.Side.Top, Ori.Side.Bottom], [$b, l, $t])
   })
@@ -243,23 +264,25 @@ describe("rankZones with preference", () => {
 })
 
 describe("rankZones with preference up to thrshold", () => {
-  const b = {
+  const b: Forto.Zone = {
     side: Ori.Side.Bottom,
     width: 10,
     height: 10,
     popoverNegAreaPercent: 0,
+    areaPercentageRemaining: 100,
   }
-  const t = {
+  const t: Forto.Zone = {
     side: Ori.Side.Top,
     width: 10,
     height: 5,
     popoverNegAreaPercent: 0,
+    areaPercentageRemaining: 100,
   }
   const test = (
-    zoneFits,
-    preferredZones,
-    preferZoneUntilPercentWorse,
-    zoneFitsRanked,
+    zoneFits: Forto.Zone[],
+    preferredZones: Forto.Settings.SidesShorthand[],
+    preferZoneUntilPercentWorse: number,
+    zoneFitsRanked: Forto.Zone[],
   ) => {
     expect(
       Forto.rankZones(
@@ -556,7 +579,7 @@ describe("calcTipPosition", () => {
 
 describe("calcLayout", () => {
   const settingsDefault = {}
-  const arrangementDefault = {
+  const arrangementDefault: Forto.ArrangementUnchecked = {
     frame: B.make(100, 100),
     target: B.translate(90, 50, B.make(10, 10)),
     popover: B.make(10, 10),

@@ -361,7 +361,10 @@ type Zone = Layout.Size & {
   popoverNegAreaPercent: number
 }
 
-type ArrangementUnchecked = Arrangement & {
+type ArrangementUnchecked = {
+  frame: BB.BoundingBox
+  target: BB.BoundingBox
+  popover: BB.BoundingBox
   tip: null | BB.BoundingBox
 }
 
@@ -378,12 +381,13 @@ const calcLayout = (
 ): Calculation => {
   const settings = Settings.checkAndNormalize(givenSettings)
   const isTipEnabled = Boolean(arrangementUnchecked.tip)
-  const arrangement: Arrangement = isTipEnabled
+  const arrangement = (isTipEnabled
     ? arrangementUnchecked
     : {
         ...arrangementUnchecked,
         tip: BB.make(0, 0),
-      }
+      }) as Arrangement
+
   const zone = optimalZone(settings, arrangement, previousZoneSide)
   const popoverPosition = calcPopoverPosition(
     settings,
@@ -450,6 +454,7 @@ export {
   calcAbsoluteTipPosition,
   calcLayout,
   Arrangement,
+  ArrangementUnchecked,
   Calculation,
   Zone,
   MeasuredZone,
