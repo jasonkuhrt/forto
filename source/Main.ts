@@ -1,4 +1,5 @@
 import * as BB from "./BoundingBox"
+import * as DOM from "./DOM"
 import * as Layout from "./Layout"
 import * as Ori from "./Ori"
 import * as F from "./Prelude"
@@ -10,7 +11,6 @@ const measureZones = (
   target: BB.BoundingBox,
   frame: BB.BoundingBox,
 ): MeasuredZone[] => {
-  console.log(frame.bottom, target.bottom)
   return [
     {
       side: Ori.Side.Top,
@@ -191,7 +191,6 @@ const rankZones = (
     )
   }
 
-  console.log("zoneFitsRanked", zoneFitsRanked)
   return zoneFitsRanked
 }
 
@@ -236,6 +235,7 @@ const calcPopoverPosition = (
   frame: BB.BoundingBox,
   target: BB.BoundingBox,
   popover: BB.BoundingBox,
+  tip: null | BB.BoundingBox,
   zone: Zone,
 ) => {
   const ori = Ori.fromSide(zone)
@@ -246,10 +246,11 @@ const calcPopoverPosition = (
   const crossLength = Ori.crossLength(ori)
 
   /* Place the popover next to the target. */
-  p[Ori.mainAxis(ori)] =
-    ["Left", "Top"].indexOf(zone.side) !== -1
-      ? target[Ori.mainStart(ori)] - popover[Ori.mainDim(ori)]
-      : target[Ori.mainEnd(ori)]
+  const isBefore = F.hasAny(["Left", "Top"], zone.side)
+  const tipLength = tip ? tip[Ori.mainLength(ori)] : 0
+  p[Ori.mainAxis(ori)] = isBefore
+    ? target[Ori.mainStart(ori)] - (popover[Ori.mainDim(ori)] + tipLength)
+    : target[Ori.mainEnd(ori)] + tipLength
 
   /* Align the popover's cross-axis center with that of target. Only the
   target length within frame should be considered. That is, find the
@@ -283,22 +284,74 @@ const calcPopoverPosition = (
   return p
 }
 
+/**
+ * Calculate the tip position relative to the popover.
+ */
 const calcTipPosition = (
-  orientation: Ori.Ori,
+  zone: Zone,
   target: BB.BoundingBox,
   popover: BB.BoundingBox,
   tip: BB.BoundingBox,
 ): Layout.Pos => {
+  const isAfter = zone.side === "Left" || zone.side === "Top"
+  const orientation = Ori.fromSide(zone)
   const crossStart = Ori.crossStart(orientation)
   const crossEnd = Ori.crossEnd(orientation)
-  // const crossLength = Ori.crossEnd(orientation)
   const innerMostBefore = F.max(popover[crossStart], target[crossStart])
   const innerMostAfter = F.min(popover[crossEnd], target[crossEnd])
   return {
     [Ori.crossAxis(orientation)]:
       Layout.centerBetween(innerMostBefore, innerMostAfter) -
-      Layout.centerOf(Ori.opposite(orientation), tip),
-    [Ori.mainAxis(orientation)]: 0,
+      (Layout.centerOf(Ori.opposite(orientation), tip) + popover[crossStart]),
+    [Ori.mainAxis(orientation)]: isAfter
+      ? popover[Ori.mainDim(orientation)]
+      : tip[Ori.mainDim(orientation)] * -1,
+  } as Layout.Pos
+}
+
+const calcAbsoluteTipPosition = (
+  zone: Zone,
+  target: BB.BoundingBox,
+  popover: BB.BoundingBox,
+  tip: BB.BoundingBox,
+): Layout.Pos => {
+  const orientation = Ori.fromSide(zone)
+  const crossStart = Ori.crossStart(orientation)
+  const crossEnd = Ori.crossEnd(orientation)
+
+  const isBefore = zone.side === "Left" || zone.side === "Top"
+
+  const tipCrossCenterLength = Layout.centerOf(Ori.opposite(orientation), tip)
+  const innerMostBefore = F.max(popover[crossStart], target[crossStart])
+  const innerMostAfter = F.min(popover[crossEnd], target[crossEnd])
+  const innerCenterLength = Layout.centerBetween(
+    innerMostBefore,
+    innerMostAfter,
+  )
+
+  const crossAxisPos = Layout.withinBounds(
+    innerMostBefore,
+    // max bound factors in element forward-rendering
+    innerMostAfter - tip[Ori.crossLength(orientation)],
+    innerCenterLength - tipCrossCenterLength,
+  )
+
+  /* Position the tip's main-axis position
+  We need to "pull back" the tip if comes before the target
+  in the coordinate system, since elements "render forward".
+
+  We need to "push ahead" the tip if comes after the target
+  in the coordinate system. Note in this case the
+  "render forward" works in our favour so we don't have to
+  "offset" it.
+  */
+  const mainAxisPos = isBefore
+    ? target[Ori.mainStart(orientation)] - tip[Ori.mainLength(orientation)]
+    : target[Ori.mainEnd(orientation)]
+
+  return {
+    [Ori.crossAxis(orientation)]: crossAxisPos,
+    [Ori.mainAxis(orientation)]: mainAxisPos,
   } as Layout.Pos
 }
 
@@ -308,7 +361,10 @@ type Zone = Layout.Size & {
   popoverNegAreaPercent: number
 }
 
-type ArrangementUnchecked = Arrangement & {
+type ArrangementUnchecked = {
+  frame: BB.BoundingBox
+  target: BB.BoundingBox
+  popover: BB.BoundingBox
   tip: null | BB.BoundingBox
 }
 
@@ -325,29 +381,33 @@ const calcLayout = (
 ): Calculation => {
   const settings = Settings.checkAndNormalize(givenSettings)
   const isTipEnabled = Boolean(arrangementUnchecked.tip)
-  const arrangement: Arrangement = isTipEnabled
+  const arrangement = (isTipEnabled
     ? arrangementUnchecked
     : {
         ...arrangementUnchecked,
         tip: BB.make(0, 0),
-      }
+      }) as Arrangement
+
   const zone = optimalZone(settings, arrangement, previousZoneSide)
   const popoverPosition = calcPopoverPosition(
     settings,
     arrangement.frame,
     arrangement.target,
     arrangement.popover,
+    arrangement.tip,
     zone,
   )
-  const popoverBoundingBox = BB.fromSizePosition(
-    arrangement.popover,
-    popoverPosition,
-  )
   const tipPosition = isTipEnabled
-    ? calcTipPosition(
-        Ori.fromSide(zone),
+    ? // TODO: Expose calculating absolute tip position via setting
+      calcTipPosition(
+        zone,
         arrangement.target,
-        popoverBoundingBox,
+        // Since the tip is positionned relative to the popover
+        // and since part of the tip positionning algorithm relies
+        // on the absolute position of popover we therefore must
+        // get an updated boundig box for popover in lieu of the
+        // brand new position we just calculated for it.
+        BB.fromSizePosition(arrangement.popover, popoverPosition),
         arrangement.tip,
       )
     : null
@@ -382,6 +442,8 @@ const createLayoutCalculator = (
 }
 
 export {
+  DOM,
+  Settings,
   adjustRankingForChangeThreshold,
   measureZones,
   calcFit,
@@ -389,10 +451,13 @@ export {
   optimalZone,
   calcPopoverPosition,
   calcTipPosition,
+  calcAbsoluteTipPosition,
   calcLayout,
   Arrangement,
+  ArrangementUnchecked,
   Calculation,
   Zone,
   MeasuredZone,
   createLayoutCalculator,
+  Ori,
 }

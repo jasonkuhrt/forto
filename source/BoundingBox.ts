@@ -1,3 +1,5 @@
+import * as Layout from "./Layout"
+
 type BoundingBox = {
   top: number
   bottom: number
@@ -34,7 +36,7 @@ const translate = (x: number, y: number, box: BoundingBox): BoundingBox => ({
 /**
  * Create a bounding box from size and position data.
  */
-const fromSizePosition = (size: Size, pos: Pos): BoundingBox => ({
+const fromSizePosition = (size: Layout.Size, pos: Layout.Pos): BoundingBox => ({
   ...size,
   left: pos.x,
   top: pos.y,

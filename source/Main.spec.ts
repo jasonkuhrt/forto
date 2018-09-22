@@ -130,19 +130,21 @@ describe("calcFit", () => {
 })
 
 describe("rankZones", () => {
-  const b = {
+  const b: Forto.Zone = {
     side: Ori.Side.Bottom,
     width: 100,
     height: 100,
+    areaPercentageRemaining: 100,
     popoverNegAreaPercent: 0,
   }
-  const t = {
+  const t: Forto.Zone = {
     side: Ori.Side.Top,
     width: 50,
     height: 50,
+    areaPercentageRemaining: 100,
     popoverNegAreaPercent: 0,
   }
-  const test = (zoneFits, zoneFitsRanked) => {
+  const test = (zoneFits: Forto.Zone[], zoneFitsRanked: Forto.Zone[]) => {
     expect(
       Forto.rankZones(Settings.checkAndNormalize({}), zoneFits, null),
     ).toEqual(zoneFitsRanked)
@@ -165,39 +167,59 @@ describe("rankZones", () => {
     test([$b, $t], [$t, $b])
   })
   it("if two zones are of equal worth maintain their existing order", () => {
-    const $b = {
+    const $b: Forto.Zone = {
       side: Ori.Side.Bottom,
       width: 1,
       height: 1,
       popoverNegAreaPercent: 0,
+      areaPercentageRemaining: 100,
     }
-    const $t = {
+    const $t: Forto.Zone = {
       side: Ori.Side.Top,
       width: 2,
       height: 2,
       popoverNegAreaPercent: 0,
+      areaPercentageRemaining: 100,
     }
-    const $r = { side: "Right", width: 2, height: 2, popoverNegAreaPercent: 0 }
-    const $l = { side: "Left", width: 2, height: 2, popoverNegAreaPercent: 0 }
+    const $r: Forto.Zone = {
+      side: Ori.Side.Right,
+      width: 2,
+      height: 2,
+      popoverNegAreaPercent: 0,
+      areaPercentageRemaining: 100,
+    }
+    const $l: Forto.Zone = {
+      side: Ori.Side.Left,
+      width: 2,
+      height: 2,
+      popoverNegAreaPercent: 0,
+      areaPercentageRemaining: 100,
+    }
     const zoneFits = [$b, $t, $l, $r]
     test(zoneFits, zoneFits)
   })
 })
 
 describe("rankZones with preference", () => {
-  const b = {
+  const b: Forto.Zone = {
     side: Ori.Side.Bottom,
     width: 100,
     height: 100,
     popoverNegAreaPercent: 1,
+    areaPercentageRemaining: 100,
   }
-  const t = {
+  const t: Forto.Zone = {
     side: Ori.Side.Top,
     width: 50,
     height: 50,
     popoverNegAreaPercent: 0,
+    areaPercentageRemaining: 100,
   }
-  const test = (zoneFits, preferredZones, zoneFitsRanked) => {
+  const test = (
+    zoneFits: Forto.Zone[],
+    preferredZones: Forto.Settings.SidesShorthand[],
+    zoneFitsRanked: Forto.Zone[],
+  ) => {
     expect(
       Forto.rankZones(
         Settings.checkAndNormalize({ preferredZones }),
@@ -210,13 +232,14 @@ describe("rankZones with preference", () => {
     test([b, t], [Ori.Side.Bottom], [t, b])
   })
   it("if mixed classes, if multiple prefs in mixed classes, then ignore prefs of second class and rank preferred first class best even if not greatest area", () => {
-    const $b = { ...b, popoverNegAreaPercent: 0 }
-    const $t = { ...b, popoverNegAreaPercent: 1 }
-    const l = {
-      side: "Left",
+    const $b: Forto.Zone = { ...b, popoverNegAreaPercent: 0 }
+    const $t: Forto.Zone = { ...b, popoverNegAreaPercent: 1 }
+    const l: Forto.Zone = {
+      side: Forto.Ori.Side.Left,
       width: 200,
       height: 200,
       popoverNegAreaPercent: 0,
+      areaPercentageRemaining: 100,
     }
     test([$b, $t, l], [Ori.Side.Top, Ori.Side.Bottom], [$b, l, $t])
   })
@@ -241,23 +264,25 @@ describe("rankZones with preference", () => {
 })
 
 describe("rankZones with preference up to thrshold", () => {
-  const b = {
+  const b: Forto.Zone = {
     side: Ori.Side.Bottom,
     width: 10,
     height: 10,
     popoverNegAreaPercent: 0,
+    areaPercentageRemaining: 100,
   }
-  const t = {
+  const t: Forto.Zone = {
     side: Ori.Side.Top,
     width: 10,
     height: 5,
     popoverNegAreaPercent: 0,
+    areaPercentageRemaining: 100,
   }
   const test = (
-    zoneFits,
-    preferredZones,
-    preferZoneUntilPercentWorse,
-    zoneFitsRanked,
+    zoneFits: Forto.Zone[],
+    preferredZones: Forto.Settings.SidesShorthand[],
+    preferZoneUntilPercentWorse: number,
+    zoneFitsRanked: Forto.Zone[],
   ) => {
     expect(
       Forto.rankZones(
@@ -363,27 +388,38 @@ describe("optimalZone (elligible specified)", () => {
 })
 
 describe("calcPopoverPosition (bounded)", () => {
-  const calcPopoverPositionBounded = Forto.calcPopoverPosition.bind(null, {
+  const settings: Forto.Settings.Settings = {
     isBounded: true,
-  })
+    zoneChangeThreshold: 0,
+    elligibleZones: null,
+    preferredZones: null,
+    preferZoneUntilPercentWorse: null,
+  }
   const frame = B.make(400, 400)
   const target = B.translate(200, 100, B.make(10, 10))
-  const zone = {
+  const zone: Forto.Zone = {
     side: Ori.Side.Bottom,
     height: 100,
     width: 400,
     popoverNegAreaPercent: 0,
+    areaPercentageRemaining: 100,
   }
+
   it("moves popover of less cross-length than target to match its cross-axis to target", () => {
     const popover = B.make(6, 6)
-    expect(calcPopoverPositionBounded(frame, target, popover, zone)).toEqual({
+    expect(
+      Forto.calcPopoverPosition(settings, frame, target, popover, null, zone),
+    ).toEqual({
       x: 202,
       y: 100 + 10,
     })
   })
+
   it("moves popover of greater cross-length than target to match its cross-axis to target", () => {
     const popover = B.make(12, 12)
-    expect(calcPopoverPositionBounded(frame, target, popover, zone)).toEqual({
+    expect(
+      Forto.calcPopoverPosition(settings, frame, target, popover, null, zone),
+    ).toEqual({
       x: 199,
       y: 100 + 10,
     })
@@ -394,7 +430,9 @@ describe("calcPopoverPosition (bounded)", () => {
   it("popover can meet but not exceed frame end bounds to match cross-axis", () => {
     const target2 = B.translate(400 - 10, 100, B.make(10, 10))
     const popover = B.make(20, 20)
-    expect(calcPopoverPositionBounded(frame, target2, popover, zone)).toEqual({
+    expect(
+      Forto.calcPopoverPosition(settings, frame, target2, popover, null, zone),
+    ).toEqual({
       x: 400 - 20,
       y: 100 + 10,
     })
@@ -402,7 +440,9 @@ describe("calcPopoverPosition (bounded)", () => {
   it("popover can meet but not exceed frame start bounds to match cross-axis", () => {
     const target2 = B.translate(0, 100, B.make(10, 10))
     const popover = B.make(20, 20)
-    expect(calcPopoverPositionBounded(frame, target2, popover, zone)).toEqual({
+    expect(
+      Forto.calcPopoverPosition(settings, frame, target2, popover, null, zone),
+    ).toEqual({
       x: 0,
       y: 100 + 10,
     })
@@ -410,7 +450,9 @@ describe("calcPopoverPosition (bounded)", () => {
   it("if popover does not fit within frame cross-length then center it within frame", () => {
     const target2 = B.translate(0, 100, B.make(10, 10))
     const popover = B.make(400 + 10, 10)
-    expect(calcPopoverPositionBounded(frame, target2, popover, zone)).toEqual({
+    expect(
+      Forto.calcPopoverPosition(settings, frame, target2, popover, null, zone),
+    ).toEqual({
       x: (-1 * 10) / 2,
       y: 100 + 10,
     })
@@ -421,7 +463,9 @@ describe("calcPopoverPosition (bounded)", () => {
   it("does not include cropped cross end of target when calculating targets cross-axis", () => {
     const target2 = B.translate(380, 100, B.make(30, 30))
     const popover = B.make(10, 10)
-    expect(calcPopoverPositionBounded(frame, target2, popover, zone)).toEqual({
+    expect(
+      Forto.calcPopoverPosition(settings, frame, target2, popover, null, zone),
+    ).toEqual({
       x: 385,
       y: 100 + 30,
     })
@@ -429,7 +473,9 @@ describe("calcPopoverPosition (bounded)", () => {
   it("does not include cropped cross start of target when calculating targets cross-axis", () => {
     const target2 = B.translate(-10, 100, B.make(30, 30))
     const popover = B.make(10, 10)
-    expect(calcPopoverPositionBounded(frame, target2, popover, zone)).toEqual({
+    expect(
+      Forto.calcPopoverPosition(settings, frame, target2, popover, null, zone),
+    ).toEqual({
       x: 5,
       y: 100 + 30,
     })
@@ -437,7 +483,9 @@ describe("calcPopoverPosition (bounded)", () => {
   it("does not include cropped cross start+end of target when calculating targets cross-axis", () => {
     const target2 = B.translate(-10, 100, B.make(420, 10))
     const popover = B.make(10, 10)
-    expect(calcPopoverPositionBounded(frame, target2, popover, zone)).toEqual({
+    expect(
+      Forto.calcPopoverPosition(settings, frame, target2, popover, null, zone),
+    ).toEqual({
       x: 200 - 5,
       y: 100 + 10,
     })
@@ -445,81 +493,93 @@ describe("calcPopoverPosition (bounded)", () => {
 })
 
 describe("calcPopoverPosition (unbounded)", () => {
-  const calcPopoverPositionUnbounded = Forto.calcPopoverPosition.bind(null, {
+  const settings: Forto.Settings.Settings = {
     isBounded: false,
-  })
+    zoneChangeThreshold: 0,
+    elligibleZones: null,
+    preferredZones: null,
+    preferZoneUntilPercentWorse: null,
+  }
   const frame = B.make(400, 400)
-  const zone = {
+  const zone: Forto.Zone = {
     side: Ori.Side.Bottom,
     height: 100,
     width: 400,
     popoverNegAreaPercent: 0,
+    areaPercentageRemaining: 100,
   }
 
   it("popover can exceed frame end bounds to match cross-axis", () => {
     const target2 = B.translate(400 - 10, 100, B.make(10, 10))
     const popover = B.make(20, 20)
-    expect(calcPopoverPositionUnbounded(frame, target2, popover, zone)).toEqual(
-      {
-        x: 400 - 15,
-        y: 100 + 10,
-      },
-    )
+    expect(
+      Forto.calcPopoverPosition(settings, frame, target2, popover, null, zone),
+    ).toEqual({
+      x: 400 - 15,
+      y: 100 + 10,
+    })
   })
   it("popover can exceed frame start bounds to match cross-axis", () => {
     const target2 = B.translate(0, 100, B.make(10, 10))
     const popover = B.make(20, 20)
-    expect(calcPopoverPositionUnbounded(frame, target2, popover, zone)).toEqual(
-      {
-        x: -5,
-        y: 100 + 10,
-      },
-    )
+    expect(
+      Forto.calcPopoverPosition(settings, frame, target2, popover, null, zone),
+    ).toEqual({
+      x: -5,
+      y: 100 + 10,
+    })
   })
   it("if popover does not fit within frame cross-length then center it within frame", () => {
     const target2 = B.translate(0, 100, B.make(10, 10))
     const popover = B.make(400 + 10, 10)
-    expect(calcPopoverPositionUnbounded(frame, target2, popover, zone)).toEqual(
-      {
-        x: -200,
-        y: 100 + 10,
-      },
-    )
+    expect(
+      Forto.calcPopoverPosition(settings, frame, target2, popover, null, zone),
+    ).toEqual({
+      x: -200,
+      y: 100 + 10,
+    })
   })
 })
 
 describe("calcTipPosition", () => {
-  const orientation = Ori.Ori.Horizontal
+  const zone: Forto.Zone = {
+    side: Ori.Side.Left,
+    // following props do not matter for test
+    height: 0,
+    width: 0,
+    popoverNegAreaPercent: 0,
+    areaPercentageRemaining: 100,
+  }
   const tip = B.make(4, 4)
   it("finds centered tip position", () => {
     const target = B.translate(200, 100, B.make(10, 10))
     const popover = B.translate(200 - 10, 100, B.make(10, 10))
-    expect(Forto.calcTipPosition(orientation, target, popover, tip)).toEqual({
-      x: 0,
-      y: 103,
+    expect(Forto.calcTipPosition(zone, target, popover, tip)).toEqual({
+      x: 10,
+      y: 3,
     })
   })
   it("refers to popover before/popover after if it should", () => {
     const target = B.translate(200, 100, B.make(30, 30))
     const popover = B.translate(200 - 10, 110, B.make(10, 10))
-    expect(Forto.calcTipPosition(orientation, target, popover, tip)).toEqual({
-      x: 0,
-      y: 113,
+    expect(Forto.calcTipPosition(zone, target, popover, tip)).toEqual({
+      x: 10,
+      y: 3,
     })
   })
   it("refers to popover before/target aftert if it should", () => {
     const target = B.translate(200, 100, B.make(30, 30))
     const popover = B.translate(200 - 30, 110, B.make(30, 30))
-    expect(Forto.calcTipPosition(orientation, target, popover, tip)).toEqual({
-      x: 0,
-      y: 118,
+    expect(Forto.calcTipPosition(zone, target, popover, tip)).toEqual({
+      x: 30,
+      y: 8,
     })
   })
 })
 
 describe("calcLayout", () => {
   const settingsDefault = {}
-  const arrangementDefault = {
+  const arrangementDefault: Forto.ArrangementUnchecked = {
     frame: B.make(100, 100),
     target: B.translate(90, 50, B.make(10, 10)),
     popover: B.make(10, 10),
@@ -528,8 +588,8 @@ describe("calcLayout", () => {
   it("calculates the layout start to finish", () => {
     expect(Forto.calcLayout(settingsDefault, arrangementDefault, null)).toEqual(
       {
-        popover: { x: 80, y: 50 },
-        tip: { x: 0, y: 54 },
+        popover: { x: 78, y: 50 },
+        tip: { x: 10, y: 4 },
         zone: {
           side: "Left",
           height: 100,

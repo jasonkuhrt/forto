@@ -134,6 +134,10 @@ const compare = (a: number, b: number): number => {
   return a < b ? -1 : a > b ? 1 : 0
 }
 
+const hasAny = <T>(xs: T[], x: T): boolean => {
+  return xs.indexOf(x) !== -1
+}
+
 export {
   defaultsTo,
   head,
@@ -151,4 +155,5 @@ export {
   flatten,
   upperLimit,
   compare,
+  hasAny,
 }

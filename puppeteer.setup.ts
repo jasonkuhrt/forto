@@ -1,6 +1,6 @@
 import * as FRP from "most"
 import * as F from "ramda"
-import * as Dom from "./source/Dom"
+import * as Dom from "./source/DOM"
 
 // Extend Most with a function to ease collection for result inspection
 

@@ -15,7 +15,7 @@ beforeAll(async () => {
   await page.addScriptTag({
     // path: "./dist/config.js",
     content: FS.readFileSync(
-      Path.join(__dirname, "../dist/puppeteer.setup.js"),
+      Path.join(__dirname, "../../dist/puppeteer.setup.js"),
       "utf8",
     ),
   })
