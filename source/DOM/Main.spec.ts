@@ -280,14 +280,16 @@ it("if ZCT set, does not change zone unless good enough", async () => {
   expect(results[0].zone.side).toEqual("Bottom")
 })
 
-describe("observe", () => {
+describe("observeWithoutPolling", () => {
   it("accepts settings e.g. elligibleZones", async () => {
     const results = await page.evaluate(() => {
       sleep(10).then(() => {
         a.target.style.height = "100px"
       })
       const a = initArrangement()
-      return FRP.from(Dom.observe({ elligibleZones: ["Bottom"] }, a))
+      return FRP.from(
+        Dom.observeWithoutPolling({ elligibleZones: ["Bottom"] }, a),
+      )
         .skip(4) // Initial binding fires element resize events
         .collect(1)
     })
@@ -302,7 +304,42 @@ describe("observeWithPolling", () => {
         a.target.style.height = "100px"
       })
       const a = initArrangement()
-      return FRP.from(Dom.observeWithPolling({ elligibleZones: ["Bottom"] }, a))
+      return FRP.from(
+        Dom.observeWithPolling({ elligibleZones: ["Bottom"] }, a, 1),
+      )
+        .skip(4) // Initial binding fires element resize events
+        .collect(1)
+    })
+    expect(results[0].zone.side).toEqual("Bottom")
+  })
+})
+
+// REFACTOR tests for this observe and almost copy-paste of tests
+// for observeWithoutPollig and observeWithPolling. Just the function
+// name is different.
+describe("observe", () => {
+  it("can be used without polling", async () => {
+    const results = await page.evaluate(() => {
+      sleep(10).then(() => {
+        a.target.style.height = "100px"
+      })
+      const a = initArrangement()
+      return FRP.from(Dom.observe({ elligibleZones: ["Bottom"] }, a))
+        .skip(4) // Initial binding fires element resize events
+        .collect(1)
+    })
+    expect(results[0].zone.side).toEqual("Bottom")
+  })
+
+  it("can be used with polling", async () => {
+    const results = await page.evaluate(() => {
+      sleep(10).then(() => {
+        a.target.style.height = "100px"
+      })
+      const a = initArrangement()
+      return FRP.from(
+        Dom.observe({ pollIntervalMs: 1, elligibleZones: ["Bottom"] }, a),
+      )
         .skip(4) // Initial binding fires element resize events
         .collect(1)
     })

@@ -25,6 +25,10 @@ type Arrangement = {
   popover: Element
 }
 
+interface DomSettings extends Settings.SettingsUnchecked {
+  pollIntervalMs?: null | number
+}
+
 // Constructor tries to run body.insertBefore
 // https://github.com/wnr/element-resize-detector/blob/ad30e37d44a90c3c0bfaeed392755641d8dde469/dist/element-resize-detector.js#L490
 // so we must wait for after DOM ready event
@@ -171,15 +175,10 @@ const createScrollOffseter = (
 
 // Main Entry Points
 
-// TODO Expose a variant where polling is a setting rather than function
-
 /**
- * Observe the arrangement for changes in bounds of any part and if changes
- * are detected then recalculate the layout. This does not actually execute
- * the layout changes, it merely provides what the latest coordinates of all
- * arrangement parts should be.
+ * Like `observe` but no polling option.
  */
-const observe = (
+const observeWithoutPolling = (
   settings: Settings.SettingsUnchecked,
   arrangement: Arrangement,
 ): Observable<Main.Calculation> => {
@@ -189,11 +188,7 @@ const observe = (
 }
 
 /**
- * Like `observe` except with the added fact that it will also poll for
- * arrangement bound changes at the given interval.
- *
- * This allows reacting to layout changes that have no event correspondance.
- * For example async content that once loaded increases the size of Popover.
+ * Like `observe` but will always poll.
  */
 const observeWithPolling = (
   settings: Settings.SettingsUnchecked,
@@ -228,4 +223,33 @@ const observeWithPolling = (
     .map(createScrollOffseter(arrangement.frame))
 }
 
-export { observeDomEvent, observe, observeWithPolling, Arrangement }
+/**
+ * Observe the arrangement for changes in bounds of any part and if changes
+ * are detected then recalculate the layout. This does not actually execute
+ * the layout changes, it merely provides what the latest coordinates of all
+ * arrangement parts should be.
+ *
+ * If a pollIntervalMs setting is passed then the observable will also poll for
+ * arrangement bound changes at the given interval. This allows reacting to
+ * layout changes that have no event correspondance. For example async content
+ * that once loaded increases the size of Popover.
+ *
+ * A pollIntervalMs of 0 has undefined behaviour.
+ */
+const observe = (
+  settings: DomSettings,
+  arrangement: Arrangement,
+): Observable<Main.Calculation> => {
+  const { pollIntervalMs, ...fortoSettings } = settings
+  return pollIntervalMs
+    ? observeWithPolling(fortoSettings, arrangement, pollIntervalMs)
+    : observeWithoutPolling(fortoSettings, arrangement)
+}
+
+export {
+  observeDomEvent,
+  observe,
+  observeWithPolling,
+  observeWithoutPolling,
+  Arrangement,
+}
