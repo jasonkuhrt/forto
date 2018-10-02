@@ -10,8 +10,8 @@ type SettingsUnchecked = {
   zoneChangeThreshold?: number
   preferZoneUntilPercentWorse?: number
   isBounded?: boolean
-  elligibleZones?: SidesShorthand[]
-  preferredZones?: SidesShorthand[]
+  elligibleZones?: SidesShorthand | SidesShorthand[]
+  preferredZones?: SidesShorthand | SidesShorthand[]
 }
 
 type Settings = {
@@ -48,10 +48,10 @@ const checkAndNormalize = (settings: SettingsUnchecked): Settings => {
     ? settings.preferZoneUntilPercentWorse
     : null
   const elligibleZones = F.isExists(settings.elligibleZones)
-    ? F.flatten(settings.elligibleZones.map(expandSideShorthand))
+    ? F.flatten(F.asArray(settings.elligibleZones).map(expandSideShorthand))
     : null
   const preferredZones = F.isExists(settings.preferredZones)
-    ? F.flatten(settings.preferredZones.map(expandSideShorthand))
+    ? F.flatten(F.asArray(settings.preferredZones).map(expandSideShorthand))
     : null
   if (elligibleZones && preferredZones) {
     const impossiblePreferredZones = F.omit(elligibleZones, preferredZones)

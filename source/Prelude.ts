@@ -18,6 +18,10 @@ const splitWith = <A>(f: Predicate<A>, xs: A[]): [A[], A[]] => {
   return [a, b]
 }
 
+const asArray = <T extends unknown>(x: T | T[]): T[] => {
+  return Array.isArray(x) ? x : [x]
+}
+
 /**
  * Map over values of an object.
  */
@@ -156,4 +160,5 @@ export {
   upperLimit,
   compare,
   hasAny,
+  asArray,
 }
