@@ -1,6 +1,8 @@
 import * as FRP from "most"
 import * as F from "ramda"
 import * as Dom from "./source/DOM"
+import * as Observable from "./source/DOM/Observable"
+import expect from "expect"
 
 // Extend Most with a function to ease collection for result inspection
 
@@ -63,6 +65,11 @@ const sleep = (ms: number) => {
   })
 }
 
+const resetDOM = () => {
+  document.body.innerHTML = ""
+  window.scrollTo(0, 0)
+}
+
 const H = {
   makeDiv,
   makePixel,
@@ -75,3 +82,6 @@ window.FRP = FRP
 window.F = F
 window.H = H
 window.sleep = sleep
+window.Observable = Observable
+window.resetDOM = resetDOM
+window.expect = expect

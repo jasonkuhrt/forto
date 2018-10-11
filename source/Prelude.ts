@@ -142,6 +142,30 @@ const hasAny = <T>(xs: T[], x: T): boolean => {
   return xs.indexOf(x) !== -1
 }
 
+/**
+ * TODO
+ */
+const isChanged = <A extends unknown>() => {
+  // We will hold some local state in order to detect when a change of bounds
+  // in some part of the arrangement has occured.
+  let curr: null | A = null
+
+  return (next: A): boolean => {
+    // console.log(
+    //   "ischanged check: did change?",
+    //   !F.isEqual(curr, next),
+    //   curr,
+    //   next,
+    // )
+    if (!curr || !isEqual(curr, next)) {
+      curr = next
+      return true
+    } else {
+      return false
+    }
+  }
+}
+
 export {
   defaultsTo,
   head,
@@ -161,4 +185,5 @@ export {
   compare,
   hasAny,
   asArray,
+  isChanged,
 }

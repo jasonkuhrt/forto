@@ -2,6 +2,14 @@ import CP from "child_process"
 import FS from "fs"
 import * as Path from "path"
 
+const session = {
+  it: (description: string, f: (...args: unknown[]) => any) => {
+    it(description, () => {
+      return page.evaluate(f)
+    })
+  },
+}
+
 beforeAll(async () => {
   CP.execSync("yarn build:test")
 
@@ -71,13 +79,8 @@ beforeAll(async () => {
       return arrangement
     }
 
-    const resetDOM = () => {
-      document.body.innerHTML = ""
-      window.scrollTo(0, 0)
-    }
-
     const makeLayoutStream = arrangement =>
-      FRP.from(Dom.observe({}, arrangement)).skip(4) // Initial binding fires element resize events
+      FRP.from(Dom.observe({}, arrangement))
 
     // Expose globals
     window.resetDOM = resetDOM
@@ -93,77 +96,36 @@ beforeEach(async () => {
   })
 })
 
-describe("observeDomEvent", () => {
-  it("observing element resize event fires event upon initial subscribing", async () => {
-    const { el, el2 } = await page.evaluate(() => {
-      const el = H.makeDiv()
-      document.body.appendChild(el)
-      const stream = Dom.observeDomEvent("resize", el)
-      return FRP.from(stream)
-        .collect(1)
-        .then(([el2]: HTMLElement[]) => ({ el, el2 }))
-    })
-    expect(el).toEqual(el2)
-  })
-
-  it("can re-observe", async () => {
-    await page.evaluate(() => {
-      let el = H.makeDiv()
-      document.body.appendChild(el)
-      const stream = Dom.observeDomEvent("resize", el)
-      return FRP.from(stream)
-        .take(1)
-        .drain()
-        .then(() => {
-          const stream2 = Dom.observeDomEvent("resize", el)
-          return FRP.from(stream2)
-            .take(1)
-            .drain()
-        })
-    })
-  })
+session.it("accepts an arrangement, returns an observable", () => {
+  const arrangement = initArrangement()
+  const o = Dom.observe({}, arrangement)
+  expect(typeof o.subscribe).toEqual("function")
 })
 
-it("accepts an arrangement, returns an observable", async () => {
-  const subscribeType = await page.evaluate(() => {
-    const arrangement = initArrangement()
-    const o = Dom.observe({}, arrangement)
-    return typeof o.subscribe
-  })
-  expect(subscribeType).toEqual("function")
-})
-
-it(`if any arrangement elements' dimensions change a new layout is calculated`, async () => {
-  await page.evaluate(() => {
+session.it(
+  `if any arrangement elements' dimensions change a new layout is calculated`,
+  () => {
     const arrangement = initArrangement()
     const promise = makeLayoutStream(arrangement).collect(1)
-    setTimeout(() => {
+    sleep(1000).then(() => {
       H.incWidth(1, arrangement.target)
-    }, 1000)
+    })
     return promise
-  })
+  },
+)
+
+session.it("if position change of target there is a change event", () => {
+  const arrangement = initArrangement()
+  const promise = FRP.from(Dom.observeWithPolling(1000, arrangement)).collect(1)
+  arrangement.frame.insertBefore(H.makePixel(), arrangement.target)
+  return promise
 })
 
-it("if position change of target there is a change event", async () => {
-  await page.evaluate(() => {
-    const arrangement = initArrangement()
-    const promise = FRP.from(Dom.observeWithPolling(1000, arrangement))
-      .skip(4) // Initial binding fires element resize events
-      .collect(1)
-    arrangement.frame.insertBefore(H.makePixel(), arrangement.target)
-    return promise
-  })
-})
-
-it("if position change of frame there is a change event", async () => {
-  await page.evaluate(() => {
-    const arrangement = initArrangement()
-    const promise = FRP.from(Dom.observeWithPolling(1000, arrangement))
-      .skip(4) // Initial binding fires element resize events
-      .collect(1)
-    document.body.insertBefore(H.makePixel(), arrangement.frame)
-    return promise
-  })
+session.it("if position change of frame there is a change event", () => {
+  const arrangement = initArrangement()
+  const promise = FRP.from(Dom.observeWithPolling(1000, arrangement)).collect(1)
+  document.body.insertBefore(H.makePixel(), arrangement.frame)
+  return promise
 })
 
 describe("if any arrangement elements' dimensions change a new layout is calculated", () => {
@@ -177,44 +139,38 @@ describe("if any arrangement elements' dimensions change a new layout is calcula
       }
     })
   })
-  it(`via change of frame`, async () => {
-    await page.evaluate(() => {
-      return testForElement("frame")
-    })
+  session.it(`via change of frame`, () => {
+    return testForElement("frame")
   })
-  it(`via change of popover`, async () => {
-    await page.evaluate(() => {
-      return testForElement("popover")
-    })
+  session.it(`via change of popover`, () => {
+    return testForElement("popover")
   })
-  it(`via change of target`, async () => {
-    await page.evaluate(() => {
-      return testForElement("target")
-    })
+  session.it(`via change of target`, () => {
+    return testForElement("target")
   })
-  it(`via change of tip`, async () => {
-    await page.evaluate(() => {
-      return testForElement("tip")
-    })
+  session.it(`via change of tip`, () => {
+    return testForElement("tip")
   })
 })
 
 // Test that changes in position of arrangement elements trigger a change
 // if using poll-based observation.
 
-it("if frame can scroll, and does scroll, a new layout is calculated", async () => {
-  await page.evaluate(() => {
+session.it(
+  "if frame can scroll, and does scroll, a new layout is calculated",
+  () => {
     const arrangement = initArrangement()
-    const promise = FRP.from(Dom.observeWithPolling(1000, arrangement))
-      .skip(4) // Initial binding fires element resize events
-      .collect(1)
+    const promise = FRP.from(Dom.observeWithPolling(1000, arrangement)).collect(
+      1,
+    )
     arrangement.frame.scrollTop = 100
     return promise
-  })
-})
+  },
+)
 
-it("if frame is window, and frame scrolls, a new layout is calculated", async () => {
-  await page.evaluate(() => {
+session.it(
+  "if frame is window, and frame scrolls, a new layout is calculated",
+  () => {
     document.body.appendChild(
       H.makeDiv({ style: { height: "10000px", width: "1px" } }),
     )
@@ -232,85 +188,77 @@ it("if frame is window, and frame scrolls, a new layout is calculated", async ()
       F.forEach(x => document.body.appendChild(x)),
     )(a)
 
-    const promise = FRP.from(Dom.observe({}, a))
-      // Initial binding fires element resize events
-      // window does not fire
-      .skip(3)
-      .collect(1)
+    const promise = FRP.from(Dom.observe({}, a)).collect(1)
 
     // Do a scroll that should trigger layout recalculation
     a.frame.scrollBy(0, 100)
 
     return promise
-  })
+  },
+)
+
+session.it("a new zone will be assigned if it becomes the new best fit", () => {
+  const arrangement = initArrangement()
+  setTimeout(() => {
+    arrangement.target.style.height = "80px"
+  }, 10)
+
+  // Initial binding fires element resize events that we do not care about
+  // The second event will be triggered by the height resize above
+  return FRP.from(Dom.observe({}, arrangement))
+    .collect(2)
+    .then(results => {
+      // Check that we went from one zone to another
+      expect(results[0].zone.side).toBe("Bottom")
+      expect(results[1].zone.side).toBe("Right")
+    })
 })
 
-it("a new zone will be assigned if it becomes the new best fit", async () => {
-  const results = await page.evaluate(() => {
-    const arrangement = initArrangement()
-    setTimeout(() => {
-      arrangement.target.style.height = "80px"
-    }, 10)
-
-    // Initial binding fires element resize events that we do not care about
-    // The second event will be triggered by the height resize above
-    return FRP.from(Dom.observe({}, arrangement))
-      .skip(3) // Initial 4 binding fires element resize events
-      .collect(2) // take 4th initial to compare with 5th triggered
+session.it("if ZCT set, does not change zone unless good enough", () => {
+  sleep(10).then(() => {
+    a.target.style.height = "50px"
   })
-  // Check that we went from one zone to another
-  expect(results[0].zone.side).toBe("Bottom")
-  expect(results[1].zone.side).toBe("Right")
-})
-
-it("if ZCT set, does not change zone unless good enough", async () => {
-  const results = await page.evaluate(() => {
-    setTimeout(() => {
-      a.target.style.height = "50px"
-    }, 10)
-    const a = initArrangement()
-    a.popover.style.height = "50px"
-    a.popover.style.width = "50px"
-    // In this test zone-right is an improvement but does not exceed
-    // the threshold
-    return FRP.from(Dom.observe({ zoneChangeThreshold: 0.45 }, a))
-      .skip(4) // Initial binding fires element resize events
-      .collect(1)
-  })
-  expect(results[0].zone.side).toEqual("Bottom")
+  const a = initArrangement()
+  a.popover.style.height = "50px"
+  a.popover.style.width = "50px"
+  // In this test zone-right is an improvement but does not exceed
+  // the threshold
+  return FRP.from(Dom.observe({ zoneChangeThreshold: 0.45 }, a))
+    .collect(1)
+    .then(results => {
+      expect(results[0].zone.side).toEqual("Bottom")
+    })
 })
 
 describe("observeWithoutPolling", () => {
-  it("accepts settings e.g. elligibleZones", async () => {
-    const results = await page.evaluate(() => {
-      sleep(10).then(() => {
-        a.target.style.height = "100px"
-      })
-      const a = initArrangement()
-      return FRP.from(
-        Dom.observeWithoutPolling({ elligibleZones: ["Bottom"] }, a),
-      )
-        .skip(4) // Initial binding fires element resize events
-        .collect(1)
+  session.it("accepts settings e.g. elligibleZones", () => {
+    sleep(10).then(() => {
+      a.target.style.height = "100px"
     })
-    expect(results[0].zone.side).toEqual("Bottom")
+    const a = initArrangement()
+    return FRP.from(
+      Dom.observeWithoutPolling({ elligibleZones: ["Bottom"] }, a),
+    )
+      .collect(1)
+      .then(results => {
+        expect(results[0].zone.side).toEqual("Bottom")
+      })
   })
 })
 
 describe("observeWithPolling", () => {
-  it("accepts settings e.g. elligibleZones", async () => {
-    const results = await page.evaluate(() => {
-      sleep(10).then(() => {
-        a.target.style.height = "100px"
-      })
-      const a = initArrangement()
-      return FRP.from(
-        Dom.observeWithPolling({ elligibleZones: ["Bottom"] }, a, 1),
-      )
-        .skip(4) // Initial binding fires element resize events
-        .collect(1)
+  session.it("accepts settings e.g. elligibleZones", () => {
+    sleep(10).then(() => {
+      a.target.style.height = "100px"
     })
-    expect(results[0].zone.side).toEqual("Bottom")
+    const a = initArrangement()
+    return FRP.from(
+      Dom.observeWithPolling({ elligibleZones: ["Bottom"] }, a, 1),
+    )
+      .collect(1)
+      .then(results => {
+        expect(results[0].zone.side).toEqual("Bottom")
+      })
   })
 })
 
@@ -318,31 +266,29 @@ describe("observeWithPolling", () => {
 // for observeWithoutPollig and observeWithPolling. Just the function
 // name is different.
 describe("observe", () => {
-  it("can be used without polling", async () => {
-    const results = await page.evaluate(() => {
-      sleep(10).then(() => {
-        a.target.style.height = "100px"
-      })
-      const a = initArrangement()
-      return FRP.from(Dom.observe({ elligibleZones: ["Bottom"] }, a))
-        .skip(4) // Initial binding fires element resize events
-        .collect(1)
+  session.it("can be used without polling", () => {
+    sleep(10).then(() => {
+      a.target.style.height = "100px"
     })
-    expect(results[0].zone.side).toEqual("Bottom")
+    const a = initArrangement()
+    return FRP.from(Dom.observe({ elligibleZones: ["Bottom"] }, a))
+      .collect(1)
+      .then(results => {
+        expect(results[0].zone.side).toEqual("Bottom")
+      })
   })
 
-  it("can be used with polling", async () => {
-    const results = await page.evaluate(() => {
-      sleep(10).then(() => {
-        a.target.style.height = "100px"
-      })
-      const a = initArrangement()
-      return FRP.from(
-        Dom.observe({ pollIntervalMs: 1, elligibleZones: ["Bottom"] }, a),
-      )
-        .skip(4) // Initial binding fires element resize events
-        .collect(1)
+  session.it("can be used with polling", () => {
+    sleep(10).then(() => {
+      a.target.style.height = "100px"
     })
-    expect(results[0].zone.side).toEqual("Bottom")
+    const a = initArrangement()
+    return FRP.from(
+      Dom.observe({ pollIntervalMs: 1, elligibleZones: ["Bottom"] }, a),
+    )
+      .collect(1)
+      .then(results => {
+        expect(results[0].zone.side).toEqual("Bottom")
+      })
   })
 })
