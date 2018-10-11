@@ -19,7 +19,7 @@ const splitWith = <A>(f: Predicate<A>, xs: A[]): [A[], A[]] => {
 }
 
 const asArray = <T extends unknown>(x: T | T[]): T[] => {
-  return Array.isArray(x) ? x : [x]
+  return Array.isArray(x) ? x : x == undefined ? [] : [x]
 }
 
 /**

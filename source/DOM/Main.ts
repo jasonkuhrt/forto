@@ -13,7 +13,7 @@ import ElementResizeDetector from "element-resize-detector"
 import Observable from "zen-observable"
 import * as Main from "../Main"
 import * as F from "../Prelude"
-import * as Settings from "../Settings"
+import * as FortoSettings from "../Settings"
 import * as H from "./Helpers"
 
 type Frame = Window | Element
@@ -25,7 +25,7 @@ type Arrangement = {
   popover: Element
 }
 
-interface DomSettings extends Settings.SettingsUnchecked {
+interface Settings extends FortoSettings.SettingsUnchecked {
   pollIntervalMs?: null | number
 }
 
@@ -179,7 +179,7 @@ const createScrollOffseter = (
  * Like `observe` but no polling option.
  */
 const observeWithoutPolling = (
-  settings: Settings.SettingsUnchecked,
+  settings: FortoSettings.SettingsUnchecked,
   arrangement: Arrangement,
 ): Observable<Main.Calculation> => {
   return observeArrChanges(arrangement)
@@ -191,7 +191,7 @@ const observeWithoutPolling = (
  * Like `observe` but will always poll.
  */
 const observeWithPolling = (
-  settings: Settings.SettingsUnchecked,
+  settings: FortoSettings.SettingsUnchecked,
   arrangement: Arrangement,
   intervalMs: number,
 ): Observable<Main.Calculation> => {
@@ -237,7 +237,7 @@ const observeWithPolling = (
  * A pollIntervalMs of 0 has undefined behaviour.
  */
 const observe = (
-  settings: DomSettings,
+  settings: Settings,
   arrangement: Arrangement,
 ): Observable<Main.Calculation> => {
   const { pollIntervalMs, ...fortoSettings } = settings
