@@ -49,15 +49,19 @@ const observeArrChangesByEvents = (
       observer.next(undefined)
     }
 
+    // Observe things that can affect the Forto layout. That means
+    // observe all elements in the arrangement (except the tip) for
+    // resizes and observe the frame for scrolls.
+    //
+    // The tip is not observed because it is generally not a
+    // dynamic piece of geometry that can/should affect the layout.
     const subs = [
-      // Watch all elements in the arrangement for resizes
-      ...F.values(arrangement).map(el =>
-        Obs.domEvent("resize", el).subscribe(observerNext),
-      ),
-      // Watch for scroll events in the frame
+      Obs.domEvent("resize", arrangement.frame),
+      Obs.domEvent("resize", arrangement.popover),
+      Obs.domEvent("resize", arrangement.target),
       // TODO throttle
-      Obs.domEvent("scroll", arrangement.frame).subscribe(observerNext),
-    ]
+      Obs.domEvent("scroll", arrangement.frame),
+    ].map(stream => stream.subscribe(observerNext))
 
     const tearDown = () => {
       for (const sub of subs) {
