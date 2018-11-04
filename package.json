@@ -42,7 +42,7 @@
     "pretty-quick": "1.7.0",
     "puppeteer": "1.8.0",
     "ramda": "0.25.0",
-    "rollup": "0.66.4",
+    "rollup": "0.67.0",
     "rollup-plugin-node-resolve": "3.4.0",
     "rollup-plugin-typescript2": "0.17.1",
     "ts-jest": "23.1.4",
