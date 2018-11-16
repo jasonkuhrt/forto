@@ -43,9 +43,9 @@
   dependencies:
     commander "*"
 
-"@types/element-resize-detector@1.1.0":
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/@types/element-resize-detector/-/element-resize-detector-1.1.0.tgz#52eeac6d330e0efb303e0d0e53ecf267474f7b69"
+"@types/element-resize-detector@1.1.1":
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/@types/element-resize-detector/-/element-resize-detector-1.1.1.tgz#4b87e9423408a93ce1365f99412bc46c93862523"
 
 "@types/estree@0.0.39":
   version "0.0.39"
