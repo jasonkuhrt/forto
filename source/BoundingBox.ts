@@ -22,7 +22,7 @@ const make = (width: number, height: number): BoundingBox => ({
 })
 
 /**
- * Update a box's bounds.
+ * Update a bounding box's bounds.
  */
 const translate = (x: number, y: number, box: BoundingBox): BoundingBox => ({
   width: box.width,
