@@ -25,7 +25,7 @@ type Arrangement = {
   popover: Element
 }
 
-interface Settings extends FortoSettings.SettingsUnchecked {
+type Settings = FortoSettings.SettingsUnchecked & {
   pollIntervalMs?: null | number
 }
 
@@ -85,12 +85,6 @@ const createScrollOffseter = (
     const frameScrollSize = H.calcScrollSize(frame)
     calculatedLayout.popover.x += frameScrollSize.width
     calculatedLayout.popover.y += frameScrollSize.height
-    // TODO Enable this to achieve absolute tip positioning.
-    //      We can make it a configuration option
-    // if (calculatedLayout.tip) {
-    //   calculatedLayout.tip.x += frameScrollSize.width
-    //   calculatedLayout.tip.y += frameScrollSize.height
-    // }
     return calculatedLayout
   }
 }
@@ -194,9 +188,10 @@ const observe = (
   arrangement: Arrangement,
 ): Observable<Main.Calculation> => {
   const { pollIntervalMs, ...fortoSettings } = settings
-  return pollIntervalMs
+  const stream = pollIntervalMs
     ? observeWithPolling(fortoSettings, arrangement, pollIntervalMs)
     : observeWithoutPolling(fortoSettings, arrangement)
+  return stream
 }
 
 export { observe, observeWithPolling, observeWithoutPolling, Arrangement }
