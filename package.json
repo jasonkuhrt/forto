@@ -7,7 +7,7 @@
   "license": "MIT",
   "scripts": {
     "build:test": "parcel build puppeteer.setup.ts",
-    "test:dev": "jest --watch --verbose",
+    "test:watch": "jest --watch --verbose",
     "test": "jest --coverage --verbose && codecov",
     "build": "rollup --config",
     "build:watch": "nodemon --exec 'yarn build' --ext .ts",
