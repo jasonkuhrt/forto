@@ -23,7 +23,7 @@
     "@types/element-resize-detector": "1.1.0",
     "@types/jest": "23.3.3",
     "@types/jest-environment-puppeteer": "2.2.1",
-    "@types/lodash": "4.14.116",
+    "@types/lodash": "4.14.118",
     "@types/lodash-es": "4.17.1",
     "@types/lodash.isequal": "4.5.3",
     "@types/puppeteer": "1.6.3",
