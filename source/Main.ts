@@ -239,49 +239,51 @@ const calcPopoverPosition = (
   zone: Zone,
 ) => {
   const ori = Ori.fromSide(zone)
-  const p = { x: 0, y: 0 }
+  const pos = { x: 0, y: 0 }
   const crossAxis = Ori.crossAxis(ori)
   const crossEnd = Ori.crossEnd(ori)
   const crossStart = Ori.crossStart(ori)
   const crossLength = Ori.crossLength(ori)
-
-  /* Place the popover next to the target. */
   const isBefore = F.hasAny(["Left", "Top"], zone.side)
-  const tipLength = tip ? tip[Ori.mainLength(ori)] : 0
-  p[Ori.mainAxis(ori)] = isBefore
+  const tipLength = tip ? settings.tipSize! : 0
+
+  /* On main axis, place the popover next to the target. */
+  pos[Ori.mainAxis(ori)] = isBefore
     ? target[Ori.mainStart(ori)] - (popover[Ori.mainDim(ori)] + tipLength)
     : target[Ori.mainEnd(ori)] + tipLength
 
-  /* Align the popover's cross-axis center with that of target. Only the
+  /* On the cross axis, align the popover to the target's center. Only the
   target length within frame should be considered. That is, find the
   cross-axis center of the part of target within the frame bounds, ignoring any
   length outside said frame bounds. */
-  let targetCrossAxisCrossPos =
-    target[crossStart] + Layout.center(target[crossLength])
-  const frameTargetEndDiff = frame[crossEnd] - target[crossEnd]
-  if (frameTargetEndDiff < 0) {
-    targetCrossAxisCrossPos += Layout.center(frameTargetEndDiff)
-  }
-  const frameTargetStartDiff = target[crossStart] - frame[crossStart]
-  if (frameTargetStartDiff < 0) {
-    targetCrossAxisCrossPos -= Layout.center(frameTargetStartDiff)
-  }
+  const applicableTargetCrossStart = F.max(
+    target[crossStart],
+    frame[crossStart],
+  )
 
-  p[crossAxis] = targetCrossAxisCrossPos - Layout.center(popover[crossLength])
+  const applicableTargetCrossEnd = F.min(target[crossEnd], frame[crossEnd])
+
+  const targetCrossAxisPos = Layout.centerBetween(
+    applicableTargetCrossStart,
+    applicableTargetCrossEnd,
+  )
+
+  pos[crossAxis] = targetCrossAxisPos - Layout.center(popover[crossLength])
 
   if (settings.isBounded) {
+    /* Constrain popover cross pos to layout within frame bounds. The exception is
+    if popover overflows in which case a centering layout is used. */
     const crossLengthDiff = frame[crossLength] - popover[crossLength]
     if (crossLengthDiff < 0) {
-      /* If the popover exceeds Frame bounds on both ends then
-      center it between them. */
-      p[crossAxis] = Layout.center(crossLengthDiff)
-    } else if (p[crossAxis] + popover[crossLength] > frame[crossEnd]) {
-      p[crossAxis] = frame[crossEnd] - popover[crossLength]
-    } else if (p[crossAxis] < 0) {
-      p[crossAxis] = 0
+      pos[crossAxis] = Layout.center(crossLengthDiff)
+    } else if (pos[crossAxis] + popover[crossLength] > frame[crossEnd]) {
+      pos[crossAxis] = frame[crossEnd] - popover[crossLength]
+    } else if (pos[crossAxis] < frame[crossStart]) {
+      pos[crossAxis] = frame[crossStart]
     }
   }
-  return p
+
+  return pos
 }
 
 /**
@@ -292,67 +294,46 @@ const calcTipPosition = (
   target: BB.BoundingBox,
   popover: BB.BoundingBox,
   tip: BB.BoundingBox,
+  // TODO
+  tipSize: number = 0,
 ): Layout.Pos => {
   const isAfter = zone.side === "Left" || zone.side === "Top"
   const orientation = Ori.fromSide(zone)
   const crossStart = Ori.crossStart(orientation)
   const crossEnd = Ori.crossEnd(orientation)
+  // console.log('popover[crossStart], target[crossStart]', popover[crossStart], target[crossStart])
   const innerMostBefore = F.max(popover[crossStart], target[crossStart])
+  // console.log('popover[crossEnd], target[crossEnd]', popover[crossEnd], target[crossEnd])
   const innerMostAfter = F.min(popover[crossEnd], target[crossEnd])
-  return {
+
+  tip // TODO remove
+  // console.log(innerMostBefore, innerMostAfter)
+  // console.log(
+  //   "Layout.centerBetween(innerMostBefore, innerMostAfter)",
+  //   Layout.centerBetween(innerMostBefore, innerMostAfter),
+  // )
+  const pos = {
     [Ori.crossAxis(orientation)]:
-      Layout.centerBetween(innerMostBefore, innerMostAfter) -
-      (Layout.centerOf(Ori.opposite(orientation), tip) + popover[crossStart]),
+      innerMostAfter - innerMostBefore < tipSize * 2
+        ? target[crossStart] > popover[crossStart]
+          ? popover.height - tipSize
+          : tipSize
+        : Layout.centerBetween(innerMostBefore, innerMostAfter) -
+          // Make the measurement relative to the popover by excluding space up to the popover's start.
+          popover[crossStart],
+    // If the tip is to be positioned "after the popover" (meaning rightward or belowward)
+    // then we have to offset the tip position by popover length to get it over there.
     [Ori.mainAxis(orientation)]: isAfter
       ? popover[Ori.mainDim(orientation)]
-      : tip[Ori.mainDim(orientation)] * -1,
+      : 0,
   } as Layout.Pos
-}
-
-const calcAbsoluteTipPosition = (
-  zone: Zone,
-  target: BB.BoundingBox,
-  popover: BB.BoundingBox,
-  tip: BB.BoundingBox,
-): Layout.Pos => {
-  const orientation = Ori.fromSide(zone)
-  const crossStart = Ori.crossStart(orientation)
-  const crossEnd = Ori.crossEnd(orientation)
-
-  const isBefore = zone.side === "Left" || zone.side === "Top"
-
-  const tipCrossCenterLength = Layout.centerOf(Ori.opposite(orientation), tip)
-  const innerMostBefore = F.max(popover[crossStart], target[crossStart])
-  const innerMostAfter = F.min(popover[crossEnd], target[crossEnd])
-  const innerCenterLength = Layout.centerBetween(
-    innerMostBefore,
-    innerMostAfter,
-  )
-
-  const crossAxisPos = Layout.withinBounds(
-    innerMostBefore,
-    // max bound factors in element forward-rendering
-    innerMostAfter - tip[Ori.crossLength(orientation)],
-    innerCenterLength - tipCrossCenterLength,
-  )
-
-  /* Position the tip's main-axis position
-  We need to "pull back" the tip if comes before the target
-  in the coordinate system, since elements "render forward".
-
-  We need to "push ahead" the tip if comes after the target
-  in the coordinate system. Note in this case the
-  "render forward" works in our favour so we don't have to
-  "offset" it.
-  */
-  const mainAxisPos = isBefore
-    ? target[Ori.mainStart(orientation)] - tip[Ori.mainLength(orientation)]
-    : target[Ori.mainEnd(orientation)]
-
-  return {
-    [Ori.crossAxis(orientation)]: crossAxisPos,
-    [Ori.mainAxis(orientation)]: mainAxisPos,
-  } as Layout.Pos
+  // TODO document that in vertical case (main position) we substract
+  // tipSize because rotation does not actually change where paints
+  // from and that... in horizontal case (cross position) to center
+  // the tip. This assumes that the arrow is intrinsically (0deg) of
+  // shape ">" making for an e.g. 8x16 dimension box.
+  pos.y -= tipSize
+  return pos
 }
 
 type Zone = Layout.Size & {
@@ -380,7 +361,7 @@ const calcLayout = (
   previousZoneSide: null | Ori.Side,
 ): Calculation => {
   const settings = Settings.checkAndNormalize(givenSettings)
-  const isTipEnabled = Boolean(arrangementUnchecked.tip)
+  const isTipEnabled = Boolean(settings.tipSize)
   const arrangement = (isTipEnabled
     ? arrangementUnchecked
     : {
@@ -409,6 +390,7 @@ const calcLayout = (
         // brand new position we just calculated for it.
         BB.fromSizePosition(arrangement.popover, popoverPosition),
         arrangement.tip,
+        settings.tipSize || 0,
       )
     : null
 
@@ -449,7 +431,6 @@ export {
   optimalZone,
   calcPopoverPosition,
   calcTipPosition,
-  calcAbsoluteTipPosition,
   calcLayout,
   Arrangement,
   ArrangementUnchecked,

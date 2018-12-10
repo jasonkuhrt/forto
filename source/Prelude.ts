@@ -151,12 +151,6 @@ const isChanged = <A extends unknown>() => {
   let curr: null | A = null
 
   return (next: A): boolean => {
-    // console.log(
-    //   "ischanged check: did change?",
-    //   !F.isEqual(curr, next),
-    //   curr,
-    //   next,
-    // )
     if (!curr || !isEqual(curr, next)) {
       curr = next
       return true

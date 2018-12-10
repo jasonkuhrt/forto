@@ -14,15 +14,16 @@ type OfASidea = {
   side: Side
 }
 
+const isHorizontalValue = (side: Side): boolean => {
+  return side === Side.Right || side === Side.Left
+}
+
 /**
  * Check which orientation the side is that something is in.
  */
 const isHorizontal = (ofASide: OfASidea): boolean => {
   // https://stackoverflow.com/questions/39785320/how-to-compare-enums-in-typescript
-  return (
-    (ofASide.side as Side) === (Side.Right as Side) ||
-    (ofASide.side as Side) === (Side.Right as Side)
-  )
+  return isHorizontalValue(ofASide.side)
 }
 
 /**
@@ -59,6 +60,7 @@ const opposite = (ori: Ori) =>
 
 export {
   isHorizontal,
+  isHorizontalValue,
   fromSide,
   crossDim,
   mainDim,

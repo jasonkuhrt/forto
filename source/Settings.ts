@@ -6,20 +6,18 @@ enum Order {
   After = "After",
 }
 
-type SettingsUnchecked = {
-  zoneChangeThreshold?: number
-  preferZoneUntilPercentWorse?: number
-  isBounded?: boolean
-  elligibleZones?: SidesShorthand | SidesShorthand[]
-  preferredZones?: SidesShorthand | SidesShorthand[]
-}
-
 type Settings = {
   isBounded: boolean
   zoneChangeThreshold: null | number
   elligibleZones: null | Ori.Side[]
   preferredZones: null | Ori.Side[]
   preferZoneUntilPercentWorse: null | number
+  tipSize: null | number
+}
+
+type SettingsUnchecked = Partial<Settings> & {
+  elligibleZones?: null | SidesShorthand | SidesShorthand[]
+  preferredZones?: null | SidesShorthand | SidesShorthand[]
 }
 
 type SidesShorthand = Ori.Ori | Order | Ori.Side
@@ -41,18 +39,23 @@ const expandSideShorthand = (elligibleZones: SidesShorthand): Ori.Side[] => {
 
 const checkAndNormalize = (settings: SettingsUnchecked): Settings => {
   const isBounded = F.defaultsTo(true, settings.isBounded)
+
   const zoneChangeThreshold = settings.zoneChangeThreshold || null
+
   const preferZoneUntilPercentWorse = F.isExists(
     settings.preferZoneUntilPercentWorse,
   )
     ? settings.preferZoneUntilPercentWorse
     : null
+
   const elligibleZones = F.isExists(settings.elligibleZones)
     ? F.flatten(F.asArray(settings.elligibleZones).map(expandSideShorthand))
     : null
+
   const preferredZones = F.isExists(settings.preferredZones)
     ? F.flatten(F.asArray(settings.preferredZones).map(expandSideShorthand))
     : null
+
   if (elligibleZones && preferredZones) {
     const impossiblePreferredZones = F.omit(elligibleZones, preferredZones)
     if (impossiblePreferredZones.length) {
@@ -64,12 +67,15 @@ const checkAndNormalize = (settings: SettingsUnchecked): Settings => {
     }
   }
 
+  const tipSize = settings.tipSize ? settings.tipSize : null
+
   return {
     isBounded,
     elligibleZones,
     preferredZones,
     zoneChangeThreshold,
     preferZoneUntilPercentWorse,
+    tipSize,
   }
 }
 

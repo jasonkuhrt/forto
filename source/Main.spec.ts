@@ -3,6 +3,8 @@ import * as Forto from "./Main"
 import * as Ori from "./Ori"
 import * as Settings from "./Settings"
 
+type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>
+
 // TODO Property Test ideas
 // * When measuring zones, the zones along an orientation always have the
 //   same cross-length.
@@ -542,72 +544,229 @@ describe("calcPopoverPosition (unbounded)", () => {
 })
 
 describe("calcTipPosition", () => {
-  const zone: Forto.Zone = {
-    side: Ori.Side.Left,
+  type Scenarios = {
+    zone: Forto.Zone
+    givenPopoverPos: { x: number; y: number }
+    tipPos: (
+      args: { popover: B.BoundingBox; tip: B.BoundingBox },
+    ) => { x: number; y: number }
+  }[][]
+
+  const zoneOf = (side: Ori.Side): Forto.Zone => ({
+    side,
     // following props do not matter for test
     height: 0,
     width: 0,
     popoverNegAreaPercent: 0,
     areaPercentageRemaining: 100,
-  }
-  const tip = B.make(4, 4)
-  it("finds centered tip position", () => {
-    const target = B.translate(200, 100, B.make(10, 10))
-    const popover = B.translate(200 - 10, 100, B.make(10, 10))
-    expect(Forto.calcTipPosition(zone, target, popover, tip)).toEqual({
-      x: 10,
-      y: 3,
-    })
   })
-  it("refers to popover before/popover after if it should", () => {
-    const target = B.translate(200, 100, B.make(30, 30))
-    const popover = B.translate(200 - 10, 110, B.make(10, 10))
-    expect(Forto.calcTipPosition(zone, target, popover, tip)).toEqual({
-      x: 10,
-      y: 3,
-    })
-  })
-  it("refers to popover before/target aftert if it should", () => {
-    const target = B.translate(200, 100, B.make(30, 30))
-    const popover = B.translate(200 - 30, 110, B.make(30, 30))
-    expect(Forto.calcTipPosition(zone, target, popover, tip)).toEqual({
-      x: 30,
-      y: 8,
-    })
-  })
+  const leftZone = zoneOf(Ori.Side.Left)
+  const rightZone = zoneOf(Ori.Side.Right)
+  // const topZone = zoneOf(Ori.Side.Top)
+  // const bottomZone = zoneOf(Ori.Side.Bottom)
+
+  const target = B.translate(200, 100, B.make(10, 10))
+  const tip = B.make(8, 16)
+  const tipSize = 2 // aka. > aka. w=2 h=4 (2x4) 0deg
+
+  // it("finds centered tip position relative to popover", () => {
+  //   /*
+  //   PT
+  //   */
+  //   const target = B.translate(200, 100, B.make(10, 10))
+  //   const popover = B.translate(200 - 10, 100, B.make(10, 10))
+  //   const pos = Forto.calcTipPosition(zone, target, popover, tip)
+  //   expect(pos).toEqual({
+  //     x: popover.width,
+  //     y: popover.height / 2,
+  //   })
+  // })
+
+  // Very odd: these tests seem to indicate tip positioning of top-left
+  // yet in the react-popover is configured for center-left origin...
+  it.each([
+    /*
+     P
+    T
+    */
+    [
+      {
+        zone: rightZone,
+        givenPopoverPos: { x: 210, y: 90 },
+        tipPos: ({ popover }) => ({
+          x: 0,
+          y: popover.height - tipSize * 2,
+        }),
+      },
+    ],
+    /*
+    PT
+    */
+    [
+      {
+        zone: leftZone,
+        givenPopoverPos: { x: 190, y: 100 },
+        tipPos: ({ popover }) => ({
+          x: popover.width,
+          y: popover.height / 2 - tipSize,
+        }),
+      },
+    ],
+    /*
+     T
+    P
+    */
+    [
+      {
+        zone: leftZone,
+        givenPopoverPos: { x: 190, y: 110 },
+        tipPos: ({ popover }) => ({
+          x: popover.width,
+          y: 0,
+        }),
+      },
+    ],
+  ] as Scenarios)(
+    "case %#: will place tip cross position to popover edge but not beyond",
+    ({ zone, givenPopoverPos, tipPos }) => {
+      const popover = B.translate(
+        givenPopoverPos.x,
+        givenPopoverPos.y,
+        B.make(10, 10),
+      )
+      const pos = Forto.calcTipPosition(zone, target, popover, tip, tipSize)
+      expect(pos).toEqual(tipPos({ popover, tip }))
+    },
+  )
+
+  // it("refers to popover before/target aftert if it should", () => {
+  //   /*
+  //     T
+  //   P
+  //   */
+  //   const target = B.translate(200, 100, B.make(30, 30))
+  //   const popover = B.translate(200 - 30, 110, B.make(30, 30))
+  //   const pos = Forto.calcTipPosition(zone, target, popover, tip)
+  //   expect(pos).toEqual({
+  //     x: popover.width,
+  //     y: tip.height / 2, // 10
+  //   })
+  // })
 })
 
 describe("calcLayout", () => {
-  const settingsDefault = {}
+  const settingsDefault: Forto.Settings.SettingsUnchecked = {
+    tipSize: 2,
+  }
   const arrangementDefault: Forto.ArrangementUnchecked = {
     frame: B.make(100, 100),
     target: B.translate(90, 50, B.make(10, 10)),
     popover: B.make(10, 10),
-    tip: B.make(2, 2),
+    tip: B.make(2, 4),
   }
+
   it("calculates the layout start to finish", () => {
     expect(Forto.calcLayout(settingsDefault, arrangementDefault, null)).toEqual(
       {
         popover: { x: 78, y: 50 },
-        tip: { x: 10, y: 4 },
+        tip: { x: 10, y: 3 },
         zone: {
           side: "Left",
           height: 100,
           width: 90,
-          areaPercentageRemaining: 0.99,
+          areaPercentageRemaining: 0.98,
           popoverNegAreaPercent: 0,
         },
       },
     )
   })
+
+  type Spec = {
+    targetW?: number
+    targetH?: number
+    popoverW?: number
+    popoverH?: number
+    targetX?: number
+    targetY?: number
+    targetPos?: [number, number]
+    frameW?: number
+    frameH?: number
+    frameX?: number
+    frameY?: number
+    framePos?: [number, number]
+  }
+
+  const I = (spec: Spec = {}): Forto.ArrangementUnchecked => {
+    const {
+      frameH = 110,
+      frameW = 110,
+      frameX = 0,
+      frameY = 0,
+      targetH = 10,
+      targetW = 10,
+      popoverW = 10,
+      popoverH = 10,
+      targetX = 50,
+      targetY = 50,
+    } = spec
+
+    const { targetPos = [targetX, targetY], framePos = [frameX, frameY] } = spec
+
+    const popover = B.make(popoverW, popoverH)
+    const target = B.make(targetW, targetH)
+
+    const arrangement = {
+      frame: B.make(frameW, frameH),
+      target,
+      popover,
+      tip: B.make(2, 4),
+    }
+
+    arrangement.target = B.translate(
+      targetPos[0],
+      targetPos[1],
+      arrangement.target,
+    )
+
+    arrangement.frame = B.translate(framePos[0], framePos[1], arrangement.frame)
+
+    return arrangement
+  }
+
+  type Scenarios = [
+    string,
+    {
+      i: Forto.ArrangementUnchecked
+      o: Omit<Forto.Calculation, "zone" | "tip">
+    }
+  ][]
+
+  const scenarios: Scenarios = [
+    [
+      "frame offset . left zone . target TR",
+      {
+        i: I({ framePos: [10, 10], frameH: 50, targetPos: [110, 10] }),
+        o: { popover: { x: 100, y: 10 } },
+      },
+    ],
+  ]
+
+  it.each(scenarios)("calculates the layout: %s", (_, { i, o }) => {
+    const settings = {}
+    const layout = Forto.calcLayout(settings, i, null)
+    expect({ popover: layout.popover }).toEqual(o)
+  })
+
   it("tip is optional", () => {
-    expect(
-      Forto.calcLayout(
-        settingsDefault,
-        { ...arrangementDefault, tip: null },
-        null,
-      ),
-    ).toEqual({
+    const settings = {
+      ...settingsDefault,
+      tipSize: null,
+    }
+    const arrangement = {
+      ...arrangementDefault,
+      tip: null,
+    }
+    expect(Forto.calcLayout(settings, arrangement, null)).toEqual({
       popover: { x: 80, y: 50 },
       tip: null,
       zone: {
