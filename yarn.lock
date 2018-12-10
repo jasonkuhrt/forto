@@ -96,9 +96,9 @@
     "@types/events" "*"
     "@types/node" "*"
 
-"@types/ramda@0.25.39":
-  version "0.25.39"
-  resolved "https://registry.yarnpkg.com/@types/ramda/-/ramda-0.25.39.tgz#7f6ddc0baa6e7f99860e7752dcfbeae5655bf525"
+"@types/ramda@0.25.40":
+  version "0.25.40"
+  resolved "https://registry.yarnpkg.com/@types/ramda/-/ramda-0.25.40.tgz#ab4970054d255ed1762fce5ebdfc3168af53d1f5"
 
 "@types/semver@^5.4.0":
   version "5.5.0"
