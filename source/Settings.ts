@@ -15,7 +15,9 @@ type Settings = {
   tipSize: null | number
 }
 
-type SettingsUnchecked = Partial<Settings> & {
+type SettingsUnchecked = Partial<
+  F.Omit<Settings, "elligibleZones" | "preferredZones">
+> & {
   elligibleZones?: null | SidesShorthand | SidesShorthand[]
   preferredZones?: null | SidesShorthand | SidesShorthand[]
 }

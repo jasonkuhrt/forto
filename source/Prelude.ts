@@ -2,6 +2,8 @@ import isEqual from "lodash.isequal"
 
 type Predicate<A> = (x: A) => boolean
 
+type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>
+
 /**
  * Partition a list based on a predicate.
  */
@@ -121,7 +123,8 @@ const values = <O extends Record<string, any>>(o: O): O[keyof O][] => {
  * Flatten one level of nest listing. E.g.: [[1,2],[3,4]] becomes [1,2,3,4].
  */
 const flatten = <A>(aa: A[][]): A[] => {
-  return [].concat.apply([], aa)
+  const array: A[] = []
+  return array.concat.apply([], aa)
 }
 
 /**
@@ -180,4 +183,5 @@ export {
   hasAny,
   asArray,
   isChanged,
+  Omit,
 }

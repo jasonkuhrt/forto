@@ -10,7 +10,7 @@
     "test:watch": "jest --watch --verbose",
     "test": "jest --coverage --verbose && codecov",
     "build": "rollup --config",
-    "build:watch": "nodemon --exec 'yarn build' --ext .ts",
+    "build:watch": "nodemon --exec 'yarn build' --ext .ts --watch source",
     "dev": "yarn build:watch",
     "prepublish": "npm run build"
   },
@@ -20,33 +20,33 @@
     }
   },
   "devDependencies": {
-    "@types/element-resize-detector": "1.1.0",
-    "@types/jest": "23.3.8",
+    "@types/element-resize-detector": "1.1.2",
+    "@types/jest": "23.3.10",
     "@types/jest-environment-puppeteer": "2.2.1",
     "@types/lodash": "4.14.118",
     "@types/lodash-es": "4.17.1",
     "@types/lodash.isequal": "4.5.3",
-    "@types/puppeteer": "1.6.3",
-    "@types/ramda": "0.25.40",
+    "@types/puppeteer": "1.10.1",
+    "@types/ramda": "0.25.42",
     "@types/zen-observable": "0.8.0",
     "codecov": "3.1.0",
     "expect": "^23.6.0",
-    "husky": "1.1.3",
+    "husky": "1.2.0",
     "jest": "23.6.0",
-    "jest-puppeteer-preset": "3.3.1",
+    "jest-puppeteer-preset": "3.6.0",
     "most": "1.7.3",
-    "nodemon": "1.18.5",
+    "nodemon": "1.18.7",
     "object.assign": "4.1.0",
-    "parcel-bundler": "1.9.7",
-    "prettier": "1.14.3",
+    "parcel-bundler": "1.10.3",
+    "prettier": "1.15.3",
     "pretty-quick": "1.8.0",
-    "puppeteer": "1.8.0",
-    "ramda": "0.25.0",
-    "rollup": "0.66.4",
-    "rollup-plugin-node-resolve": "3.4.0",
-    "rollup-plugin-typescript2": "0.17.1",
-    "ts-jest": "23.1.4",
-    "typescript": "3.1.4"
+    "puppeteer": "1.11.0",
+    "ramda": "0.26.1",
+    "rollup": "0.67.4",
+    "rollup-plugin-node-resolve": "4.0.0",
+    "rollup-plugin-typescript2": "0.18.0",
+    "ts-jest": "23.10.5",
+    "typescript": "3.2.2"
   },
   "prettier": {
     "semi": false,
@@ -72,6 +72,11 @@
     "collectCoverageFrom": [
       "**/source/**/*.ts",
       "!**/build/**/*"
-    ]
+    ],
+    "globals": {
+      "ts-jest": {
+        "diagnostics": false
+      }
+    }
   }
 }

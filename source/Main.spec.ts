@@ -2,8 +2,7 @@ import * as B from "./BoundingBox"
 import * as Forto from "./Main"
 import * as Ori from "./Ori"
 import * as Settings from "./Settings"
-
-type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>
+import * as F from "./Prelude"
 
 // TODO Property Test ideas
 // * When measuring zones, the zones along an orientation always have the
@@ -334,7 +333,9 @@ describe("optimalZone (elligible unspecified)", () => {
     popover: B.make(9, 9),
     tip: B.make(1, 1),
   }
-  const optimalZone = Forto.optimalZone.bind(null, { elligibleZones: null })
+  const optimalZone: any = Forto.optimalZone.bind(null, {
+    elligibleZones: null,
+  } as any)
 
   it("should return the optimal zone", () => {
     expect(optimalZone(arrangement)).toEqual({
@@ -396,6 +397,7 @@ describe("calcPopoverPosition (bounded)", () => {
     elligibleZones: null,
     preferredZones: null,
     preferZoneUntilPercentWorse: null,
+    tipSize: 0,
   }
   const frame = B.make(400, 400)
   const target = B.translate(200, 100, B.make(10, 10))
@@ -501,6 +503,7 @@ describe("calcPopoverPosition (unbounded)", () => {
     elligibleZones: null,
     preferredZones: null,
     preferZoneUntilPercentWorse: null,
+    tipSize: 0,
   }
   const frame = B.make(400, 400)
   const zone: Forto.Zone = {
@@ -737,7 +740,7 @@ describe("calcLayout", () => {
     string,
     {
       i: Forto.ArrangementUnchecked
-      o: Omit<Forto.Calculation, "zone" | "tip">
+      o: F.Omit<Forto.Calculation, "zone" | "tip">
     }
   ][]
 
