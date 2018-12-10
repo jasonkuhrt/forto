@@ -8,6 +8,7 @@ enum Order {
 
 type Settings = {
   isBounded: boolean
+  boundingMode: "always" | "never" | "targetInFrame"
   zoneChangeThreshold: null | number
   elligibleZones: null | Ori.Side[]
   preferredZones: null | Ori.Side[]
@@ -42,6 +43,8 @@ const expandSideShorthand = (elligibleZones: SidesShorthand): Ori.Side[] => {
 const checkAndNormalize = (settings: SettingsUnchecked): Settings => {
   const isBounded = F.defaultsTo(true, settings.isBounded)
 
+  const boundingMode = settings.boundingMode || "targetInFrame"
+
   const zoneChangeThreshold = settings.zoneChangeThreshold || null
 
   const preferZoneUntilPercentWorse = F.isExists(
@@ -73,6 +76,7 @@ const checkAndNormalize = (settings: SettingsUnchecked): Settings => {
 
   return {
     isBounded,
+    boundingMode,
     elligibleZones,
     preferredZones,
     zoneChangeThreshold,

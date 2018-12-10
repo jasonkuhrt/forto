@@ -247,15 +247,21 @@ const calcPopoverPosition = (
   const isBefore = F.hasAny(["Left", "Top"], zone.side)
   const tipLength = tip ? settings.tipSize! : 0
 
-  /* On main axis, place the popover next to the target. */
-  pos[Ori.mainAxis(ori)] = isBefore
-    ? target[Ori.mainStart(ori)] - (popover[Ori.mainDim(ori)] + tipLength)
-    : target[Ori.mainEnd(ori)] + tipLength
+  /* Along main axis, place the popover next to the target. */
+  // TODO Refactor
+  if (settings.boundingMode === "always") {
+    pos[Ori.mainAxis(ori)] = isBefore
+      ? F.min(target[Ori.mainStart(ori)], frame[Ori.mainEnd(ori)]) -
+        (popover[Ori.mainDim(ori)] + tipLength)
+      : F.max(target[Ori.mainEnd(ori)], frame[Ori.mainStart(ori)]) + tipLength
+  } else {
+    pos[Ori.mainAxis(ori)] = isBefore
+      ? target[Ori.mainStart(ori)] - (popover[Ori.mainDim(ori)] + tipLength)
+      : target[Ori.mainEnd(ori)] + tipLength
+  }
 
-  /* On the cross axis, align the popover to the target's center. Only the
-  target length within frame should be considered. That is, find the
-  cross-axis center of the part of target within the frame bounds, ignoring any
-  length outside said frame bounds. */
+  /* Along the cross axis, align the popover to the target's center. Only the
+  target's length _within_ the frame should be measured.*/
   const applicableTargetCrossStart = F.max(
     target[crossStart],
     frame[crossStart],

@@ -739,6 +739,7 @@ describe("calcLayout", () => {
   type Scenarios = [
     string,
     {
+      settings?: Forto.Settings.SettingsUnchecked
       i: Forto.ArrangementUnchecked
       o: F.Omit<Forto.Calculation, "zone" | "tip">
     }
@@ -746,19 +747,29 @@ describe("calcLayout", () => {
 
   const scenarios: Scenarios = [
     [
-      "frame offset . left zone . target TR",
+      "frame offset (left zone, target TR)",
       {
         i: I({ framePos: [10, 10], frameH: 50, targetPos: [110, 10] }),
         o: { popover: { x: 100, y: 10 } },
       },
     ],
+    [
+      "always bounded",
+      {
+        settings: { boundingMode: "always" },
+        i: I({ targetPos: [0, -100] }),
+        o: { popover: { x: 0, y: 0 } },
+      },
+    ],
   ]
 
-  it.each(scenarios)("calculates the layout: %s", (_, { i, o }) => {
-    const settings = {}
-    const layout = Forto.calcLayout(settings, i, null)
-    expect({ popover: layout.popover }).toEqual(o)
-  })
+  it.each(scenarios)(
+    "calculates the layout: %s",
+    (_, { i, o, settings = {} }) => {
+      const layout = Forto.calcLayout(settings, i, null)
+      expect({ popover: layout.popover }).toEqual(o)
+    },
+  )
 
   it("tip is optional", () => {
     const settings = {
