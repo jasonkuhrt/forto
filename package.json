@@ -39,7 +39,7 @@
     "object.assign": "4.1.0",
     "parcel-bundler": "1.9.7",
     "prettier": "1.14.3",
-    "pretty-quick": "1.7.0",
+    "pretty-quick": "1.8.0",
     "puppeteer": "1.8.0",
     "ramda": "0.25.0",
     "rollup": "0.66.4",
