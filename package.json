@@ -35,7 +35,7 @@
     "jest": "23.6.0",
     "jest-puppeteer-preset": "3.6.0",
     "most": "1.7.3",
-    "nodemon": "1.18.7",
+    "nodemon": "1.18.9",
     "object.assign": "4.1.0",
     "parcel-bundler": "1.10.3",
     "prettier": "1.15.3",
