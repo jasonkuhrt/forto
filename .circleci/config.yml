@@ -1,0 +1,34 @@
+version: 2.1
+
+workflows:
+  main:
+    jobs:
+      - test
+
+jobs:
+  test:
+    executor: node
+    steps:
+      - checkout
+      - install_deps
+      - run: yarn run test
+
+commands:
+  install_deps:
+    parameters:
+      cache-version:
+        type: string
+        default: v1
+    steps:
+      - restore_cache:
+          keys:
+            - <<parameters.cache-version>>-{{ checksum "yarn.lock" }}
+      - run: yarn install
+      - save_cache:
+          key: <<parameters.cache-version>>-{{ checksum "yarn.lock" }}
+          paths:
+            - ~/.cache/yarn
+
+executors:
+  node:
+    docker: circleci/node:10
