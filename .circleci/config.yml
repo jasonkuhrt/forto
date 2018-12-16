@@ -12,7 +12,7 @@ jobs:
       - checkout
       - install_deps
       # TODO Figure out how to get puppeteer running in cci
-      - run: yarn run ci
+      - run: yarn run test:ci
 
 commands:
   install_deps:
