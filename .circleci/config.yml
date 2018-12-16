@@ -23,10 +23,10 @@ commands:
     parameters:
       run:
         type: string
-      steps:
-        - checkout
-        - install_deps
-        - yarn run <<parameters.run>>
+    steps:
+      - checkout
+      - install_deps
+      - yarn run <<parameters.run>>
   install_deps:
     parameters:
       cache-version:
