@@ -27,7 +27,7 @@
     "@types/lodash-es": "4.17.1",
     "@types/lodash.isequal": "4.5.3",
     "@types/puppeteer": "1.10.1",
-    "@types/ramda": "0.25.42",
+    "@types/ramda": "0.25.44",
     "@types/zen-observable": "0.8.0",
     "codecov": "3.1.0",
     "expect": "^23.6.0",
