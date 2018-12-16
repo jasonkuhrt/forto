@@ -26,7 +26,7 @@ commands:
     steps:
       - checkout
       - install_deps
-      - yarn run <<parameters.run>>
+      - run: yarn run <<parameters.run>>
   install_deps:
     parameters:
       cache-version:
