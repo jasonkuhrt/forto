@@ -1,0 +1,13 @@
+{
+  "extends": "./tsconfig",
+  "compilerOptions": {
+    "strict": true,
+    "moduleResolution": "node",
+    "target": "esnext",
+    "module": "ES2015",
+    "lib": [],
+    "noEmit": true
+  },
+  "include": ["source/**/*.spec.ts"],
+  "exclude": []
+}

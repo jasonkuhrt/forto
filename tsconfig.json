@@ -15,5 +15,6 @@
     "allowSyntheticDefaultImports": true,
     "lib": ["dom", "es5", "scripthost", "es2015.promise"]
   },
-  "include": ["./source/**/*.ts"]
+  "include": ["source/**/*.ts"],
+  "exclude": ["source/**/*spec.ts"]
 }
