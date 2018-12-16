@@ -8,7 +8,8 @@
   "scripts": {
     "build:test": "parcel build puppeteer.setup.ts",
     "test:watch": "jest --watch --verbose",
-    "test": "jest --coverage --verbose && codecov",
+    "test": "jest --coverage --verbose",
+    "test:ci": "jest --coverage --verbose --config jest.config.ci.js && codecov",
     "build": "rollup --config",
     "build:watch": "nodemon --exec 'yarn build' --ext .ts --watch source",
     "dev": "yarn build:watch",
@@ -58,25 +59,5 @@
     "lodash.isequal": "^4.5.0",
     "tslib": "^1.9.3",
     "zen-observable": "^0.8.8"
-  },
-  "jest": {
-    "preset": "jest-puppeteer-preset",
-    "transform": {
-      "^.+\\.ts$": "ts-jest"
-    },
-    "testRegex": ".*spec.ts$",
-    "moduleFileExtensions": [
-      "ts",
-      "js"
-    ],
-    "collectCoverageFrom": [
-      "**/source/**/*.ts",
-      "!**/build/**/*"
-    ],
-    "globals": {
-      "ts-jest": {
-        "diagnostics": false
-      }
-    }
   }
 }
