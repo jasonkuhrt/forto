@@ -4,8 +4,14 @@ workflows:
   main:
     jobs:
       - test
+      - check-types
 
 jobs:
+  check-types:
+    executor: node
+    steps:
+      - checkout
+      - run: yarn check:types
   test:
     executor: node
     steps:
