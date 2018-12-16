@@ -4,17 +4,29 @@ workflows:
   main:
     jobs:
       - test
+      - check-types
 
 jobs:
+  check-types:
+    executor: node
+    steps:
+      - yarn:
+          run: check:types
   test:
     executor: node
     steps:
-      - checkout
-      - install_deps
-      # TODO Figure out how to get puppeteer running in cci
-      - run: yarn run test:ci
+      - yarn:
+          run: test:ci
 
 commands:
+  yarn:
+    parameters:
+      run:
+        type: string
+    steps:
+      - checkout
+      - install_deps
+      - run: yarn run <<parameters.run>>
   install_deps:
     parameters:
       cache-version:
