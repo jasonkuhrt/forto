@@ -10,7 +10,7 @@ const pkg = require("./package.json")
 const external = F.keys(F.omit(["lodash-es"], pkg.dependencies))
 
 export default {
-  input: "source/Main.ts",
+  input: "source/index.ts",
   plugins: [pluginTypescript({ clean: true }), pluginResolve()],
   external,
   output: [
