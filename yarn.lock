@@ -719,10 +719,10 @@
   dependencies:
     "@types/node" "*"
 
-"@types/ramda@0.25.44":
-  version "0.25.44"
-  resolved "https://registry.yarnpkg.com/@types/ramda/-/ramda-0.25.44.tgz#3e442ed487844a4fc33efed357d514940ef1b7fe"
-  integrity sha512-LaaBuiDSTo4FlsgNMpKoIgnbq85PP/blpptQgNijtR/H5iXhtBtByCLUElIEuSVxyno1h0yfHYqDooa+C1spIg==
+"@types/ramda@0.25.46":
+  version "0.25.46"
+  resolved "https://registry.yarnpkg.com/@types/ramda/-/ramda-0.25.46.tgz#8399a35eb117f4a821deb9c4cfecc9b276fb7daf"
+  integrity sha512-UiyHmzWu0KftAWZXfiUvwToVTHGhaG2fnWVckGwaic4By6YyGqtOpq7m8R3HLrpEsYH0AnRQjtXhdL8igmCuDw==
 
 "@types/semver@^5.5.0":
   version "5.5.0"
