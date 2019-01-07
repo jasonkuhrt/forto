@@ -7830,7 +7830,7 @@ ts-jest@23.10.5:
     semver "^5.5"
     yargs-parser "10.x"
 
-ts-node-dev@^1.0.0-pre.32:
+ts-node-dev@1.0.0-pre.32:
   version "1.0.0-pre.32"
   resolved "https://registry.yarnpkg.com/ts-node-dev/-/ts-node-dev-1.0.0-pre.32.tgz#aa3bb9056c002713cfc393b2c324459020db41dc"
   integrity sha512-hOy2mp5ncnKAJFjuQtfHOk6tqG7FfTnuARDsV5WGSQz0ldPG9iTQLbDn+q2wwNuvjbCfsAeGWwDMJc/73EraPQ==
