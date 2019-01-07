@@ -5,7 +5,7 @@
     "noImplicitReturns": true,
     "esModuleInterop": true,
     "target": "es5",
-    "module": "ES2015",
+    "module": "commonjs",
     "outDir": "./build",
     "declaration": true,
     "sourceMap": true,
@@ -13,7 +13,7 @@
     "noUnusedParameters": true,
     "importHelpers": true,
     "allowSyntheticDefaultImports": true,
-    "lib": ["dom", "es5", "scripthost", "es2015.promise"]
+    "lib": ["dom", "es5"]
   },
   "include": ["source/**/*.ts"],
   "exclude": ["source/**/*spec.ts"]
