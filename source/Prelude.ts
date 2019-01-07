@@ -1,4 +1,4 @@
-import { isEqual } from "lodash-es"
+import isEqual from "lodash.isequal"
 
 type Predicate<A> = (x: A) => boolean
 

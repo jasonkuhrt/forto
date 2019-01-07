@@ -23,6 +23,7 @@ export default {
         tslib: "tslib",
         "zen-observable": "Observable",
         "element-resize-detector": "ElementResizeDetector",
+        "lodash.isequal": "isEqual",
       },
     },
     {
