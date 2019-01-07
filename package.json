@@ -1,19 +1,17 @@
 {
   "name": "forto",
   "version": "0.0.0",
-  "main": "build-umd/bundle.js",
-  "types": "build-umd/Main.d.ts",
-  "module": "build-esm/bundle.js",
+  "main": "build/index.js",
   "license": "MIT",
   "scripts": {
-    "clean": "rm -rf build*",
+    "clean": "rm -rf build",
     "build:test": "parcel build puppeteer.setup.ts",
     "test:watch": "jest --watch --verbose",
     "test": "jest",
     "check:types": "tsc --noEmit",
     "test:ci": "jest --config jest.config.ci.js && codecov",
-    "build": "rollup --config",
-    "build:watch": "nodemon --exec 'yarn build' --ext .ts --watch source",
+    "build": "tsc",
+    "build:watch": "ts-node-dev --respawn --no-notify source/index.ts",
     "dev": "yarn build:watch",
     "prepublish": "npm run build"
   },
@@ -45,10 +43,8 @@
     "pretty-quick": "1.8.0",
     "puppeteer": "1.11.0",
     "ramda": "0.26.1",
-    "rollup": "1.0.2",
-    "rollup-plugin-node-resolve": "4.0.0",
-    "rollup-plugin-typescript2": "0.18.1",
     "ts-jest": "23.10.5",
+    "ts-node-dev": "^1.0.0-pre.32",
     "typescript": "3.2.2"
   },
   "prettier": {
@@ -57,7 +53,6 @@
   },
   "dependencies": {
     "element-resize-detector": "^1.1.11",
-    "lodash-es": "^4.17.7",
     "lodash.isequal": "^4.5.0",
     "tslib": "^1.9.3",
     "zen-observable": "^0.8.8"
