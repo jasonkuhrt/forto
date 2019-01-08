@@ -5,8 +5,8 @@ workflows:
     jobs:
       - test
       - check-types
-      - release-latest:
-          name:
+      - release:
+          name: release-latest
           requires:
             - test
             - check-types
@@ -14,8 +14,8 @@ workflows:
             branches:
               only:
                 - master
-      - release-beta:
-          name:
+      - release:
+          name: release-beta
           requires:
             - test
             - check-types
