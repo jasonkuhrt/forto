@@ -5,6 +5,24 @@ workflows:
     jobs:
       - test
       - check-types
+      - release:
+          name: release-latest
+          requires:
+            - test
+            - check-types
+          filters:
+            branches:
+              only:
+                - master
+      - release:
+          name: release-beta
+          requires:
+            - test
+            - check-types
+          filters:
+            branches:
+              only:
+                - beta
 
 jobs:
   check-types:
@@ -17,6 +35,11 @@ jobs:
     steps:
       - yarn:
           run: test:ci
+  release:
+    executor: node
+    steps:
+      - yarn:
+          run: semantic-release
 
 commands:
   yarn:
