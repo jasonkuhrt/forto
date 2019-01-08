@@ -6,7 +6,7 @@ workflows:
       - test
       - check-types
       - release-latest:
-          name:
+          ? name
           requires:
             - test
             - check-types
@@ -15,7 +15,7 @@ workflows:
               only:
                 - master
       - release-beta:
-          name:
+          ? name
           requires:
             - test
             - check-types
