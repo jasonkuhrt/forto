@@ -43,6 +43,7 @@
     "pretty-quick": "1.8.0",
     "puppeteer": "1.11.0",
     "ramda": "0.26.1",
+    "semantic-release": "^16.0.0-beta",
     "ts-jest": "23.10.5",
     "ts-node-dev": "1.0.0-pre.32",
     "typescript": "3.2.2"
