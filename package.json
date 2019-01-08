@@ -4,16 +4,16 @@
   "main": "build/index.js",
   "license": "MIT",
   "scripts": {
-    "clean": "rm -rf build",
-    "build:test": "parcel build puppeteer.setup.ts",
-    "test:watch": "jest --watch --verbose",
     "test": "jest",
-    "check:types": "tsc --noEmit",
+    "test:watch": "jest --watch --verbose",
     "test:ci": "jest --config jest.config.ci.js && codecov",
+    "check:types": "tsc --noEmit",
     "build": "tsc",
+    "build:test": "parcel build puppeteer.setup.ts",
     "build:watch": "ts-node-dev --respawn --no-notify source/index.ts",
+    "build:clean": "rm -rf build",
     "dev": "yarn build:watch",
-    "prepublish": "npm run build"
+    "prepublish": "yarn build"
   },
   "husky": {
     "hooks": {
