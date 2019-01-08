@@ -6,6 +6,7 @@ workflows:
       - test
       - check-types
       - release:
+          context: org-global
           name: release-latest
           requires:
             - test
@@ -15,6 +16,7 @@ workflows:
               only:
                 - master
       - release:
+          context: org-global
           name: release-beta
           requires:
             - test
