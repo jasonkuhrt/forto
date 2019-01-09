@@ -11,7 +11,7 @@
     "check:types": "tsc --noEmit",
     "build": "tsc",
     "build:test": "parcel build puppeteer.setup.ts",
-    "build:watch": "ts-node-dev --respawn --no-notify source/index.ts",
+    "build:watch": "tsc --watch --pretty",
     "build:clean": "rm -rf build",
     "dev": "yarn build:watch",
     "prepublishOnly": "yarn build"
@@ -24,8 +24,6 @@
   "devDependencies": {
     "@types/jest": "23.3.12",
     "@types/jest-environment-puppeteer": "2.2.1",
-    "@types/lodash": "4.14.119",
-    "@types/lodash-es": "4.17.1",
     "@types/puppeteer": "1.11.1",
     "@types/ramda": "0.25.46",
     "codecov": "3.1.0",
@@ -43,7 +41,6 @@
     "ramda": "0.26.1",
     "semantic-release": "^16.0.0-beta",
     "ts-jest": "23.10.5",
-    "ts-node-dev": "1.0.0-pre.32",
     "typescript": "3.2.2"
   },
   "prettier": {
