@@ -81,12 +81,33 @@ const observeArrChangesByEvents = (
 const createScrollOffseter = (
   frame: Frame,
 ): ((v: Main.Calculation) => Main.Calculation) => {
+  // incorrect assumption: frame contains target
+  // more useful assumption: window scroll
   return calculatedLayout => {
     const frameScrollSize = H.calcScrollSize(frame)
     calculatedLayout.popover.x += frameScrollSize.width
     calculatedLayout.popover.y += frameScrollSize.height
     return calculatedLayout
   }
+}
+
+/**
+ * A Wrapper around scroll offsetter hardcoded to window.
+ *
+ * *Rationale*
+ *
+ * It has become apparent that assuming `target` resides
+ * in `frame` is not a safe assumption. And when it is not
+ * the case scroll offsetter of frame would create incorrect
+ * layout of popover as its position would change relative to
+ * the frame scroll, but not the popover.
+ *
+ * On the other hand everything is within window. It may become
+ * necessary to add option for consumer to disable frame
+ * scrolling. Presently though, this function is a try/compromise.
+ */
+const createWindowScrollOffseter = () => {
+  return createScrollOffseter(window)
 }
 
 // Main Entry Points
@@ -101,7 +122,7 @@ const observeWithoutPolling = (
   return observeArrChangesByEvents(arrangement)
     .map(Main.createLayoutCalculator(settings))
     .filter(F.isChanged())
-    .map(createScrollOffseter(arrangement.frame))
+    .map(createWindowScrollOffseter())
 }
 
 /**
@@ -167,7 +188,7 @@ const observeWithPolling = (
   return Obs.merge(eventedChanges, uneventedChanges)
     .map(Main.createLayoutCalculator(settings))
     .filter(F.isChanged())
-    .map(createScrollOffseter(arrangement.frame))
+    .map(createWindowScrollOffseter())
 }
 
 /**
