@@ -14,7 +14,7 @@
     "build:watch": "ts-node-dev --respawn --no-notify source/index.ts",
     "build:clean": "rm -rf build",
     "dev": "yarn build:watch",
-    "prepublish": "yarn build"
+    "prepublishOnly": "yarn build"
   },
   "husky": {
     "hooks": {
