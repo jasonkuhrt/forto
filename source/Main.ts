@@ -426,6 +426,93 @@ const createLayoutCalculator = (
   }
 }
 
+const crossAxis = (zone: Zone) => Ori.crossAxis(Ori.fromSide(zone))
+
+const mainAxis = (zone: Zone) => Ori.mainAxis(Ori.fromSide(zone))
+
+const layoutOrderNum = (zone: Zone): -1 | 1 => {
+  return zone.side === Ori.Side.Top || zone.side === Ori.Side.Left ? -1 : 1
+}
+
+/**
+ * Create a set of layout functions working against the
+ * relative cross/main of the given zone.
+ */
+const createCompositor = (zone: Zone) => {
+  type ChangeSpec = {
+    cross?: number
+    main?: number
+  }
+
+  const ca = crossAxis(zone)
+  const ma = mainAxis(zone)
+
+  return {
+    /**
+     * Return a translation of the given position. Does not mutate.
+     */
+    translate: (pos: Layout.Pos, change: ChangeSpec): Layout.Pos => {
+      const _pos = { ...pos }
+      if (change.cross !== undefined) {
+        _pos[ca] += change.cross
+      }
+      if (change.main !== undefined) {
+        _pos[ma] += change.main
+      }
+      return _pos
+    },
+
+    /**
+     * Respective to the given zone, return a number
+     * that is the given number "pushed back" from the
+     * target (necessarially along the main axis, as the
+     * cross, being parallel, has no toward/away).
+     *
+     * Basically this function simply deals with handling if
+     * the number needs to be negative or not, while the caller
+     * just declaratively states their intent.
+     *
+     * Consider following examples of moving away `n` from
+     * target (`T`) for different zones (`Z`):
+     *
+     *    n ->       TZ n
+     *
+     *    n ->    -n ZT
+     *
+     *               -n
+     *                Z
+     *    n ->        T
+     *
+     *                Z
+     *    n ->        T
+     *                n
+     *
+     * Example usage:
+     *
+     *     c.translate(pos, { main: c.awayFromTarget(8) })
+     *
+     * TODO:
+     *
+     *     Leaky abstraction? Is following useless/confusing?:
+     *
+     *     c.translate(pos, { cross: c.awayFromTarget(8) })
+     */
+    awayFromTarget: (n: number): number => {
+      return n * layoutOrderNum(zone)
+    },
+
+    cross: {
+      prop: ca,
+      get: (pos: Layout.Pos): number => pos[ca],
+    },
+
+    main: {
+      prop: ma,
+      get: (pos: Layout.Pos): number => pos[ma],
+    },
+  }
+}
+
 export {
   Settings,
   adjustRankingForChangeThreshold,
@@ -443,4 +530,5 @@ export {
   MeasuredZone,
   createLayoutCalculator,
   Ori,
+  createCompositor,
 }
