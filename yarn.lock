@@ -8646,7 +8646,7 @@ sax@^1.2.4, sax@~1.2.1, sax@~1.2.4:
   resolved "https://registry.yarnpkg.com/sax/-/sax-1.2.4.tgz#2816234e2378bddc4e5354fab5caa895df7100d9"
   integrity sha512-NqVDv9TpANUjFm0N8uM5GxL36UgKi9/atZw+x7YFnQ8ckwFGKrl4xX4yWtrey3UJm5nP1kUbnYgLopqWNSRhWw==
 
-semantic-release@^16.0.0-beta:
+semantic-release@16.0.0-beta.16:
   version "16.0.0-beta.16"
   resolved "https://registry.yarnpkg.com/semantic-release/-/semantic-release-16.0.0-beta.16.tgz#9cee5e7370a8146ad128c0b1bc92e0268b185c57"
   integrity sha512-Nxbom+BNIqmwTOtxhfT1WawOr6GmTJThZFISnBHCwse6uRQOob6D2EOiePMjiVp6oCRQFMPnU2VYlCP6TCjaDQ==
