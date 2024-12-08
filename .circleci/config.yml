@@ -70,4 +70,4 @@ commands:
 executors:
   node:
     docker:
-      - image: circleci/node:10
+      - image: circleci/node:10.24.1
